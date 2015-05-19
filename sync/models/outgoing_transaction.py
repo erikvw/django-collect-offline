@@ -6,8 +6,12 @@ from .base_transaction import BaseTransaction
 
 
 class OutgoingTransaction(BaseTransaction):
+    """A model class for locally created transactions ready to be fetched
+    by another system."""
+    is_consumed = models.BooleanField(
+        default=False,
+        db_index=True)
 
-    """ Transactions produced locally to be consumed/sent to a queue or consumer """
     is_consumed_middleman = models.BooleanField(
         default=False,
         db_index=True,
@@ -27,5 +31,4 @@ class OutgoingTransaction(BaseTransaction):
 
     class Meta:
         app_label = 'sync'
-        db_table = 'bhp_sync_outgoingtransaction'
         ordering = ['timestamp']

@@ -6,10 +6,12 @@ from django.db import models
 
 from ..managers import IncomingTransactionManager
 
+from ..mixins.transaction_mixin import TransactionMixin
+
 from .base_transaction import BaseTransaction
 
 
-class IncomingTransaction(BaseTransaction):
+class IncomingTransaction(BaseTransaction, TransactionMixin):
     """ Transactions received from a remote producer and to be consumed locally. """
     is_consumed = models.BooleanField(
         default=False,
@@ -30,5 +32,4 @@ class IncomingTransaction(BaseTransaction):
 
     class Meta:
         app_label = 'sync'
-        db_table = 'bhp_sync_incomingtransaction'
         ordering = ['timestamp']

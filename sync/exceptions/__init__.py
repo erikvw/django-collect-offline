@@ -1,16 +1,7 @@
 
-
-class PendingTransactionError(Exception):
-    pass
-
-
-class SerializationTransactionError(Exception):
+class SyncError(Exception):
     pass
 
 
 class TransactionConsumerError(Exception):
-    pass
-
-
-class ProducerError(Exception):
     pass
