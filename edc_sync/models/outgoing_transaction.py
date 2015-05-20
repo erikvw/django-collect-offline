@@ -2,7 +2,7 @@ from datetime import datetime
 
 from django.db import models
 
-from edc_sync import BaseTransaction
+from . import BaseTransaction
 
 
 class OutgoingTransaction(BaseTransaction):
@@ -22,7 +22,7 @@ class OutgoingTransaction(BaseTransaction):
         db_index=True,
     )
 
-    objects = models.Manager()
+    # objects = models.Manager()
 
     def save(self, *args, **kwargs):
         if self.is_consumed_server and not self.consumed_datetime:

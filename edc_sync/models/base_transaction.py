@@ -3,7 +3,7 @@ from django.db import models
 
 from edc_base.model.models import BaseUuidModel
 
-transaction_producer = ''
+from edc_sync import transaction_producer
 
 
 class BaseTransaction(BaseUuidModel):
@@ -76,8 +76,13 @@ class BaseTransaction(BaseUuidModel):
         return '{0} {1} {2}'.format(self.tx_name, self.producer, self.action)
 
     def render(self):
-        url = reverse('view_transaction_url', kwargs={'model_name': self._meta.object_name.lower(), 'pk': self.pk})
-        ret = """<a href="{url}" class="add-another" id="add_id_report" onclick="return showAddAnotherPopup(this);"> <img src="/static/admin/img/icon_addlink.gif" width="10" height="10" alt="View transaction"/></a>""".format(url=url)
+        url = reverse(
+            'view_transaction_url',
+            kwargs={'model_name': self._meta.object_name.lower(), 'pk': self.pk}
+        )
+        ret = ('<a href="{url}" class="add-another" id="add_id_report" onclick="return '
+               'showAddAnotherPopup(this);"> <img src="/static/admin/img/icon_addlink.gif" '
+               'width="10" height="10" alt="View transaction"/></a>'.format(url=url))
         return ret
     render.allow_tags = True
 

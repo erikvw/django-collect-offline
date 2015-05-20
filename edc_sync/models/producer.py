@@ -1,7 +1,7 @@
 from django.db import models
 
-from edc.core.crypto_fields.fields import EncryptedCharField
-from edc.base.model.models import BaseUuidModel
+from django_crypto_fields.fields import EncryptedCharField
+from edc_base.model.models import BaseUuidModel
 from edc.device.sync.classes import PasswordModelField
 
 

@@ -4,11 +4,10 @@ from datetime import datetime
 
 from django.db import models
 
-from edc_sync import IncomingTransactionManager
+# from ..managers import IncomingTransactionManager
+from ..mixins import TransactionMixin
 
-from edc_sync import TransactionMixin
-
-from edc_sync import BaseTransaction
+from . import BaseTransaction
 
 
 class IncomingTransaction(BaseTransaction, TransactionMixin):
@@ -21,7 +20,7 @@ class IncomingTransaction(BaseTransaction, TransactionMixin):
         default=False,
         db_index=True)
 
-    objects = IncomingTransactionManager()
+    # objects = IncomingTransactionManager()
 
     def save(self, *args, **kwargs):
         if self.hostname_modified == socket.gethostname():

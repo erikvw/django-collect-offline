@@ -1,10 +1,10 @@
 import logging
 
-from django.conf import settings
+# from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.db.models import get_model
+from django.apps import apps
 
-from edc.base.model.models import BaseUuidModel
+from edc_base.model.models import BaseUuidModel
 
 logger = logging.getLogger(__name__)
 
@@ -20,19 +20,19 @@ class BaseSyncUuidModel(BaseUuidModel):
     """Base model for all UUID models and adds synchronization
     methods and signals. """
 
-    def is_serialized(self, serialize=True):
-        """Returns True only if ALLOW_MODEL_SERIALIZATION is explicitly
-        set to True in settings.
-
-        ALLOW_MODEL_SERIALIZATION is a required settings attribute for this module.
-        """
-        try:
-            return settings.ALLOW_MODEL_SERIALIZATION
-        except AttributeError:
-            raise ImproperlyConfigured(
-                'Model uses base classes from edc.sync_old. Add attribute '
-                '\'ALLOW_MODEL_SERIALIZATION = True\' to settings to enable '
-                'serialization of transactions (or = False to disable).')
+#     def is_serialized(self, serialize=True):
+#         """Returns True only if ALLOW_MODEL_SERIALIZATION is explicitly
+#         set to True in settings.
+#
+#         ALLOW_MODEL_SERIALIZATION is a required settings attribute for this module.
+#         """
+#         try:
+#             return settings.ALLOW_MODEL_SERIALIZATION
+#         except AttributeError:
+#             raise ImproperlyConfigured(
+#                 'Model uses base classes from edc.sync_old. Add attribute '
+#                 '\'ALLOW_MODEL_SERIALIZATION = True\' to settings to enable '
+#                 'serialization of transactions (or = False to disable).')
 
     def deserialize_prep(self, **kwargs):
         """Users may override to manipulate the incoming object before calling save()"""
@@ -45,7 +45,7 @@ class BaseSyncUuidModel(BaseUuidModel):
         Note: this is necessary because a deserialized object will not create
               an Outgoing Transaction by default since the "raw" parameter is True
               on deserialization."""
-        OutgoingTransaction = get_model('sync_old', 'outgoingtransaction')
+        OutgoingTransaction = apps.get_model('edc_sync', 'outgoingtransaction')
         try:
             OutgoingTransaction.objects.get(pk=incoming_transaction.id)
         except OutgoingTransaction.DoesNotExist:

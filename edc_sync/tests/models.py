@@ -2,7 +2,7 @@ from datetime import datetime, date
 
 from django.db import models
 
-from edc_sync import SyncMixin
+from ..mixins import SyncMixin
 
 
 class TestModel (models.Model, SyncMixin):

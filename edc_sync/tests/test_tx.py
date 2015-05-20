@@ -33,6 +33,7 @@ class TestTx(TestCase):
         self.assertTrue(test_model.to_outgoing('I'))
 
     def test_fetch_incoming(self):
+        """Asserts model instance to outgoing and fetched by incoming."""
         test_model = TestModel(character='erik', integer=1)
         with transaction.atomic():
             test_model.save()

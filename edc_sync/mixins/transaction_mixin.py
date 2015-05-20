@@ -9,7 +9,7 @@ from django.db.utils import IntegrityError
 
 from django_crypto_fields.classes import Cryptor
 
-transaction_producer = ''
+from .. import transaction_producer
 
 
 class TransactionMixin(object):

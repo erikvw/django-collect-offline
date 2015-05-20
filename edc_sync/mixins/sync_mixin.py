@@ -5,10 +5,8 @@ from django.apps import apps
 
 from django_crypto_fields.classes import Cryptor
 
-# from ..classes import transaction_producer
-from edc_sync import SyncError
+from .. import transaction_producer
 
-transaction_producer = ''
 
 class SyncMixin(object):
 
@@ -26,9 +24,17 @@ class SyncMixin(object):
             json_tx = Cryptor().aes_encrypt(json_tx, self.aes_mode)
         return json_tx
 
+    def action(self, created=None, deleted=None):
+        if created is True:
+            return 'I'
+        if created is False:
+            return 'U'
+        if deleted is True:
+            return 'D'
+
     def to_outgoing(self, action, using=None):
         """Saves the current instance to the OutgoingTransaction model."""
-        OutgoingTransaction = apps.get_model('edc_sync', 'OutgoingTransaction')
+        OutgoingTransaction = apps.get_model('edc_sync.OutgoingTransaction')
         return OutgoingTransaction.objects.using(using).create(
             tx_name=self._meta.object_name,
             tx_pk=self.id,
@@ -36,3 +42,6 @@ class SyncMixin(object):
             timestamp=datetime.today().strftime('%Y%m%d%H%M%S%f'),
             producer=transaction_producer,
             action=action)
+
+    def to_inspector(self):
+        pass

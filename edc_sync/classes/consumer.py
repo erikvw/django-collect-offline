@@ -1,5 +1,3 @@
-from django.apps import apps
-
 from ..exceptions import TransactionConsumerError
 
 from ..models import OutgoingTransaction, IncomingTransaction
