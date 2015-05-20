@@ -4,11 +4,11 @@ from datetime import datetime
 
 from django.db import models
 
-from ..managers import IncomingTransactionManager
+from edc_sync import IncomingTransactionManager
 
-from ..mixins.transaction_mixin import TransactionMixin
+from edc_sync import TransactionMixin
 
-from .base_transaction import BaseTransaction
+from edc_sync import BaseTransaction
 
 
 class IncomingTransaction(BaseTransaction, TransactionMixin):
@@ -31,5 +31,5 @@ class IncomingTransaction(BaseTransaction, TransactionMixin):
         super(IncomingTransaction, self).save(*args, **kwargs)
 
     class Meta:
-        app_label = 'sync'
+        app_label = 'edc_sync'
         ordering = ['timestamp']

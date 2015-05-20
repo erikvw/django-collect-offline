@@ -2,7 +2,7 @@ from datetime import datetime, date
 
 from django.db import models
 
-from ..mixins import SyncMixin
+from edc_sync import SyncMixin
 
 
 class TestModel (models.Model, SyncMixin):
@@ -21,4 +21,4 @@ class TestModel (models.Model, SyncMixin):
     objects = models.Manager()
 
     class Meta:
-        app_label = 'sync'
+        app_label = 'edc_sync'

@@ -6,7 +6,7 @@ from django.apps import apps
 from django_crypto_fields.classes import Cryptor
 
 # from ..classes import transaction_producer
-from ..exceptions import SyncError
+from edc_sync import SyncError
 
 transaction_producer = ''
 
@@ -28,7 +28,7 @@ class SyncMixin(object):
 
     def to_outgoing(self, action, using=None):
         """Saves the current instance to the OutgoingTransaction model."""
-        OutgoingTransaction = apps.get_model('sync', 'OutgoingTransaction')
+        OutgoingTransaction = apps.get_model('edc_sync', 'OutgoingTransaction')
         return OutgoingTransaction.objects.using(using).create(
             tx_name=self._meta.object_name,
             tx_pk=self.id,

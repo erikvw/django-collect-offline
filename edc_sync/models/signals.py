@@ -9,10 +9,10 @@ from django.apps import apps
 # from edc.core.crypto_fields.classes import FieldCryptor
 from django_crypto_fields.classes import Cryptor
 
-from ..classes import Transaction, transaction_producer
+from edc_sync import Transaction, transaction_producer
 
-from .base_sync_uuid_model import BaseSyncUuidModel
-from .incoming_transaction import IncomingTransaction
+from edc_sync import BaseSyncUuidModel
+from edc_sync import IncomingTransaction
 
 
 @receiver(post_save, weak=False, dispatch_uid="deserialize_to_inspector_on_post_save")
@@ -73,7 +73,7 @@ def serialize_on_post_delete(sender, instance, using, **kwargs):
     except AttributeError:
         pass
     if is_serialized or instance._meta.proxy:
-        OutgoingTransaction = apps.get_model('sync', 'outgoingtransaction')
+        OutgoingTransaction = apps.get_model('edc_sync', 'outgoingtransaction')
         json_obj = serializers.serialize(
             "json", [instance, ],
             ensure_ascii=False,
