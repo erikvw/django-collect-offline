@@ -26,5 +26,6 @@ class Consumer(object):
                     values.update({field.name: getattr(outgoing_transaction, field.name)})
             incoming_transaction = IncomingTransaction(**values)
             incoming_transaction.save(using=using_destination)
+            incoming_transaction.to_model_instance(using_destination, check_hostname=True)
             outgoing_transaction.is_consumed = True
             outgoing_transaction.save(using=using_source)

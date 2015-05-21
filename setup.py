@@ -10,13 +10,13 @@ with open(os.path.join(os.path.dirname(__file__), 'README.md')) as readme:
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
-    name='edc-edc_sync',
-    version='0.0.0-alpha',
+    name='edc-sync',
+    version='0.1.0a0',
     author=u'Erik van Widenfelt',
     author_email='ew2789@gmail.com',
     packages=find_packages(),
     include_package_data=True,
-    url='http://github.com/erikvw/edc-edc_sync',
+    url='https://github.com/botswana-harvard/edc-sync',
     license='GPL license, see LICENSE',
     description='Sync models instances between client and server.',
     long_description=README,
@@ -24,8 +24,9 @@ setup(
     keywords='django data synchronization offline',
     install_requires=[
         'Django>=1.7',
-        'django-extensions>=1.5.5',
         'unipath>=1.1',
+	'django-crypto-fields>=0.1',
+	'edc-base>=0.1',
     ],
     classifiers=[
         'Environment :: Web Environment',
