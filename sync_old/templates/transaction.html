@@ -1,0 +1,13 @@
+
+{% extends "section.html" %}
+{% block content %}
+    <table>
+    {% for field, value in textfields.iteritems %}
+        <tr><td><b>{{field}}:</b></td></tr>
+        <tr><td>{{value}}</td></tr>
+    {% endfor%}
+    {% for field, value in charfields.iteritems %}
+        <tr><td><b>{{field}}:</b> {{value}}</td></tr>
+    {% endfor%}    
+    </table>
+{% endblock content %}

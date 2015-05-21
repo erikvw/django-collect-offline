@@ -1,0 +1,38 @@
+{% extends "section.html"%}
+
+{% block breadcrumbs %}
+
+    <div class="breadcrumbs">
+        <a href="/{{ home }}">Home</a>
+        &rsaquo; <a href="/bhp_sync/">Synchronize with Community Server</A>
+        &rsaquo; Producer {{ producer|capfirst }}        
+    </div>
+    
+{% endblock %}
+
+
+{% block before_messages %}
+
+<table>
+<tr><TD><H4>Fetch Transactions from Producer </H4></TD></TR>
+<tr><td>Fetching transactions from producer "{{ producer }}"</td></tr>
+<tr><td>Producer URL: <A href="/bhp_sync/consume/{{ producer.name }}/">/bhp_sync/consume/{{ producer.name }}/</A></td></tr> 
+<tr><td>(go to <A href="/admin/bhp_sync/">Synchronization models</A>)
+<tr><td>The messages below appear in the order they were processed by the Community Server</td></tr>
+</table>
+{% endblock before_messages %}
+
+
+{% if messages %}
+    <table>
+        {% for message in messages %}
+            <tr><td>{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</td></tr>
+        {% endfor %}
+    </table>
+{% endif %}
+
+{{ error_response }}
+
+
+{% block section_buttons %}{% endblock section_buttons %}
+{% block section_title %}{% endblock section_title %}
