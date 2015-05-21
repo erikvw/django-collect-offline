@@ -4,7 +4,7 @@ from django.db import models
 from django.apps import apps
 from django.conf import settings
 
-from edc.device.device.classes import Device
+from edc_device.device import Device
 
 from ..mixins import TransactionMixin
 
@@ -44,7 +44,7 @@ class MiddleManTransaction(BaseTransaction, TransactionMixin):
         if model and 'save_to_inspector' in dir(model):
             fields = model_dict.get('fields')
             instance_pk = model_dict.get('pk')
-            model().save_to_inspector(fields, instance_pk, using)
+            model().save_to_inspector(fields, instance.pk, using)
 
     objects = models.Manager()
 
