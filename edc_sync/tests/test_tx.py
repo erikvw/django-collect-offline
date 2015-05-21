@@ -25,12 +25,9 @@ class TestTx(TestCase):
 
     def test_save_to_outgoing(self):
         """Assert can json.load decrypted json (roundtrip)."""
-        test_model = TestModel(character='erik', integer=1)
+        test_model = TestModel.objects.create(character='erik', integer=1)
         with transaction.atomic():
-            self.assertRaises(IntegrityError, test_model.to_outgoing, 'I')
-        with transaction.atomic():
-            test_model.save()
-        self.assertTrue(test_model.to_outgoing('I'))
+            self.assertTrue(test_model.to_outgoing('I'))
 
     def test_fetch_incoming(self):
         """Asserts model instance to outgoing and fetched by incoming."""
