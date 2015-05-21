@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/botswana-harvard/edc-sync.svg?branch=develop)](https://travis-ci.org/botswana-harvard/edc-sync)
 [![Coverage Status](https://coveralls.io/repos/botswana-harvard/edc-sync/badge.svg)](https://coveralls.io/r/botswana-harvard/edc-sync)
+[![Code Health](https://landscape.io/github/botswana-harvard/edc-sync/develop/landscape.svg?style=flat)](https://landscape.io/github/botswana-harvard/edc-sync/develop)
 
 # edc-sync
 
