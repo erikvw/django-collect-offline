@@ -24,7 +24,6 @@ setup(
     keywords='django data synchronization offline',
     install_requires=[
         'Django>=1.7',
-        'django-extensions>=1.5.5',
         'unipath>=1.1',
     ],
     classifiers=[
