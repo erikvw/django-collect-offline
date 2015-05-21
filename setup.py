@@ -11,12 +11,12 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='edc-sync',
-    version='0.0.0a0',
+    version='0.1.0a0',
     author=u'Erik van Widenfelt',
     author_email='ew2789@gmail.com',
     packages=find_packages(),
     include_package_data=True,
-    url='http://github.com/botswana-harvard/edc-sync',
+    url='https://github.com/botswana-harvard/edc-sync',
     license='GPL license, see LICENSE',
     description='Sync models instances between client and server.',
     long_description=README,
@@ -25,6 +25,8 @@ setup(
     install_requires=[
         'Django>=1.7',
         'unipath>=1.1',
+	'django-crypto-fields>=0.1',
+	'edc-base>=0.1',
     ],
     classifiers=[
         'Environment :: Web Environment',
