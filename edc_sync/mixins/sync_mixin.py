@@ -37,10 +37,12 @@ class SyncMixin(object):
     def action(self, created=None, deleted=None):
         if created is True:
             return 'I'
-        if created is False:
+        elif created is False:
             return 'U'
-        if deleted is True:
+        elif deleted is True:
             return 'D'
+        else:
+            return None
 
     def to_outgoing(self, action, using=None):
         """Saves the current instance to the OutgoingTransaction model."""
