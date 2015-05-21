@@ -2,12 +2,9 @@ import socket
 
 from django.core import serializers
 from django.db import transaction
-# from django.db.models.fields.related import ForeignKey, OneToOneField
-# from django.db.utils import IntegrityError
 
 from django_crypto_fields.classes import Cryptor
 
-# from .. import transaction_producer
 from django.core.serializers.base import DeserializationError
 
 
@@ -20,7 +17,6 @@ class TransactionMixin(object):
         if self.use_encryption:
             json_tx = Cryptor().aes_decrypt(self.tx, self.aes_mode)
         return serializers.deserialize("json", json_tx)
-        # TODO: m2m_relation_dict is {m2m_field_name: list_of_related_objects}.
 
     def to_model_instance(self, to, check_hostname=None):
         if self.is_consumed:
@@ -36,7 +32,8 @@ class TransactionMixin(object):
             elif self.action == 'D':
                 self.delete_obj(obj)
             else:
-                raise DeserializationError('Unknown object action. Expected one of [I, U, D]. Got {}'.format(self.action))
+                raise DeserializationError(
+                    'Unknown object action. Expected one of [I, U, D]. Got {}'.format(self.action))
         return self.is_consumed or self.is_ignored
 
     def ignore_obj(self, obj):
