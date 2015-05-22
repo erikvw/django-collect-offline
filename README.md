@@ -11,7 +11,7 @@ Description
 -----------
 
 Synchronization
-===============
++++++++++++++++
 Synchronization is one-way and always toward a central server that has the master database for the project. Many clients push data to one server. 
 
 We use __edc-sync__ in Django apps deployed to low-resourced remote communities where there is no reliable internet, public or private network. Our Research Assistants collect participant data in households, mobile tents and remote clinics. The Research Assistants enter data directly into their offline laptops. Once back online, data is pushed to the __community-server__ and later to the __central-server__. 
