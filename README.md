@@ -13,7 +13,7 @@ Synchronization is one-way and always toward a central server that has the maste
 
 We use __edc-sync__ in Django apps deployed to low-resourced remote communities where there is no reliable internet, public or private network. Our Research Assistants collect participant data in households, mobile tents and remote clinics. The Research Assistants enter data directly into their offline laptops. Once back online, data is pushed to the __community-server__ and later to the __central-server__. 
 
-Our research often involves collecting blood specimens which need to get to our community clinic soon after collected. To allow the Research Assistants to remain in the field, we send a driver with a __middleman__ laptop that can grab all pending data from the Research Assistants laptop. Additionally, the driver can use the data pushed to the __middleman__ to reconcile specimens and requisition data with the Research Assistant before moving on to the community clinic. 
+Our research often involves collecting blood specimens which need to get to our community clinic soon after collection. To allow the Research Assistants to remain in the field, we send a driver to the Research Assistant to fetch the specimens. The driver has a __middleman__ laptop that pulls all pending data from the Research Assistant's laptop. The driver and the Research Assistant then reconcile specimens and requisition data against the __middleman__ data and the physical specimen. (Note: we requisition and label specimens in the field through the app). 
 
 __edc-sync__ uses either the REST API or FILE transfer:
 - field client ---REST---> community server
