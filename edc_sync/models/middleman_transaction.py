@@ -1,6 +1,5 @@
-from datetime import datetime
-
 from django.db import models
+from django.utils import timezone
 # from django.apps import apps
 from django.conf import settings
 
@@ -11,7 +10,7 @@ from ..mixins import TransactionMixin
 from . import BaseTransaction
 
 
-class MiddleManTransaction(BaseTransaction, TransactionMixin):
+class MiddlemanTransaction(BaseTransaction, TransactionMixin):
 
     """Transactions produced locally to be consumed/sent to a queue or consumer."""
 
@@ -27,12 +26,11 @@ class MiddleManTransaction(BaseTransaction, TransactionMixin):
 
     def save(self, *args, **kwargs):
         if self.is_consumed_server and not self.consumed_datetime:
-            self.consumed_datetime = datetime.today()
+            self.consumed_datetime = timezone.now()
         if not Device().is_middleman:
             raise TypeError(
-                '\'{0}\' is not configured to be a MiddleMan, so you cannot '
-                'save MiddleMan transanctions here.'.format(settings.DEVICE_ID))
-        super(MiddleManTransaction, self).save(*args, **kwargs)
+                '\'{0}\' is not configured to be a MiddleMan.'.format(settings.DEVICE_ID))
+        super(MiddlemanTransaction, self).save(*args, **kwargs)
 
 #     def deserialize_to_inspector_on_post_save(self, instance, raw, created, using, **kwargs):
 #         instance.to_model_instance(using)

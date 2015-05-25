@@ -29,3 +29,9 @@ class Consumer(object):
             incoming_transaction.to_model_instance(using_destination, check_hostname=True)
             outgoing_transaction.is_consumed = True
             outgoing_transaction.save(using=using_source)
+
+    def fetch_outgoing_http(self, producer_url):
+        pass
+
+    def fetch_outgoing_file(self, url):
+        pass

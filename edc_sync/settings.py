@@ -39,6 +39,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_crypto_fields',
+    'rest_framework',
     'edc_sync',
 )
 
@@ -53,7 +55,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.security.SecurityMiddleware',
 )
 
-ROOT_URLCONF = 'urls'
+ROOT_URLCONF = 'edc_sync.urls'
 
 TEMPLATES = [
     {
@@ -109,3 +111,10 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 GIT_DIR = BASE_DIR.ancestor(1)
+
+SERVER_DEVICE_ID_LIST = ['99']
+MIDDLEMAN_DEVICE_ID_LIST = ['96']
+
+# REST_FRAMEWORK = {
+#     'TEST_REQUEST_DEFAULT_FORMAT': 'json'
+# }

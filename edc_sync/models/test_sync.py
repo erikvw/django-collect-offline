@@ -6,7 +6,7 @@ from edc_base.model.models import BaseUuidModel
 from ..mixins import SyncMixin
 
 
-class TestModel (BaseUuidModel, SyncMixin):
+class TestSync (BaseUuidModel, SyncMixin):
 
     character = models.CharField(
         max_length=10)
@@ -14,10 +14,10 @@ class TestModel (BaseUuidModel, SyncMixin):
     integer = models.IntegerField()
 
     report_datetime = models.DateTimeField(
-        default=timezone.now())
+        default=timezone.now)
 
     report_date = models.DateField(
-        default=timezone.now().date())
+        default=timezone.now)
 
     objects = models.Manager()
 

@@ -2,56 +2,53 @@ from django.db import models
 
 from django_crypto_fields.fields import EncryptedCharField
 from edc_base.model.models import BaseUuidModel
-from edc.device.sync.classes import PasswordModelField
 
 
 class Producer(BaseUuidModel):
 
     name = models.CharField(
-        max_length=50,
+        max_length=25,
         help_text='Usually hostname-database_name. e.g mpp83-bhp041_survey',
         unique=True)
 
     settings_key = models.CharField(
-        max_length=50,
+        max_length=25,
         help_text='Key in settings.DATABASES, usually hostname of producer',
         unique=True)
 
     url = models.CharField(max_length=64)
 
-    # TODO: change this in next revision! should be db_host
-    producer_ip = EncryptedCharField(
-        verbose_name="Producer IP address.",
+    db_host = models.CharField(
+        verbose_name="Producer hostname.",
+        max_length=25,
         null=True,
-        db_index=True,
-        help_text=("provide the IP address of the producer."))
+        help_text=("provide the hostname of the producer."))
 
-    db_user = EncryptedCharField(
+    db_user = models.CharField(
         verbose_name="Database username.",
+        max_length=25,
         default='root',
         null=True,
-        db_index=True,
         help_text=("provide the database name of the producer."))
 
-    # TODO: change this in next revision! should be db_name
-    db_user_name = EncryptedCharField(
+    db_name = models.CharField(
         verbose_name="Database name.",
+        max_length=25,
         null=True,
         db_index=True,
         help_text=("provide the database name of the producer."))
 
-    port = EncryptedCharField(
+    db_port = models.CharField(
         verbose_name="Database port.",
+        max_length=25,
         default='',
         blank=True,
         null=True,
-        help_text=("provide the database name of the producer."))
+        help_text=("provide the database port of the producer."))
 
-    db_password = PasswordModelField(
+    db_password = EncryptedCharField(
         verbose_name="Database password.",
-        max_length=250,
-        null=True,
-        db_index=True,
+        max_length=50,
         help_text=("provide the password to database on the producer."))
 
     is_active = models.BooleanField(
@@ -78,11 +75,10 @@ class Producer(BaseUuidModel):
 
     objects = models.Manager()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     class Meta:
-        app_label = 'sync_old'
-        db_table = 'bhp_sync_producer'
+        app_label = 'edc_sync'
         ordering = ['name']
         unique_together = (('settings_key', 'is_active'), )

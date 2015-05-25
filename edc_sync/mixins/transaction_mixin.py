@@ -1,3 +1,4 @@
+import base64
 import socket
 
 from django.core import serializers
@@ -15,7 +16,7 @@ class TransactionMixin(object):
 
     def deserialized_objects(self):
         if self.use_encryption:
-            json_tx = Cryptor().aes_decrypt(self.tx, self.aes_mode)
+            json_tx = Cryptor().aes_decrypt(base64.b64decode(self.tx), self.aes_mode)
         return serializers.deserialize("json", json_tx)
 
     def to_model_instance(self, to, check_hostname=None):

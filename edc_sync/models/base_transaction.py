@@ -8,22 +8,24 @@ from edc_sync import transaction_producer
 
 class BaseTransaction(BaseUuidModel):
 
-    tx = models.BinaryField()
+    tx = models.TextField(
+        max_length=500,
+        help_text='stores secret bytes as a b64 encoded string'
+    )
 
     tx_name = models.CharField(
         max_length=64,
         db_index=True,
     )
 
-    tx_pk = models.CharField(
-        max_length=36,
-        db_index=True,
-    )
+    tx_pk = models.UUIDField()
+
+    tx_modified = models.DateTimeField()
 
     producer = models.CharField(
-        max_length=50,
-        default=transaction_producer,
-        db_index=True,
+        max_length=75,
+        default='producer',  # transaction_producer.transaction_producer,
+        null=True,
         help_text='Producer name',
     )
 
@@ -53,13 +55,11 @@ class BaseTransaction(BaseUuidModel):
 
     is_ignored = models.BooleanField(
         default=False,
-        db_index=True,
         help_text='Ignore if update'
     )
 
     is_error = models.BooleanField(
         default=False,
-        db_index=True,
     )
 
     error = models.TextField(
@@ -72,7 +72,7 @@ class BaseTransaction(BaseUuidModel):
 
     batch_id = models.IntegerField(null=True, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return '{0} {1} {2}'.format(self.tx_name, self.producer, self.action)
 
     def render(self):

@@ -1,10 +1,7 @@
-import socket
-
-from datetime import datetime
+from django.utils import timezone
 
 from django.db import models
 
-# from ..managers import IncomingTransactionManager
 from ..mixins import TransactionMixin
 
 from . import BaseTransaction
@@ -16,17 +13,9 @@ class IncomingTransaction(BaseTransaction, TransactionMixin):
         default=False,
         db_index=True)
 
-    is_self = models.BooleanField(
-        default=False,
-        db_index=True)
-
-    # objects = IncomingTransactionManager()
-
     def save(self, *args, **kwargs):
-        if self.hostname_modified == socket.gethostname():
-            self.is_self = True  # FIXME: is this needed?
         if self.is_consumed and not self.consumed_datetime:
-            self.consumed_datetime = datetime.today()
+            self.consumed_datetime = timezone.now()
         super(IncomingTransaction, self).save(*args, **kwargs)
 
     class Meta:
