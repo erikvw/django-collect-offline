@@ -4,5 +4,6 @@ django-extensions==1.5.5
 Unipath==1.1
 django-crypto-fields
 django-revision
+factory_boy
 -e git+https://github.com/botswana-harvard/edc-base@develop#egg=edc-base
 -e git+https://github.com/botswana-harvard/edc-device@develop#egg=edc-device
