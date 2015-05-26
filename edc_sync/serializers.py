@@ -21,12 +21,12 @@ class MiddlemanTransactionSerializer(ModelSerializer):
         fields = ('tx', 'tx_name', 'tx_pk', 'producer')
 
 
-class Out2InTransactionSerializer(ModelSerializer):
- 
-    def save(self):
-        incoming_transaction = IncomingTransaction
-        pass
- 
-    class Meta:
-        model = OutgoingTransaction
-        fields = ('tx', 'tx_name', 'tx_pk', 'producer')
+# class Out2InTransactionSerializer(ModelSerializer):
+#
+#     def save(self):
+#         incoming_transaction = IncomingTransaction
+#         pass
+#
+#     class Meta:
+#         model = OutgoingTransaction
+#         fields = ('tx', 'tx_name', 'tx_pk', 'producer')

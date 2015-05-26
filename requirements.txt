@@ -1,7 +1,7 @@
-Django==1.8.2
+Django>=1.8.2
 djangorestframework==3.1.2
-django-crypto-fields==0.1.4
 django-extensions==1.5.5
-django-revision==0.1.6
 Unipath==1.1
-edc-base==0.1.0
+django-crypto-fields
+django-revision
+-e git+https://github.com/botswana-harvard/edc-base@develop#egg=edc-base

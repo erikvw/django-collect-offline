@@ -5,9 +5,7 @@ from django.test.testcases import TestCase
 from django.db import transaction
 
 from ..classes import Consumer
-from ..models import IncomingTransaction, OutgoingTransaction
-
-from .models import TestModel
+from ..models import IncomingTransaction, OutgoingTransaction, TestModel
 
 
 class TestTx(TestCase):

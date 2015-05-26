@@ -25,8 +25,8 @@ setup(
     install_requires=[
         'Django>=1.7',
         'unipath>=1.1',
-	'django-crypto-fields>=0.1',
-	'edc-base>=0.1',
+        'django-crypto-fields>=0.1',
+        'edc-base>=0.1',
     ],
     classifiers=[
         'Environment :: Web Environment',

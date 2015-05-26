@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.db import models
 from django.utils import timezone
 
@@ -14,10 +16,10 @@ class TestModel (BaseUuidModel, SyncMixin):
     integer = models.IntegerField()
 
     report_datetime = models.DateTimeField(
-        default=timezone.now())
+        default=timezone.now)
 
     report_date = models.DateField(
-        default=timezone.now().date())
+        default=date.today)
 
     objects = models.Manager()
 

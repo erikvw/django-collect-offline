@@ -1,8 +1,10 @@
 import factory
 
+from datetime import datetime
+
 from django.utils import timezone
 
-from ..models import TestModel
+from ...models import TestModel
 
 
 class TestModelFactory(factory.DjangoModelFactory):
@@ -12,4 +14,4 @@ class TestModelFactory(factory.DjangoModelFactory):
     character = 'Erik'
     integer = 1
     report_datetime = timezone.now()
-    report_date = timezone.now()
+    report_date = datetime.now()
