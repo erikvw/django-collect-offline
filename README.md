@@ -30,4 +30,15 @@ __edc-sync__ uses either the REST API or FILE transfer:
 It is also possible to use Django's DB router if connections are good and reliable.
 
 
+Some models are ready to use edc-sync if it is available:
+	
+	try:
+	    from edc_sync.mixins import SyncMixin
+	except ImportError:
+	    SyncMixin = type('SyncMixin', (object, ), {})
+	
+	
+	class CallLog (SyncMixin, BaseUuidModel):
+	    ...
+
 
