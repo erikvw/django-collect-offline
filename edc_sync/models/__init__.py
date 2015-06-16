@@ -6,3 +6,4 @@ from .producer import Producer
 # from .signals import *
 from .test_sync import TestSync
 from .test_model import TestModel
+from .user import User
