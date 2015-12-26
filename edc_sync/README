@@ -1,0 +1,136 @@
+
+to activate add this to your settings.py
+
+ALLOW_MODEL_SERIALIZATION = True
+
+
+add this to your models.py
+
+try:
+    from edc.device.sync.classes import BaseSyncModel as BaseUuidModel
+except ImportError:
+    from edc_base.model.classes import BaseUuidModel
+    
+-or just-
+
+from edc.device.sync.classes import BaseSyncModel as BaseUuidModel
+
+
+IMPORTANT:
+if you auto-create instances of any pertinent models in a model save() method, put it in a 
+conditional, because you do not want the save() to create these model instances on deserialization.
+
+    def save(self, *args, **kwargs):
+        if not kwargs.get('suppress_autocreate_on_deserialize', False):
+            Appointment.create()
+            
+from django.db import models
+producer = 'mkl94'
+app_list=['maikalelo_maternal',]
+common_foreign_key_field_name = 'id'
+model_list = [{'name': model._meta.module_name, 'model':model} 
+                        for model in models.get_models() 
+                        if (model._meta.app_label in app_list) 
+                        and common_foreign_key_field_name in 
+                        [field.name for field in model._meta.fields] 
+                        and '_audit_id' not in 
+                        [field.name for field in model._meta.fields]
+                       ]
+
+lst = []
+for dct in model_list:
+    lst.append('%s: %s' % (dct['name'], dct['model'].objects.filter(hostname_created=producer).count()))
+
+lst.sort()
+lst
+                           
+#resave models
+for dct in model_list:
+    for m in dct['model'].objects.filter(hostname_created='mkl04'):
+        m.hostname_created = 'mkl94'
+        m.save()
+
+maybe update producer
+
+update bhp_sync_transaction set producer='mkl51' where producer='dmc3' and is_consumed=False;
+
+
+** Sync Errors from mochudi
+*****************************************
+
+Case 1: Structure and its members have been generated on more than one netbook. 
+
+Netbook A has already sync'ed. When netbook B tries to sync and integrity error 
+occurs as the structure and member data have different pks.
+
+better to figure out the use of natrual keys, but...
+
+
+1. determine the houshold identifier. The pk for the household is in the householdstructure
+transaction and will be the same on both systems
+
+2. determine the householdstructure old and new pks.
+
+3. change
+
+4. determine the conflicting householdstructurememeber old and new pks 
+
+5. change
+
+change the pk on the transaction. for example, in the case of the mochudi survey 
+the household structure and household structure members often get created on more than on system
+where only the pk is different
+
+the old_pk is listed in the json object on the producer
+the new_pk is the pk assigned to the record on the consumer. in this
+case the consumer is the community server and the producer is a 
+netbook.
+
+# pk on netbook for record (or related records) existing on community server
+old_pk='2458e764-48bb-11e1-a0e4-6dc5fbbdc8e2'
+
+# pk on consumer / community server
+new_pk='406e16f2-4e49-11e1-afda-002564c382e3'
+
+# replace on netbook
+for t in Transaction.objects.filter(is_consumed=False,producer=producer, tx__icontains=old_pk):
+    t.tx = t.tx.replace(old_pk, new_pk)
+    t.save()
+
+# run the sync from the community server to consume the corrected transactions
+
+Note, we are not changing the pk in the tables on the netbook and further edits to these records
+will recreate the integrity error and require the above steps to be repeated.
+
+
+** Examples from maikalelo
+**************************************************
+#fix Entry instance with different pk
+new_pk = u'ebd4af6a-560f-11e1-aede-001c7b771d23'
+for t in Transaction.objects.filter(is_consumed=False):
+    t.tx = t.tx.replace(u'97a4fd58-540e-11e1-a1fc-50af7311838d', new_pk)
+    t.save()
+
+
+# resave all models with m2m field to get the correct m2m transactions
+from django.db.models import get_models
+m2m_models = []
+for model in get_models():
+    if model._meta.app_label in ['maikalelo_infant', 'maikalelo_maternal', 'maikalelo_lab']:
+        for fld in model._meta.many_to_many:            
+            for m in model.objects.all():
+                m.save()
+            break                
+                #m2m_models.append(model)
+
+
+# resave all models with m2m field to get the correct m2m transactions
+from django.db.models import get_models
+m2m_models = []
+for model in get_models():
+    if model._meta.app_label in ['mochudi_subject', 'mochudi_household', 'mochudi_survey_lab']:
+        for fld in model._meta.many_to_many:            
+            for m in model.objects.all():
+                m.save()
+            break                
+                
