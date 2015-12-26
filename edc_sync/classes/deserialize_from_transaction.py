@@ -24,10 +24,6 @@ class DeserializeFromTransaction(object):
             return None
         return decoded
 
-    def decrypt_transanction(self, incoming_transaction):
-            model_dict = FieldCryptor('aes', 'local').decrypt(incoming_transaction.tx)
-            return json.loads(model_dict)
-
     def deserialize(self, incoming_transaction, using, **kwargs):
         # may bypass this check for for testing ...
         using = using or 'default'
@@ -39,10 +35,6 @@ class DeserializeFromTransaction(object):
         for obj in serializers.deserialize("json", tr):
             # if you get an error deserializing a datetime, confirm dev version of json.py
             if obj.object.skip_saving_criteria():
-                # If there you want a certain model to not be persisted for what ever reason,
-                # (Usually to deal with temporary data cleaning issues) then define the method skip_saving_criteria()
-                # in your model which return True/False based on the criteria to be used for skipping. This will
-                # override the method in BaseSyncUuid model which by default returns False.
                 continue
             if incoming_transaction.action == 'D':
                 # If the transactions is a DELETE then let the model itself deal with how

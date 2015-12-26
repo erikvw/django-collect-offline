@@ -83,7 +83,7 @@ class Producer(BaseUuidModel):
         return self.name
 
     class Meta:
-        app_label = 'sync'
+        app_label = 'edc_sync'
         db_table = 'bhp_sync_producer'
         ordering = ['name']
         unique_together = (('settings_key', 'is_active'), )

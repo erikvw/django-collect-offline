@@ -2,12 +2,10 @@ import factory
 
 from django.utils import timezone
 
-from ...models import BaseTransaction
-
 
 class BaseTransactionFactory(factory.DjangoModelFactory):
     class Meta:
-        model = BaseTransaction
+        abstract = True
 
     tx = ('enc1:::d9fbf0312906ffcc085145bd0f4f1df7de0cd43dc037cfffe4243c03fd'
           '5b5486enc2:::GJirsgc6CyK66MQWLMBQPLzYoGUOxWSXE8MhPgvIqP0bRmAWXaI2D'

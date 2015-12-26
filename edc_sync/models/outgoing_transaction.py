@@ -10,13 +10,11 @@ class OutgoingTransaction(BaseTransaction):
     """ Transactions produced locally to be consumed/sent to a queue or consumer """
     is_consumed_middleman = models.BooleanField(
         default=False,
-        db_index=True,
-    )
+        db_index=True)
 
     is_consumed_server = models.BooleanField(
         default=False,
-        db_index=True,
-    )
+        db_index=True)
 
     objects = models.Manager()
 
@@ -26,6 +24,6 @@ class OutgoingTransaction(BaseTransaction):
         super(OutgoingTransaction, self).save(*args, **kwargs)
 
     class Meta:
-        app_label = 'sync'
+        app_label = 'edc_sync'
         db_table = 'bhp_sync_outgoingtransaction'
         ordering = ['timestamp']

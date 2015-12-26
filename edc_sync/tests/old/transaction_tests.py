@@ -1,7 +1,7 @@
 from django.test import TestCase
 
-from edc.device.sync.classes import Consumer, DeserializeFromTransaction, SerializeToTransaction
-from edc.device.sync.models import Producer, OutgoingTransaction, IncomingTransaction, TestItem
+from edc_sync.classes import Consumer, DeserializeFromTransaction
+from edc_sync.models import Producer, OutgoingTransaction, IncomingTransaction, TestItem
 
 
 class TransactionTests(TestCase):

@@ -1,15 +1,6 @@
 import socket
-import logging
+
 from django.conf import settings
-
-
-logger = logging.getLogger(__name__)
-
-
-class NullHandler(logging.Handler):
-    def emit(self, record):
-        pass
-nullhandler = logger.addHandler(NullHandler())
 
 
 class TransactionProducer(object):

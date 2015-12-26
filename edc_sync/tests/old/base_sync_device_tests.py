@@ -7,7 +7,7 @@ from tastypie.models import ApiKey
 
 from edc_device import device
 
-from ..models import OutgoingTransaction, IncomingTransaction, MiddleManTransaction
+from edc_sync.models import OutgoingTransaction, IncomingTransaction, MiddleManTransaction
 
 
 class BaseSyncDeviceTests(TestCase):

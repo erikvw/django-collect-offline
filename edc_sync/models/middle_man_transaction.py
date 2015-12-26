@@ -1,51 +1,59 @@
-from datetime import datetime
+import json
 
+from django.conf import settings
 from django.db import models
 from django.db.models import get_model
-from django.conf import settings
+from django.utils import timezone
 
 from edc_device import device
+from edc_base.encrypted_fields import FieldCryptor
 
-from ..classes import DeserializeFromTransaction
+from ..exceptions import SyncError
 
 from .base_transaction import BaseTransaction
 
 
 class MiddleManTransaction(BaseTransaction):
 
-    """ transactions produced locally to be consumed/sent to a queue or consumer """
+    """A model class for transactions produced locally to be consumed/sent
+    to a queue or consumer """
 
     is_consumed_middleman = models.BooleanField(
         default=False,
-        db_index=True,
-    )
+        db_index=True)
 
     is_consumed_server = models.BooleanField(
         default=False,
-        db_index=True,
-    )
+        db_index=True)
 
     def save(self, *args, **kwargs):
         if self.is_consumed_server and not self.consumed_datetime:
-            self.consumed_datetime = datetime.today()
+            self.consumed_datetime = timezone.now()
         if not device.is_middleman:
-            raise TypeError('\'{0}\' is not configured to be a MiddleMan, so you cannot save MiddleMan transanctions here.'.format(settings.DEVICE_ID))
+            raise SyncError(
+                '\'{0}\' is not configured to be a Middleman. '
+                'Transaction cannot be created.'.format(settings.DEVICE_ID))
         super(MiddleManTransaction, self).save(*args, **kwargs)
 
+    def decrypt_transaction(self):
+            model_dict = FieldCryptor('aes', 'local').decrypt(self.tx)
+            return json.loads(model_dict)
+
     def deserialize_to_inspector_on_post_save(self, instance, raw, created, using, **kwargs):
-        model_dict = DeserializeFromTransaction().decrypt_transanction(self)[0]
-        tokens = model_dict.get('model').split('.')
-        app_name = tokens[0]
-        model_name = tokens[1]
-        model = get_model(app_name, model_name)
-        if model and 'save_to_inspector' in dir(model):
-            fields = model_dict.get('fields')
-            instance_pk = model_dict.get('pk')
-            model().save_to_inspector(fields, instance_pk, using)
+        model_dict = self.decrypt_transaction(self)[0]
+        model = get_model(model_dict.get('model').split('.'))
+        try:
+            model().save_to_inspector(
+                model_dict.get('fields'),
+                model_dict.get('pk'),
+                using)
+        except AttributeError as e:
+            if 'save_to_inspector' not in str(e):
+                raise SyncError(str(e))
 
     objects = models.Manager()
 
     class Meta:
-        app_label = 'sync'
+        app_label = 'edc_sync'
         db_table = 'bhp_sync_middlemantransaction'
         ordering = ['timestamp']

@@ -11,8 +11,9 @@ from django.shortcuts import redirect
 from django.core.urlresolvers import reverse
 
 from edc_device import device
-from edc.device.sync.classes import transaction_producer
-from edc.device.sync.models import Producer, RequestLog, IncomingTransaction, MiddleManTransaction
+
+from ..classes import transaction_producer
+from ..models import Producer, RequestLog, IncomingTransaction, MiddleManTransaction
 
 
 class ConsumeTransactions(object):
@@ -126,7 +127,8 @@ class ConsumeTransactions(object):
                                     # Read from Netbook's outgoing and create MiddleMan locally.
                                     # transanction_model = MiddleManTransaction
                                     try:
-                                        middle_man_transaction = MiddleManTransaction.objects.get(pk=outgoing_transaction['id'])
+                                        middle_man_transaction = MiddleManTransaction.objects.get(
+                                            pk=outgoing_transaction['id'])
                                         middle_man_transaction.is_consumed_server = False
                                         middle_man_transaction.is_error = False
                                         middle_man_transaction.save()
@@ -143,13 +145,12 @@ class ConsumeTransactions(object):
                                     # Then i must be a SERVER
                                     try:
                                         # START HERE
-                                        # a little tricky cause it could be from Middleman or Netbook, depending on which was synced first
-                                        # but either way, what we want to do is ignore the tranction that already exists in the server,
-                                        # irregardles of where it comes from, it should exactly be the same transanction.
-                                        incoming_transaction = IncomingTransaction.objects.get(pk=outgoing_transaction['id'])
-                                        # incoming_transaction.is_consumed = False
-                                        # incoming_transaction.is_error = False
-                                        # incoming_transaction.save()
+                                        # a little tricky cause it could be from
+                                        # Middleman or Netbook, depending on which was synced first
+                                        # but either way, what we want to do is ignore the transaction
+                                        # that already exists on the server regardless of where it
+                                        # came from. It should exactly be the same transaction.
+                                        IncomingTransaction.objects.get(pk=outgoing_transaction['id'])
                                     except IncomingTransaction.DoesNotExist:
                                         IncomingTransaction.objects.create(
                                             pk=outgoing_transaction['id'],
@@ -165,7 +166,7 @@ class ConsumeTransactions(object):
                                     outgoing_transaction['is_consumed_server'] = False
                                 else:
                                     if not outgoing_transaction['is_consumed_middleman']:
-                                        # transanction was consumed straight in the Server, MiddleMan bypassed
+                                        # transaction was consumed straight in the Server, MiddleMan bypassed
                                         outgoing_transaction['is_consumed_middleman'] = False
                                     outgoing_transaction['is_consumed_server'] = True
                                 outgoing_transaction['consumer'] = transaction_producer
@@ -246,7 +247,8 @@ class ConsumeTransactions(object):
 def consume_transactions(request, **kwargs):
     consume_transactions = None
     if 'ALLOW_MODEL_SERIALIZATION' not in dir(settings):
-        messages.add_message(request, messages.ERROR, 'ALLOW_MODEL_SERIALIZATION global boolean not found in settings.')
+        messages.add_message(request, messages.ERROR,
+                             'ALLOW_MODEL_SERIALIZATION global boolean not found in settings.')
     try:
         consume_transactions = ConsumeTransactions(
             request,
@@ -255,7 +257,8 @@ def consume_transactions(request, **kwargs):
         consume_transactions.consume()
     except ValueError as value_error:
         if 'ApiKey not found' in str(value_error):
-            messages.add_message(request, messages.ERROR, '{} {}'.format(str(value_error), 'Contact the Data Manager.'))
+            messages.add_message(
+                request, messages.ERROR, '{} {}'.format(str(value_error), 'Contact the Data Manager.'))
     except AttributeError as attribute_error:
         if 'ALLOW_MODEL_SERIALIZATION' in str(attribute_error):
             messages.add_message(request, messages.ERROR, (

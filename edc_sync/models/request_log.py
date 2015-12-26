@@ -23,5 +23,5 @@ class RequestLog(BaseUuidModel):
         blank=True)
 
     class Meta:
-        app_label = 'sync'
+        app_label = 'edc_sync'
         db_table = 'bhp_sync_requestlog'

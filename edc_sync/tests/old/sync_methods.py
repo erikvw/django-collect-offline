@@ -5,9 +5,8 @@ from django.core.management import call_command
 from django.test import TestCase
 
 from edc.core.bhp_content_type_map.models import ContentTypeMap
-from edc.device.sync.classes import Consumer, DeserializeFromTransaction
-from edc.device.sync.models import Producer, OutgoingTransaction, IncomingTransaction
-from edc.subject.consent.models import ConsentCatalogue
+from edc_sync.classes import Consumer
+from edc_sync.models import Producer, OutgoingTransaction, IncomingTransaction
 
 
 class SyncMethodsTests(TestCase):

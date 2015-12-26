@@ -1,6 +1,6 @@
 import factory
 
-from edc.device.sync.models import Producer
+from edc_sync.models import Producer
 
 
 class ProducerFactory(factory.DjangoModelFactory):

@@ -24,8 +24,7 @@ class ServerTests(BaseSyncDeviceTests):
         self.assertEqual(User.objects.all().count(), 1)
         self.assertEqual(ApiKey.objects.all().count(), 1)
         self.denies_anonymous_acess(producer, app_name)
-        print 'Number of OUTGOING TRANSACTIONS = {0}'.format(OutgoingTransaction.objects.all().count())
-        #print response
+        print('Number of OUTGOING TRANSACTIONS = {0}'.format(OutgoingTransaction.objects.all().count()))
         if not socket.gethostname() + '-bhp066' in settings.MIDDLE_MAN_LIST:
             response = self.client.get('/bhp_sync/consume/' + producer + '/' + app_name + '/', follow=True)
             self.assertTrue(str(response).find('/bhp_sync/api_otsr/outgoingtransaction') != -1)
@@ -37,6 +36,3 @@ class ServerTests(BaseSyncDeviceTests):
             self.assertFalse(str(response).find('/bhp_sync/api_otsr/outgoingtransaction') != -1)
         self.assertEqual(response.status_code, 200)
         self.assertRedirects(response, '/dispatch/bcpp/sync/' + producer + '/')
-
-    def test_consume_from_usb(self):
-        pass

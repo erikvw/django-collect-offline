@@ -1,8 +1,7 @@
 from django.contrib import messages
 
-from edc.core.crypto_fields.classes import FieldCryptor
+from edc_base.encrypted_fields import FieldCryptor
 
-from .classes import SerializeToTransaction
 from .exceptions import ProducerError
 from .utils import update_producer_from_settings
 
@@ -20,17 +19,13 @@ update_producer_from_settings_file.short_description = (
 
 
 def serialize(modeladmin, request, queryset):
-
     """ for a model instance serializing to outgoing"""
-    serialize_to_transaction = SerializeToTransaction()
     n = 0
     for instance in queryset:
-        raw = False
-        created = True
-        using = 'default'
-        serialize_to_transaction.serialize(instance.__class__, instance, raw, created, using)
+        instance.to_outgoing_transaction()
         n += 1
-    messages.add_message(request, messages.SUCCESS, '%s transactions have been sent to Outgoing' % (n,))
+    messages.add_message(
+        request, messages.SUCCESS, '{} transactions have been sent to Outgoing'.format(n,))
 serialize.short_description = "Send as Outgoing Transaction"
 
 
@@ -40,7 +35,8 @@ def reset_transaction_as_not_consumed(modeladmin, request, queryset):
         qs.is_consumed = False
         qs.consumer = None
         qs.save()
-reset_transaction_as_not_consumed.short_description = "Set transactions as NOT consumed (is_consumed=False)"
+reset_transaction_as_not_consumed.short_description = (
+    "Set transactions as NOT consumed (is_consumed=False)")
 
 
 def reset_outgoing_transaction_server_as_not_consumed(modeladmin, request, queryset):
@@ -116,7 +112,8 @@ def reset_incomingtransaction_error_status(modeladmin, request, queryset):
         qs.is_error = False
         qs.error = None
         qs.save()
-reset_incomingtransaction_error_status.short_description = "Reset transaction error status (is_error=False)"
+reset_incomingtransaction_error_status.short_description = (
+    "Reset transaction error status (is_error=False)")
 
 
 def set_incomingtransaction_as_ignore_status(modeladmin, request, queryset):
@@ -125,7 +122,8 @@ def set_incomingtransaction_as_ignore_status(modeladmin, request, queryset):
         qs.is_ignored = True
         qs.error = None
         qs.save()
-set_incomingtransaction_as_ignore_status.short_description = "Set transaction ignore status (is_ignored=True)"
+set_incomingtransaction_as_ignore_status.short_description = (
+    "Set transaction ignore status (is_ignored=True)")
 
 
 def reset_incomingtransaction_ignore_status(modeladmin, request, queryset):
@@ -134,7 +132,8 @@ def reset_incomingtransaction_ignore_status(modeladmin, request, queryset):
         qs.is_ignored = False
         qs.error = None
         qs.save()
-reset_incomingtransaction_ignore_status.short_description = "Reset transaction ignore status (is_ignored=False)"
+reset_incomingtransaction_ignore_status.short_description = (
+    "Reset transaction ignore status (is_ignored=False)")
 
 
 def decrypt_incomingtransaction(modeladmin, request, queryset):
@@ -154,7 +153,8 @@ def set_incomingtransaction_audits_to_ignored(modeladmin, request, queryset):
             qs.is_ignored = True
             qs.error = None
             qs.save()
-set_incomingtransaction_audits_to_ignored.short_description = "Set audit transactions ignore status (is_ignored=True)"
+set_incomingtransaction_audits_to_ignored.short_description = (
+    "Set audit transactions ignore status (is_ignored=True)")
 
 
 def reset_incomingtransaction_audits(modeladmin, request, queryset):
@@ -164,7 +164,8 @@ def reset_incomingtransaction_audits(modeladmin, request, queryset):
             qs.is_ignored = False
             qs.error = None
             qs.save()
-reset_incomingtransaction_audits.short_description = "Reset audit transactions ignore status (is_ignored=False)"
+reset_incomingtransaction_audits.short_description = (
+    "Reset audit transactions ignore status (is_ignored=False)")
 
 
 def toggle_producer_is_active(modeladmin, request, queryset):
@@ -175,4 +176,5 @@ def toggle_producer_is_active(modeladmin, request, queryset):
         else:
             qs.is_active = True
         qs.save()
-toggle_producer_is_active.short_description = "Toggle producer as active or not active (is_active=True/False)"
+toggle_producer_is_active.short_description = (
+    "Toggle producer as active or not active (is_active=True/False)")

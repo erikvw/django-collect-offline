@@ -12,5 +12,17 @@ class TransactionConsumerError(Exception):
     pass
 
 
-class ProducerError(Exception):
+class SyncError(Exception):
+    pass
+
+
+class UsingError(Exception):
+    pass
+
+
+class UsingSourceError(Exception):
+    pass
+
+
+class UsingDestinationError(Exception):
     pass

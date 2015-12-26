@@ -64,23 +64,22 @@ class TransactionHelper(object):
                 hostname_modified=hostname,
                 is_consumed_server=False,
                 is_consumed_middleman=False,
-                is_ignored=False
-                )
+                is_ignored=False)
             if outgoing_transactions and raise_exception:
                 raise PendingTransactionError('Host \'{}\' has {} pending transactions. '
                                               'Please correct before continuing. (using={})'.format(
                                                   hostname, outgoing_transactions.count(), using))
-            return outgoing_transactions
-        has_outgoing_transactions = OutgoingTransaction.objects.using(using).filter(
-            hostname_modified=hostname,
-            is_consumed_server=False,
-            is_consumed_middleman=False,
-            is_ignored=False
-            ).exists()
-        if has_outgoing_transactions and raise_exception:
-            raise PendingTransactionError('Host {} has pending transactions. '
-                                          'Please correct before continuing. (using={})'.format(hostname, using))
-        return has_outgoing_transactions
+        else:
+            outgoing_transactions = OutgoingTransaction.objects.using(using).filter(
+                hostname_modified=hostname,
+                is_consumed_server=False,
+                is_consumed_middleman=False,
+                is_ignored=False).exists()
+            if outgoing_transactions and raise_exception:
+                raise PendingTransactionError(
+                    'Host {} has pending transactions. '
+                    'Please correct before continuing. (using={})'.format(hostname, using))
+        return outgoing_transactions
 
     def outgoing_transactions(self, hostname, using, raise_exception=None):
         """Returns a queryset of OutgoingTransactions as determined by method
@@ -89,5 +88,5 @@ class TransactionHelper(object):
         Args: hostname, using, raise_exception=None"""
         using = using or 'default'
         raise_exception = raise_exception or False
-        return self.has_outgoing_for_producer(hostname, using, return_queryset=True,
-                                              raise_exception=raise_exception)
+        return self.has_outgoing_for_producer(
+            hostname, using, return_queryset=True, raise_exception=raise_exception)

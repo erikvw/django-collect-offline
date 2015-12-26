@@ -1,25 +1,15 @@
 from __future__ import print_function
 
-import logging
-
 from datetime import datetime, timedelta
 
 from django.core.serializers.base import DeserializationError
 from django.db.models import get_model
+
 from edc_device import device
 
 from ..exceptions import TransactionConsumerError
 
 from .deserialize_from_transaction import DeserializeFromTransaction
-
-
-logger = logging.getLogger(__name__)
-
-
-class NullHandler(logging.Handler):
-    def emit(self, record):
-        pass
-nullhandler = logger.addHandler(NullHandler())
 
 
 class Consumer(object):
@@ -35,32 +25,28 @@ class Consumer(object):
         deserialize_from_transaction = DeserializeFromTransaction()
         IncomingTransaction = get_model('sync', 'IncomingTransaction')
         if model_name and not producer_name:
-            total_incoming_transactions = IncomingTransaction.objects.using(using).filter(is_consumed=False,
-                                                                                          is_ignored=False,
-                                                                                          tx_name=model_name).count()
+            total_incoming_transactions = IncomingTransaction.objects.using(using).filter(
+                is_consumed=False, is_ignored=False, tx_name=model_name).count()
         elif producer_name and not model_name:
-            total_incoming_transactions = IncomingTransaction.objects.using(using).filter(is_consumed=False,
-                                                                                          is_ignored=False,
-                                                                                          producer=producer_name).count()
+            total_incoming_transactions = IncomingTransaction.objects.using(using).filter(
+                is_consumed=False, is_ignored=False, producer=producer_name).count()
         elif producer_name and model_name:
-            total_incoming_transactions = IncomingTransaction.objects.using(using).filter(is_consumed=False,
-                                                                                          is_ignored=False,
-                                                                                          tx_name=model_name,
-                                                                                          producer=producer_name).count()
+            total_incoming_transactions = IncomingTransaction.objects.using(using).filter(
+                is_consumed=False, is_ignored=False, tx_name=model_name, producer=producer_name).count()
         else:
-            total_incoming_transactions = IncomingTransaction.objects.using(using).filter(is_consumed=False,
-                                                                                          is_ignored=False).count()
+            total_incoming_transactions = IncomingTransaction.objects.using(using).filter(
+                is_consumed=False, is_ignored=False).count()
         for index, incoming_transaction in self.enumerated_incomming(using, model_name, producer_name):
             action = ''
-            print('{0} / {1} {2} {3}'.format(index + 1, total_incoming_transactions,
-                                             incoming_transaction.producer,
-                                             incoming_transaction.tx_name))
+            print('{0} / {1} {2} {3}'.format(
+                index + 1, total_incoming_transactions,
+                incoming_transaction.producer,
+                incoming_transaction.tx_name))
             print('    tx_pk=\'{0}\''.format(incoming_transaction.tx_pk))
             action = 'failed'
             try:
-                if deserialize_from_transaction.deserialize(incoming_transaction,
-                                                            using,
-                                                            check_hostname=check_hostname):
+                if deserialize_from_transaction.deserialize(
+                        incoming_transaction, using, check_hostname=check_hostname):
                     action = 'saved'
                 print('    {0}'.format(action))
             except DeserializationError as deserialization_error:
@@ -71,25 +57,29 @@ class Consumer(object):
     def enumerated_incomming(self, using, model_name, producer_name):
         IncomingTransaction = get_model('sync', 'IncomingTransaction')
         if model_name and not producer_name:
-            return enumerate(IncomingTransaction.objects.using(using).filter(
-                        is_consumed=False,
-                        is_ignored=False,
-                        tx_name=model_name).order_by('timestamp', 'producer'))
+            return enumerate(
+                IncomingTransaction.objects.using(using).filter(
+                    is_consumed=False,
+                    is_ignored=False,
+                    tx_name=model_name).order_by('timestamp', 'producer'))
         elif producer_name and not model_name:
-            return enumerate(IncomingTransaction.objects.using(using).filter(
-                        is_consumed=False,
-                        is_ignored=False,
-                        producer=producer_name).order_by('timestamp', 'producer'))
+            return enumerate(
+                IncomingTransaction.objects.using(using).filter(
+                    is_consumed=False,
+                    is_ignored=False,
+                    producer=producer_name).order_by('timestamp', 'producer'))
         elif producer_name and model_name:
-            return enumerate(IncomingTransaction.objects.using(using).filter(
-                        is_consumed=False,
-                        is_ignored=False,
-                        tx_name=model_name,
-                        producer=producer_name).order_by('timestamp', 'producer'))
+            return enumerate(
+                IncomingTransaction.objects.using(using).filter(
+                    is_consumed=False,
+                    is_ignored=False,
+                    tx_name=model_name,
+                    producer=producer_name).order_by('timestamp', 'producer'))
         else:
-            return enumerate(IncomingTransaction.objects.using(using).filter(
-                        is_consumed=False,
-                        is_ignored=False).order_by('timestamp', 'producer'))
+            return enumerate(
+                IncomingTransaction.objects.using(using).filter(
+                    is_consumed=False,
+                    is_ignored=False).order_by('timestamp', 'producer'))
 
     def pre_sync(self, using=None, lock_name=None, **kwargs):
         pass
@@ -101,20 +91,26 @@ class Consumer(object):
         from ..models import IncomingTransaction
         today = datetime.now()
         margin = timedelta(days=1)
-        consumed_today = IncomingTransaction.objects.filter(created__range=(today - margin, today + margin), is_consumed=True)
-        not_consumed_today = IncomingTransaction.objects.filter(created__range=(today - margin, today + margin), is_consumed=False)
+        consumed_today = IncomingTransaction.objects.filter(
+            created__range=(today - margin, today + margin), is_consumed=True)
+        not_consumed_today = IncomingTransaction.objects.filter(
+            created__range=(today - margin, today + margin), is_consumed=False)
         not_consumed_not_ignored_today = not_consumed_today.filter(is_ignored=True)
-        message = ('\'{0}\' transactions where CONSUMED today, \n \'{1}\' transactions FAILED to consume '
-                   'today, \n \'{2}\' of those that failed to consume have been set as IGNORED.').format(
-                       consumed_today.count(), not_consumed_today.count(), not_consumed_not_ignored_today.count())
+        message = (
+            '\'{0}\' transactions where CONSUMED today, \n \'{1}\' transactions FAILED to consume '
+            'today, \n \'{2}\' of those that failed to consume have been set as IGNORED.').format(
+                consumed_today.count(), not_consumed_today.count(), not_consumed_not_ignored_today.count())
         return message
 
     def fetch_outgoing(self, using_source, using_destination=None):
-        """Fetches all OutgoingTransactions not consumed from a source and saves them locally (default).
+        """Fetches all OutgoingTransactions not consumed from a source
+        and saves them locally (default).
 
             Args:
-                using_source: DATABASE key for the database with the OutgoingTransactions
-                using_destination: DATABASE key for the database receiving the IncoingTransactions. (default=default)"""
+                using_source: DATABASE key for the database with
+                    the OutgoingTransactions
+                using_destination: DATABASE key for the database
+                    receiving the IncoingTransactions. (default=default)"""
         if not using_destination:
             using_destination = 'default'
         if using_source == using_destination:

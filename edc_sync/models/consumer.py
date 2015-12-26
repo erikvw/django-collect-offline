@@ -21,6 +21,6 @@ class Consumer(BaseUuidModel):
         return self.name
 
     class Meta:
-        app_label = 'sync'
+        app_label = 'edc_sync'
         db_table = 'bhp_sync_consumer'
         ordering = ['name']

@@ -1,9 +1,9 @@
 from django.contrib import admin
-from edc_base.modeladmin.admin import BaseModelAdmin
+
 from ..models import RequestLog
 
 
-class RequestLogAdmin(BaseModelAdmin):
+class RequestLogAdmin(admin.ModelAdmin):
 
     list_display = ('producer', 'request_datetime', 'status', 'comment')
 
