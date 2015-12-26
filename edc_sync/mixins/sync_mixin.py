@@ -5,14 +5,14 @@ from datetime import datetime
 
 from django.core import serializers
 from django.apps import apps
-
+from django.db import models
 from django_crypto_fields.classes import Cryptor
 from django.core.exceptions import ImproperlyConfigured
 
 from ..transaction_producer import transaction_producer
 
 
-class SyncMixin(object):
+class SyncMixin(models.Model):
 
     aes_mode = 'local'
     use_encryption = True
@@ -59,3 +59,6 @@ class SyncMixin(object):
 
     def to_inspector(self):
         pass
+
+    class Meta:
+        abstract = True
