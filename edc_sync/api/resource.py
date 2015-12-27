@@ -1,9 +1,25 @@
+from tastypie.constants import ALL
 from tastypie.authentication import ApiKeyAuthentication
 from tastypie.authorization import DjangoAuthorization
 from tastypie.resources import ModelResource
 from tastypie.serializers import Serializer
 
 from ..models import OutgoingTransaction, MiddleManTransaction
+
+
+class OutgoingTransactionResource(ModelResource):
+
+    class Meta:
+        queryset = OutgoingTransaction.objects.filter(
+            is_consumed_server=False).order_by('timestamp')
+        resource_name = 'outgoingtransaction'
+        authentication = ApiKeyAuthentication()
+        authorization = DjangoAuthorization()
+        allowed_methods = ['get', 'post', 'put', ]
+        filtering = {
+            'is_consumed_middleman': ALL,
+        }
+        serializer = Serializer()
 
 
 class OutgoingTransactionMiddleManResource(ModelResource):

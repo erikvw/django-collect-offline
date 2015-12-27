@@ -1,6 +1,6 @@
 from django.conf import settings
 
-from edc.device.sync.exceptions import ProducerError
+from ..exceptions import SyncProducerError
 
 from ..models import Producer
 
@@ -9,7 +9,7 @@ def load_producer_db_settings(producer_name=None, refresh=None):
     """Updates the settings.DATABASES dictionary with the connections to the
     producer databases for setting_keys that do already exist.
 
-    Raise a ProducerError exception if the producer does not exist or producer details
+    Raise a SyncError if the producer does not exist or producer details
     are incomplete.
 
     TODO: the producer attributes should be confirmed, eg hostname, IP, password. etc."""
@@ -28,7 +28,7 @@ def load_producer_db_settings(producer_name=None, refresh=None):
         if (producer.db_user_name is None or producer.db_user is None or
                 producer.db_password is None or producer.producer_ip is None or
                 producer.settings_key is None):
-            raise ProducerError('Producer {} is incorrectly defined in model Producer. '
+            raise SyncProducerError('Producer {} is incorrectly defined in model Producer. '
                                 'Please correct or set is_active=False. Got settings_key={} '
                                 'db_name={} db_user={} db_password={} producer_ip={}'.format(
                                     producer.name,

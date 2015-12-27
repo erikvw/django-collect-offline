@@ -1,6 +1,6 @@
 from django.conf import settings
 
-from edc.device.sync.exceptions import ProducerError
+from ..exceptions import SyncProducerError
 
 
 def update_producer_from_settings(producer=None):
@@ -9,14 +9,14 @@ def update_producer_from_settings(producer=None):
     try:
         producer = Producer.objects.get(settings_key=producer.settings_key, is_active=True)
         if not settings.DATABASES.get(producer.settings_key):
-            raise ProducerError(
+            raise SyncProducerError(
                 'Unable to update Producer \'{}\', Settings key \'{}\' '
                 'does not exist.'.format(producer.name, producer.settings_key))
         update_producer_from_configuration_file(producer)
     except (KeyError, TypeError):
         update_producer(producer)
     except Producer.DoesNotExist:
-        raise ProducerError('Unable to update Producer \'{}\'. Producer is not '
+        raise SyncProducerError('Unable to update Producer \'{}\'. Producer is not '
                             'active (is_active=False).'.format(producer))
     return Producer.objects.get(pk=producer.pk)
 

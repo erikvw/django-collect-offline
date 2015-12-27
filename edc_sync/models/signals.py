@@ -5,11 +5,11 @@ from django.utils import timezone
 
 from edc_base.encrypted_fields import FieldCryptor
 
-from ..classes import transaction_producer
 from ..exceptions import SyncError
 
 from .incoming_transaction import IncomingTransaction
 from .outgoing_transaction import OutgoingTransaction
+from .transaction_producer import transaction_producer
 
 
 @receiver(post_save, weak=False, dispatch_uid="deserialize_to_inspector_on_post_save")

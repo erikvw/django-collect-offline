@@ -55,5 +55,4 @@ class MiddleManTransaction(BaseTransaction):
 
     class Meta:
         app_label = 'edc_sync'
-        db_table = 'bhp_sync_middlemantransaction'
         ordering = ['timestamp']

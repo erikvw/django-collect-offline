@@ -38,16 +38,14 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         email_sender = 'django@bhp.org.bw'
         UploadTransactionFile = get_model('import', 'UploadTransactionFile')
-        missing_files = []
         if not len(args) == 3:
             raise CommandError('Please input arguments in this form--success <[]> --error <[]> --email <comma_separated>')
         if options['email'] and options['success'] and options['error']:
             subject, body, recipient_list = TransactionUpload().compile_upload_stats(args, UploadTransactionFile)
-            #for producer in Producer.objects.filter(is_active=True):
             self.send_email(email_sender, subject, body, recipient_list)
         else:
             raise CommandError('Unknown option, Try --help for a list of valid options')
-        print "Successfully sent email to {0}".format(recipient_list)
+        print("Successfully sent email to {0}".format(recipient_list))
 
     def send_email(self, email_sender, subject, body, recipient_list):
         send_mail(subject, body, email_sender, recipient_list, fail_silently=False)

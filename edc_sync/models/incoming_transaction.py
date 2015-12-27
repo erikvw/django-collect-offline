@@ -11,14 +11,18 @@ from django.db.utils import IntegrityError
 
 from edc_base.encrypted_fields import FieldCryptor
 
-from ..classes import transaction_producer
+from ..exceptions import SyncError
 from ..managers import IncomingTransactionManager
 
 from .base_transaction import BaseTransaction
+from .transaction_producer import transaction_producer
 
 
 class IncomingTransaction(BaseTransaction):
     """ Transactions received from a remote producer and to be consumed locally. """
+
+    check_hostname = None
+
     is_consumed = models.BooleanField(
         default=False,
         db_index=True)
@@ -36,21 +40,19 @@ class IncomingTransaction(BaseTransaction):
             self.consumed_datetime = datetime.today()
         super(IncomingTransaction, self).save(*args, **kwargs)
 
-    def deserialize_transaction(self, using, check_hostname=None):
-        # may bypass this check for for testing ...
-        using = using or 'default'
-        check_hostname = True if check_hostname is None else check_hostname
+    def deserialize_transaction(self, check_hostname=None):
         is_success = False
+        self.check_hostname = True if check_hostname is None else check_hostname
         decrypted_transaction = FieldCryptor('aes', 'local').decrypt(self.tx)
-        # msg = '    ERROR'
         for obj in serializers.deserialize("json", decrypted_transaction):
-            # if you get an error deserializing a datetime, confirm dev version of json.py
-            if obj.object.skip_saving_criteria():
-                continue
             if self.action == 'D':
                 is_success = self.deserialize_delete_tx(obj)
-            elif self.action == 'I' or self.action == 'U':
+            elif self.action == 'I':
                 is_success = self.deserialize_update_tx(obj)
+            elif self.action == 'U':
+                is_success = self.deserialize_update_tx(obj)
+            else:
+                raise SyncError('Unexpected value for action. Got {}'.format(self.action))
         return is_success
 
     def deserialize_delete_tx(self, obj):
@@ -60,7 +62,7 @@ class IncomingTransaction(BaseTransaction):
         self.is_ignored = False
         self.is_consumed = True
         self.consumer = transaction_producer
-        self.save(using=self.using)
+        self.save()
         is_success = True
         return is_success
 
@@ -74,8 +76,8 @@ class IncomingTransaction(BaseTransaction):
             obj.object.deserialize_prep()
             try:
                 with transaction.atomic():
-                    obj.save(using=self.using)
-                    msg = '    OK - normal save on {0}'.format(self.using)
+                    obj.save()
+                    msg = '    OK - normal save'
                 is_success = True
             except IntegrityError as exception:
                 if 'Cannot add or update a child row' in str(exception):
@@ -94,7 +96,7 @@ class IncomingTransaction(BaseTransaction):
             if is_success:
                 self.is_consumed = True
                 self.consumer = transaction_producer
-                self.save(using=self.using)
+                self.save()
 
     def ignore_own_transaction(self):
         # ignore your own transactions and mark them as is_ignored=True
@@ -127,7 +129,7 @@ class IncomingTransaction(BaseTransaction):
                 if isinstance(field, ForeignKey):
                     try:
                         getattr(obj.object, field.name)
-                    except:
+                    except AttributeError:
                         print('    unable to getattr {0}'.format(field.name))
                         foreign_key_error.append(field)
             for field in foreign_key_error:
@@ -204,5 +206,5 @@ class IncomingTransaction(BaseTransaction):
 
     class Meta:
         app_label = 'edc_sync'
-        db_table = 'bhp_sync_incomingtransaction'
+        # db_table = 'bhp_sync_incomingtransaction'
         ordering = ['timestamp']

@@ -3,7 +3,7 @@ from django.db import models
 from edc_base.encrypted_fields import EncryptedCharField
 from edc_base.model.models import BaseUuidModel
 
-from ..classes import PasswordModelField
+from .password_field import PasswordModelField
 
 
 class Producer(BaseUuidModel):
@@ -84,6 +84,5 @@ class Producer(BaseUuidModel):
 
     class Meta:
         app_label = 'edc_sync'
-        db_table = 'bhp_sync_producer'
         ordering = ['name']
         unique_together = (('settings_key', 'is_active'), )

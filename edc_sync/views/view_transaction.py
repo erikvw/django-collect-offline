@@ -10,7 +10,7 @@ from edc_base.encrypted_fields import EncryptedTextField, FieldCryptor
 @login_required
 def view_transaction(request, **kwargs):
     cryptor = FieldCryptor('aes', 'local')
-    app_label = kwargs.get('app_label', 'sync')
+    app_label = kwargs.get('app_label', 'edc_sync')
     model_name = kwargs.get('model_name')
     pk = kwargs.get('pk')
     model = get_model(app_label, model_name)

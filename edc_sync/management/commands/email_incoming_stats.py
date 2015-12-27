@@ -22,8 +22,7 @@ class Command(BaseCommand):
             dest='email',
             action='store_true',
             default=False,
-            help=('Send an email nofication.')),
-        )
+            help=('Send an email nofication.')))
 
     def handle(self, *args, **options):
         email_sender = 'django@bhp.org.bw'
@@ -40,15 +39,14 @@ class Command(BaseCommand):
         if not args:
             CommandError('Invalid options, Try --help for a list of valid options')
         if options['email']:
-            print args
             recipient_list = args[0].split(',')
-            print "sending email to {0}".format(recipient_list)
+            print("sending email to {0}".format(recipient_list))
             # TODO: if connection is not up the report will not be delivered
             # e.g. no retry -- what about using edc.notification
             self.send_email(email_sender, recipient_list, body)
         else:
             raise CommandError('Unknown option, Try --help for a list of valid options')
-        print "Successfully sent email to {0}".format(recipient_list)
+        print("Successfully sent email to {0}".format(recipient_list))
 
     def send_email(self, email_sender, recipient_list, body):
         subject = "{}: incoming tx report for {}".format(socket.gethostname(),
@@ -58,7 +56,5 @@ class Command(BaseCommand):
     @property
     def stats(self):
         return IncomingTransaction.objects.values('tx_name').filter(
-            is_consumed=False, is_ignored=False
-            ).annotate(
-                tx_count=Count('tx_name')
-                ).order_by('tx_name')
+            is_consumed=False, is_ignored=False).annotate(
+                tx_count=Count('tx_name')).order_by('tx_name')

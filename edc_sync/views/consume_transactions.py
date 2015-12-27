@@ -12,8 +12,7 @@ from django.core.urlresolvers import reverse
 
 from edc_device import device
 
-from ..classes import transaction_producer
-from ..models import Producer, RequestLog, IncomingTransaction, MiddleManTransaction
+from ..models import Producer, RequestLog, IncomingTransaction, MiddleManTransaction, transaction_producer
 
 
 class ConsumeTransactions(object):

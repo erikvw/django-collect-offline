@@ -16,14 +16,6 @@ from django.db.models.fields.related import OneToOneField
 
 class DeserializeFromTransaction(object):
 
-    def deserialize_json_file(self, file_pointer):
-        try:
-            json_txt = file_pointer.read()
-            decoded = json.loads(json_txt)
-        except:
-            return None
-        return decoded
-
     def deserialize(self, incoming_transaction, using, **kwargs):
         # may bypass this check for for testing ...
         using = using or 'default'
@@ -68,9 +60,6 @@ class DeserializeFromTransaction(object):
                             obj.save(using=using)
                             is_success = True
                             msg = '    OK - normal save on {0}'.format(using)
-#                             obj.object._deserialize_post(incoming_transaction)
-#                             print msg
-#                             is_success = True
                     except IntegrityError as integrity_error:
                         if 'Cannot add or update a child row' in str(integrity_error):
                             if 'audit' in obj.object._meta.db_table:

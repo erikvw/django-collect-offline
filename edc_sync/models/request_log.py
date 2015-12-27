@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from django.db import models
 
 from edc_base.model.models import BaseUuidModel
@@ -24,4 +25,3 @@ class RequestLog(BaseUuidModel):
 
     class Meta:
         app_label = 'edc_sync'
-        db_table = 'bhp_sync_requestlog'

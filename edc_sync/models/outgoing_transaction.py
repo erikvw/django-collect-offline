@@ -1,6 +1,5 @@
-from datetime import datetime
-
 from django.db import models
+from django.utils import timezone
 
 from .base_transaction import BaseTransaction
 
@@ -20,10 +19,9 @@ class OutgoingTransaction(BaseTransaction):
 
     def save(self, *args, **kwargs):
         if self.is_consumed_server and not self.consumed_datetime:
-            self.consumed_datetime = datetime.today()
+            self.consumed_datetime = timezone.now()
         super(OutgoingTransaction, self).save(*args, **kwargs)
 
     class Meta:
         app_label = 'edc_sync'
-        db_table = 'bhp_sync_outgoingtransaction'
         ordering = ['timestamp']

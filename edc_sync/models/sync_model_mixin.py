@@ -6,10 +6,10 @@ from django.utils import timezone
 
 from edc_base.encrypted_fields import FieldCryptor
 
-from ..classes import transaction_producer
 from ..exceptions import SyncError
 
 from .outgoing_transaction import OutgoingTransaction
+from .transaction_producer import transaction_producer
 
 
 class SyncModelMixin(models.Model):
@@ -23,7 +23,7 @@ class SyncModelMixin(models.Model):
         except AttributeError:
             raise SyncError('Model {} is missing method natural_key '.format(self._meta.model_name))
         try:
-            self.objects.get_by_natural_key
+            self.__class__.objects.get_by_natural_key
         except AttributeError:
             raise SyncError('Model {} is missing manager method get_by_natural_key '.format(self._meta.model_name))
         super(SyncModelMixin, self).__init__(*args, **kwargs)
@@ -34,16 +34,16 @@ class SyncModelMixin(models.Model):
         using = using or 'default'
         created = True if created is None else created
         action = 'I' if created else 'U'
+        outgoing_transaction = None
         if self.is_serialized():
-            # if self._meta.proxy_for_model:  # if this is a proxy model, get to the main model
-            #   instance = self._meta.proxy_for_model.objects.using(using).get(id=self.id).id
-            return OutgoingTransaction.objects.using(using).create(
+            outgoing_transaction = OutgoingTransaction.objects.using(using).create(
                 tx_name=self._meta.object_name,
                 tx_pk=self.id,
                 tx=self.encrypted_json(),
                 timestamp=timezone.now().strftime('%Y%m%d%H%M%S%f'),
                 producer=transaction_producer,
                 action=action)
+        return outgoing_transaction
 
     def is_serialized(self):
         """Returns the value of the settings.ALLOW_MODEL_SERIALIZATION or True.
@@ -73,36 +73,37 @@ class SyncModelMixin(models.Model):
         """
         False
 
-    def deserialize_prep(self, **kwargs):
-        """Users may override to manipulate the incoming object before calling save()"""
-        pass
-
-    def _deserialize_post(self, incoming_transaction):
-        """Default behavior for all subclasses of this class is to
-        serialize to outgoing transaction.
-
-        Note: this is necessary because a deserialized object will not create
-              an Outgoing Transaction by default since the "raw" parameter is True
-              on deserialization."""
-
-        if not settings.ALLOW_MODEL_SERIALIZATION:
-            raise SyncError('Unexpectedly attempted to serialize even though settings.ALLOW_MODEL_SERIALIZATION=False')
-        try:
-            OutgoingTransaction.objects.get(pk=incoming_transaction.id)
-        except OutgoingTransaction.DoesNotExist:
-            OutgoingTransaction.objects.create(
-                pk=incoming_transaction.id,
-                tx_name=incoming_transaction.tx_name,
-                tx_pk=incoming_transaction.tx_pk,
-                tx=incoming_transaction.tx,
-                timestamp=incoming_transaction.timestamp,
-                producer=incoming_transaction.producer,
-                action=incoming_transaction.action)
-        self.deserialize_post()
-
-    def deserialize_post(self):
-        """Users may override to do app specific tasks after deserialization."""
-        pass
+#     def deserialize_prep(self, **kwargs):
+#         """Users may override to manipulate the incoming object before calling save()"""
+#         pass
+# 
+#     def _deserialize_post(self, incoming_transaction):
+#         """Default behavior for all subclasses of this class is to
+#         serialize to outgoing transaction.
+# 
+#         Note: this is necessary because a deserialized object will not create
+#               an Outgoing Transaction by default since the "raw" parameter is True
+#               on deserialization."""
+# 
+#         if not settings.ALLOW_MODEL_SERIALIZATION:
+#             raise SyncError(
+#                 'Unexpectedly attempted to serialize even though settings.ALLOW_MODEL_SERIALIZATION=False')
+#         try:
+#             OutgoingTransaction.objects.get(pk=incoming_transaction.id)
+#         except OutgoingTransaction.DoesNotExist:
+#             OutgoingTransaction.objects.create(
+#                 pk=incoming_transaction.id,
+#                 tx_name=incoming_transaction.tx_name,
+#                 tx_pk=incoming_transaction.tx_pk,
+#                 tx=incoming_transaction.tx,
+#                 timestamp=incoming_transaction.timestamp,
+#                 producer=incoming_transaction.producer,
+#                 action=incoming_transaction.action)
+#         self.deserialize_post()
+# 
+#     def deserialize_post(self):
+#         """Users may override to do app specific tasks after deserialization."""
+#         pass
 
     def deserialize_on_duplicate(self):
         """Users may override this to determine how to handle a duplicate

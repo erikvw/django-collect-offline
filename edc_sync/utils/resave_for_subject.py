@@ -1,7 +1,7 @@
 from django.db.models import get_models, get_model
 
 from edc_appointment.models import Appointment
-from edc.subject.registration.models import RegisteredSubject
+from edc_registration.models import RegisteredSubject
 
 APP_LABEL = 0
 MODEL_NAME = 1

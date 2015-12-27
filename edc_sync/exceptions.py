@@ -16,6 +16,10 @@ class SyncError(Exception):
     pass
 
 
+class SyncProducerError(Exception):
+    pass
+
+
 class UsingError(Exception):
     pass
 

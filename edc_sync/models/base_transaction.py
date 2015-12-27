@@ -3,7 +3,7 @@ from django.db import models
 
 from edc_base.model.models import BaseUuidModel
 
-from ..classes import transaction_producer
+from .transaction_producer import transaction_producer
 
 
 class BaseTransaction(BaseUuidModel):
@@ -19,7 +19,7 @@ class BaseTransaction(BaseUuidModel):
         db_index=True)
 
     producer = models.CharField(
-        max_length=50,
+        max_length=100,
         default=transaction_producer,
         db_index=True,
         help_text='Producer name')
@@ -62,9 +62,6 @@ class BaseTransaction(BaseUuidModel):
     batch_seq = models.IntegerField(null=True, blank=True)
 
     batch_id = models.IntegerField(null=True, blank=True)
-
-    def is_serialized(self):
-        return False
 
     def __unicode__(self):
         return '{0} {1} {2}'.format(self.tx_name, self.producer, self.action)

@@ -1,6 +1,6 @@
 from django import forms
-# from django.db import models
-from edc.core.crypto_fields.fields import EncryptedCharField
+
+from edc_base.encrypted_fields import EncryptedCharField
 
 
 class PasswordField(forms.CharField):

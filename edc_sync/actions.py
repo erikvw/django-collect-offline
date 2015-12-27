@@ -2,7 +2,7 @@ from django.contrib import messages
 
 from edc_base.encrypted_fields import FieldCryptor
 
-from .exceptions import ProducerError
+from .exceptions import SyncProducerError
 from .utils import update_producer_from_settings
 
 
@@ -12,7 +12,7 @@ def update_producer_from_settings_file(modeladmin, request, queryset):
             producer = update_producer_from_settings(qs)
             messages.add_message(request, messages.SUCCESS,
                                  'Producer {} has been updated.'.format(producer))
-        except ProducerError as producer_error:
+        except SyncProducerError as producer_error:
             messages.add_message(request, messages.ERROR, str(producer_error))
 update_producer_from_settings_file.short_description = (
     "Update active producer from settings file (settings_key must match)")
