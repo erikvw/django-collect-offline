@@ -21,11 +21,13 @@ class SyncModelMixin(models.Model):
         try:
             self.natural_key
         except AttributeError:
-            raise SyncError('Model {} is missing method natural_key '.format(self._meta.model_name))
+            raise SyncError('Model {}.{} is missing method natural_key '.format(
+                self._meta.app_label, self._meta.model_name))
         try:
             self.__class__.objects.get_by_natural_key
         except AttributeError:
-            raise SyncError('Model {} is missing manager method get_by_natural_key '.format(self._meta.model_name))
+            raise SyncError('Model {}.{} is missing manager method get_by_natural_key '.format(
+                self._meta.app_label, self._meta.model_name))
         super(SyncModelMixin, self).__init__(*args, **kwargs)
 
     def to_outgoing_transaction(self, created=None, using=None):
@@ -48,11 +50,19 @@ class SyncModelMixin(models.Model):
     def is_serialized(self):
         """Returns the value of the settings.ALLOW_MODEL_SERIALIZATION or True.
 
-        If True, this instance will serialized and saved to OutgoingTransaction"""
+        If True, this instance will serialized and saved to OutgoingTransaction.
+
+        If this is an audit trail model instance, serialization be disabled if
+        ALLOW_AUDIT_TRAIL_MODEL_SERIALIZATION=False. (default=True)"""
         try:
             is_serialized = settings.ALLOW_MODEL_SERIALIZATION
         except AttributeError:
             is_serialized = True
+        if is_serialized:
+            try:
+                is_serialized = settings.ALLOW_AUDIT_TRAIL_MODEL_SERIALIZATION
+            except AttributeError:
+                is_serialized = True
         return is_serialized
 
     def encrypted_json(self):
