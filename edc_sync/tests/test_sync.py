@@ -116,7 +116,6 @@ class TestSync(TestCase):
     def test_deserialize_server2(self):
         TestModel.objects.using('other').create(f1='erik')
         self.assertRaises(TestModel.DoesNotExist, TestModel.objects.get, f1='erik')
-        
         saved, new = IncomingTransaction.objects.deserialize(ignore_device_id=True)
         self.assertEqual((0, 0), (saved, new))
         self.assertRaises(TestModel.DoesNotExist, TestModel.objects.get, f1='erik')

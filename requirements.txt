@@ -10,3 +10,4 @@ git+https://github.com/botswana-harvard/edc-device@develop#egg=edc-device
 git+https://github.com/botswana-harvard/edc-sync@develop#egg=edc-sync
 git+https://github.com/botswana-harvard/edc-base@develop#egg=edc-base
 git+https://github.com/botswana-harvard/edc-crypto-fields@develop#egg=edc-crypto-fields
+git+https://github.com/botswana-harvard/edc-configuration@develop#egg=edc-configuration
