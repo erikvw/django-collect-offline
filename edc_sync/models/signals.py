@@ -76,7 +76,5 @@ def serialize_on_post_delete(sender, instance, using, **kwargs):
                 producer=transaction_producer,
                 action='D')
     except AttributeError as e:
-        if 'is_serialized' in str(e):
-            pass
-        else:
+        if 'is_serialized' not in str(e):
             raise SyncError(str(e))
