@@ -4,7 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.management import call_command
 from django.test import TestCase
 
-from edc.core.bhp_content_type_map.models import ContentTypeMap
+from edc_content_type_map.models import ContentTypeMap
 from edc_sync.classes import Consumer
 from edc_sync.models import Producer, OutgoingTransaction, IncomingTransaction
 
