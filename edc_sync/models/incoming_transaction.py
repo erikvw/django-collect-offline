@@ -41,69 +41,58 @@ class IncomingTransaction(BaseTransaction):
         super(IncomingTransaction, self).save(*args, **kwargs)
 
     def deserialize_transaction(self, check_hostname=None):
-        is_success = False
-        self.check_hostname = True if check_hostname is None else check_hostname
+        inserted, updated, deleted = 0, 0, 0
+        check_hostname = True if check_hostname is None else check_hostname
         decrypted_transaction = FieldCryptor('aes', 'local').decrypt(self.tx)
         for obj in serializers.deserialize("json", decrypted_transaction):
             if self.action == 'D':
-                is_success = self.deserialize_delete_tx(obj)
+                deleted = self.deserialize_delete_tx(obj, check_hostname)
             elif self.action == 'I':
-                is_success = self.deserialize_update_tx(obj)
+                inserted = self.deserialize_insert_tx(obj, check_hostname)
             elif self.action == 'U':
-                is_success = self.deserialize_update_tx(obj)
+                updated = self.deserialize_update_tx(obj, check_hostname)
             else:
                 raise SyncError('Unexpected value for action. Got {}'.format(self.action))
-        return is_success
+        return inserted, updated, deleted
 
-    def deserialize_delete_tx(self, obj):
-        # If the transactions is a DELETE then let the model itself deal with how
-        # it handles this action by overiding method deserialize_prep() in the model.
-        obj.object.deserialize_prep(action='D')
-        self.is_ignored = False
-        self.is_consumed = True
-        self.consumer = transaction_producer
-        self.save()
-        is_success = True
-        return is_success
+    def deserialize_insert_tx(self, obj, check_hostname=None, verbose=None):
+        return self.deserialize_update_tx(obj, check_hostname, verbose)
 
-    def deserialize_update_tx(self, obj):
-        print('    {0}'.format(obj.object._meta.object_name))
-        if obj.object.hostname_modified == socket.gethostname() and self.check_hostname:
-            is_success = self.ignore_own_transaction()
+    def deserialize_delete_tx(self, obj, check_hostname=None):
+        # obj.object.deserialize_prep(action='D')
+        count = 0
+        check_hostname = True if check_hostname is None else check_hostname
+        if obj.object.hostname_modified == socket.gethostname() and check_hostname:
+            raise SyncError('Incoming transactions exist that are from this host.')
         else:
-            self.is_ignored = False
-            is_success = False
-            obj.object.deserialize_prep()
-            try:
-                with transaction.atomic():
-                    obj.save()
-                    msg = '    OK - normal save'
-                is_success = True
-            except IntegrityError as exception:
-                if 'Cannot add or update a child row' in str(exception):
-                    is_success = self.retry_on_cannot_add_or_update_child_row(obj, exception)
-                elif 'Duplicate' in str(exception):
-                    is_success = self.retry_on_duplicate(obj, exception)
-                else:
-                    print('    {0}'.format(exception))
-                    raise IntegrityError(exception)
-            except:
-                print(connection.queries)
-                print("        [b] Unexpected error:", sys.exc_info())
-                raise
-            obj.object._deserialize_post(self)
-            print(msg)
-            if is_success:
+            with transaction.atomic():
+                self.is_ignored = False
                 self.is_consumed = True
                 self.consumer = transaction_producer
                 self.save()
+                count = 1
+        return count
 
-    def ignore_own_transaction(self):
-        # ignore your own transactions and mark them as is_ignored=True
-        print('    skipping - not consuming my own transactions (using={0})'.format(self.using))
-        self.is_ignored = True
-        self.save()
-        return True
+    def deserialize_update_tx(self, obj, check_hostname=None, verbose=None):
+        count = 0
+        check_hostname = True if check_hostname is None else check_hostname
+        if obj.object.hostname_modified == socket.gethostname() and check_hostname:
+            raise SyncError('Incoming transactions exist that are from this host.')
+        else:
+            with transaction.atomic():
+                obj.save()
+                count = 1
+                self.is_consumed = True
+                self.consumer = transaction_producer
+                self.save()
+        return count
+
+#     def ignore_own_transaction(self):
+#         """ Ignores own transactions by marking them as is_ignored=True."""
+#         print('    skipping - not consuming own transactions (using={0})'.format(self.using))
+#         self.is_ignored = True
+#         self.save()
+#         return True
 
     def retry_on_cannot_add_or_update_child_row(self, obj, exception):
         if 'audit' in obj.object._meta.db_table:
@@ -207,4 +196,4 @@ class IncomingTransaction(BaseTransaction):
     class Meta:
         app_label = 'edc_sync'
         # db_table = 'bhp_sync_incomingtransaction'
-        ordering = ['timestamp']
+        ordering = ['timestamp', 'producer']

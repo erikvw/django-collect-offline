@@ -30,7 +30,7 @@ class SyncModelMixin(models.Model):
                 self._meta.app_label, self._meta.model_name))
         super(SyncModelMixin, self).__init__(*args, **kwargs)
 
-    def to_outgoing_transaction(self, created=None, using=None):
+    def to_outgoing_transaction(self, using, created=None):
         """ Serializes the model instance to an encrypted json object
         and saves the json object to the OutgoingTransaction model."""
         using = using or 'default'
@@ -44,7 +44,8 @@ class SyncModelMixin(models.Model):
                 tx=self.encrypted_json(),
                 timestamp=timezone.now().strftime('%Y%m%d%H%M%S%f'),
                 producer=transaction_producer,
-                action=action)
+                action=action,
+                using=using)
         return outgoing_transaction
 
     def is_serialized(self):
@@ -86,15 +87,15 @@ class SyncModelMixin(models.Model):
 #     def deserialize_prep(self, **kwargs):
 #         """Users may override to manipulate the incoming object before calling save()"""
 #         pass
-# 
+#
 #     def _deserialize_post(self, incoming_transaction):
 #         """Default behavior for all subclasses of this class is to
 #         serialize to outgoing transaction.
-# 
+#
 #         Note: this is necessary because a deserialized object will not create
 #               an Outgoing Transaction by default since the "raw" parameter is True
 #               on deserialization."""
-# 
+#
 #         if not settings.ALLOW_MODEL_SERIALIZATION:
 #             raise SyncError(
 #                 'Unexpectedly attempted to serialize even though settings.ALLOW_MODEL_SERIALIZATION=False')
@@ -110,7 +111,7 @@ class SyncModelMixin(models.Model):
 #                 producer=incoming_transaction.producer,
 #                 action=incoming_transaction.action)
 #         self.deserialize_post()
-# 
+#
 #     def deserialize_post(self):
 #         """Users may override to do app specific tasks after deserialization."""
 #         pass

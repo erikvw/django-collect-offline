@@ -1,12 +1,15 @@
+from collections import namedtuple
 from datetime import timedelta
 
 from django.db import models
 from django.utils import timezone
 
 from edc_base.encrypted_fields import FieldCryptor
-from edc_device import device
+from edc_device import device as site_device
 
 from ..exceptions import SyncError
+
+MessageTuple = namedtuple('Message', 'index, total, inserted updated deleted producer tx_name tx_pk success')
 
 
 class IncomingTransactionManager(models.Manager):
@@ -23,8 +26,11 @@ class IncomingTransactionManager(models.Manager):
                 incoming_transaction.tx = field_cryptor.encrypt(tx)
                 incoming_transaction.save_base(using=using)
 
-    def deserialize(self, model_name=None, producer_name=None, ignore_device_id=None):
+    def deserialize(self, model_name=None, producer_name=None, check_hostname=None,
+                    ignore_device_id=None, custom_device=None):
         """Deserialize new incoming transactions."""
+        device = custom_device or site_device
+        check_hostname = True if check_hostname is None else check_hostname
         if not device.is_server:
             if not ignore_device_id:
                 raise SyncError('Transactions can only be deserialized on a host that is server. '
@@ -35,21 +41,18 @@ class IncomingTransactionManager(models.Manager):
         if producer_name:
             options.update({'producer': self.producer_name})
         incoming_transactions = self.filter(**options).order_by('timestamp', 'producer')
-        count_new = incoming_transactions.count()
-        count_saved = 0
+        total = incoming_transactions.count()
+        messages = []
         for index, incoming_transaction in enumerate(incoming_transactions):
-            action = ''
-            print('{0} / {1} {2} {3}'.format(
-                index + 1, count_new,
+            print(incoming_transaction.tx_name)
+            inserted, updated, deleted = incoming_transaction.deserialize_transaction(check_hostname=check_hostname)
+            messages.append(MessageTuple(
+                index, total, inserted, updated, deleted,
                 incoming_transaction.producer,
-                incoming_transaction.tx_name))
-            print('    tx_pk=\'{0}\''.format(incoming_transaction.tx_pk))
-            action = 'failed'
-            if incoming_transaction.deserialize_transaction():
-                action = 'saved'
-                count_saved += 1
-            print('    {0}'.format(action))
-        return count_saved, count_new
+                incoming_transaction.tx_name,
+                incoming_transaction.tx_pk,
+                True))
+        return messages
 
     def deserialized_message(self):
         today = timezone.now()

@@ -29,7 +29,7 @@ def serialize_m2m_on_save(sender, action, instance, using, **kwargs):
     """
     if action == 'post_add':
         try:
-            instance.to_outgoing_transaction(created=True)
+            instance.to_outgoing_transaction(using, created=True)
         except AttributeError as e:
             if 'to_outgoing_transaction' not in str(e):
                 raise AttributeError(str(e))
@@ -40,7 +40,7 @@ def serialize_on_save(sender, instance, raw, created, using, **kwargs):
     """ Serialize the model instance as an OutgoingTransaction."""
     if not raw:
         try:
-            instance.to_outgoing_transaction(created, using)
+            instance.to_outgoing_transaction(using, created=created)
         except AttributeError as e:
             if 'to_outgoing_transaction' not in str(e):
                 raise AttributeError(str(e))
@@ -57,7 +57,6 @@ def deserialize_on_post_save(sender, instance, raw, created, using, **kwargs):
 @receiver(post_delete, weak=False, dispatch_uid="serialize_on_post_delete")
 def serialize_on_post_delete(sender, instance, using, **kwargs):
     """Creates a serialized OutgoingTransaction when a model instance is deleted."""
-    using = using or 'default'
     try:
         if instance.is_serialized() or instance._meta.proxy:
             json_obj = serializers.serialize("json", [instance, ], ensure_ascii=False, use_natural_keys=True)
@@ -74,7 +73,8 @@ def serialize_on_post_delete(sender, instance, using, **kwargs):
                 tx=json_tx,
                 timestamp=timezone.now().strftime('%Y%m%d%H%M%S%f'),
                 producer=transaction_producer,
-                action='D')
+                action='D',
+                using=using or 'default')
     except AttributeError as e:
         if 'is_serialized' not in str(e):
             raise SyncError(str(e))
