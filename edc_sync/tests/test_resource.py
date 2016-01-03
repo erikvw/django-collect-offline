@@ -1,11 +1,9 @@
-from datetime import date
-
 from django.contrib.auth.models import User
 
 from tastypie.models import ApiKey
 from tastypie.test import ResourceTestCase
-from edc_sync.tests.test_models import TestModel
-from edc_sync.models.incoming_transaction import IncomingTransaction
+# from edc_sync.tests.test_models import TestModel
+# from edc_sync.models.incoming_transaction import IncomingTransaction
 
 
 class TestResource(ResourceTestCase):
@@ -21,20 +19,20 @@ class TestResource(ResourceTestCase):
     def get_credentials(self):
         return self.create_apikey(username=self.username, api_key=self.api_client_key)
 
-    def test_model(self):
-
-        self.assertEqual(TestModel.objects.count(), 0)
-
-        resource_data = {
-            'target': 30,
-            'is_consumed': False
-        }
-        self.assertHttpCreated(
-            self.api_client.post(
-                '/api/v1/outgoingtransaction/',
-                format='json',
-                data=resource_data,
-                authentication=self.get_credentials()
-            )
-        )
-        self.assertEqual(IncomingTransaction.objects.count(), 1)
+#     def test_model(self):
+#
+#         self.assertEqual(TestModel.objects.count(), 0)
+#
+#         resource_data = {
+#             'target': 30,
+#             'is_consumed': False
+#         }
+#         self.assertHttpCreated(
+#             self.api_client.post(
+#                 '/api/v1/outgoingtransaction/',
+#                 format='json',
+#                 data=resource_data,
+#                 authentication=self.get_credentials()
+#             )
+#         )
+#         self.assertEqual(IncomingTransaction.objects.count(), 1)
