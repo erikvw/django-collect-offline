@@ -75,11 +75,11 @@ To include a model add the `SyncModelMixin`. For example the base class for all 
         
 `SyncModelMixin` needs model method `natural_key` and the model manager method `get_by_natural_key`. If either or both do not exist, a `SyncError` Exception is raises. In the example above, the `CrfModelMixin` declares the `objects` model manager that includes the required manager method.
 
-`SyncModelMixin` creates `OutgoingTransaction` instances on the same DB as the model for all inserts, updates and deletes.
+For any insert, update or delete of concrete models based on `MaternalCrfModel`, the `SyncModelMixin` creates `OutgoingTransaction` instances on the same DB as the concrete model.
 
 ### Copy transactions from one DB to another
 
-If data is entered on 'client' and needs to be synchronized to 'server', your `settings.DATABASES` might be like this:
+Data entered on 'client' eventually needs to be synchronized to 'server'. Your `settings.DATABASES` might be like this:
     
     DATABASES = {
         'default': {},
@@ -93,7 +93,7 @@ If data is entered on 'client' and needs to be synchronized to 'server', your `s
         }
     }
       
-As data is entered on `client`, the data is serialized into model `OutgoingTransaction` on `client`. The outgoing transactions on `client` are copied to `server` like this:
+As data is entered on `client`, the data is serialized into model `OutgoingTransaction` on `client`. The outgoing transactions on `client` are can be copied to `server` like this:
 
     OutgoingTransaction.objects.using('client').filter(
             is_consumed_server=False).copy_to_incoming_transaction('server') 
