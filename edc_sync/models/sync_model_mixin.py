@@ -60,6 +60,7 @@ class SyncModelMixin(models.Model):
         except AttributeError:
             is_serialized = True
         if is_serialized:
+            # TODO: does this work?? dont think so
             try:
                 is_serialized = settings.ALLOW_AUDIT_TRAIL_MODEL_SERIALIZATION
             except AttributeError:

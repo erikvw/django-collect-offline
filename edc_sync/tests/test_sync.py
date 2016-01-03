@@ -1,4 +1,6 @@
+from django.core.exceptions import MultipleObjectsReturned
 from django.db import models
+from django.test.testcases import TestCase
 from django.test.utils import override_settings
 
 from edc_base.model.models import BaseUuidModel
@@ -8,8 +10,6 @@ from edc_sync.models import SyncModelMixin, OutgoingTransaction
 from edc_sync.models.incoming_transaction import IncomingTransaction
 
 from .test_models import TestModel, ComplexTestModel, Fk, M2m
-from django.test.testcases import TransactionTestCase
-from django.core.exceptions import MultipleObjectsReturned
 
 
 class BadTestModel(SyncModelMixin, BaseUuidModel):
@@ -37,16 +37,9 @@ class AnotherBadTestModel(SyncModelMixin, BaseUuidModel):
         app_label = 'edc_sync'
 
 
-class TestSync(TransactionTestCase):
+class TestSync(TestCase):
 
-    def setUp(self):
-        TestModel.objects.using('other').delete()
-        TestModel.history.model.objects.using('other').delete()
-        OutgoingTransaction.objects.using('other').delete()
-        self.assertEqual(IncomingTransaction.objects.using('other').all().count(), 0)
-        self.assertEqual(IncomingTransaction.objects.using('default').all().count(), 0)
-        self.assertEqual(OutgoingTransaction.objects.using('other').all().count(), 0)
-        self.assertEqual(OutgoingTransaction.objects.using('default').all().count(), 0)
+    multi_db = True
 
     def get_credentials(self):
         return self.create_apikey(username=self.username, api_key=self.api_client_key)
@@ -110,7 +103,9 @@ class TestSync(TransactionTestCase):
         device = DeviceClass(device_id='10')
         self.assertFalse(device.is_server)
         TestModel.objects.create(f1='erik')
-        self.assertRaises(SyncError, IncomingTransaction.objects.deserialize, custom_device=device)
+        self.assertRaises(
+            SyncError,
+            IncomingTransaction.objects.filter(is_consumed=False).deserialize, custom_device=device)
 
     def test_deserialize_succeeds_as_server(self):
         device = DeviceClass(device_id='99')
@@ -118,21 +113,17 @@ class TestSync(TransactionTestCase):
         TestModel.objects.create(f1='erik')
         with self.assertRaises(SyncError):
             try:
-                IncomingTransaction.objects.deserialize(custom_device=device)
+                IncomingTransaction.objects.filter(is_consumed=False).deserialize(custom_device=device)
             except:
                 pass
             else:
                 raise SyncError()
 
-#     def test_resource(self):
-#         TestModel.objects.using('other').create(f1='erik')
-
     def test_copy_db_to_db(self):
         TestModel.objects.using('other').create(f1='erik')
         self.assertEqual(
             IncomingTransaction.objects.using('default').all().count(), 0)
-        for obj in OutgoingTransaction.objects.using('other').all():
-            obj.copy_to_incoming_transaction('default')
+        OutgoingTransaction.objects.using('other').all().copy_to_incoming_transaction('default')
         self.assertEquals(
             OutgoingTransaction.objects.using('other').all().count(),
             IncomingTransaction.objects.using('default').all().count())
@@ -140,9 +131,9 @@ class TestSync(TransactionTestCase):
     def test_deserialize_insert(self):
         device = DeviceClass(device_id='99')
         TestModel.objects.using('other').create(f1='erik')
-        for obj in OutgoingTransaction.objects.using('other').all():
-            obj.copy_to_incoming_transaction('default')
-        messages = IncomingTransaction.objects.deserialize(custom_device=device, check_hostname=False)
+        OutgoingTransaction.objects.using('other').all().copy_to_incoming_transaction('default')
+        messages = IncomingTransaction.objects.filter(
+            is_consumed=False).deserialize(custom_device=device, check_hostname=False)
         self.assertEqual(2, len(messages))
         for message in messages:
             self.assertEqual((1, 0, 0), (message.inserted, message.updated, message.deleted))
@@ -157,14 +148,15 @@ class TestSync(TransactionTestCase):
     def test_deserialize_update(self):
         device = DeviceClass(device_id='99')
         test_model = TestModel.objects.using('other').create(f1='erik')
-        for obj in OutgoingTransaction.objects.using('other').all():
-            obj.copy_to_incoming_transaction('default')
-        IncomingTransaction.objects.deserialize(custom_device=device, check_hostname=False)
+        OutgoingTransaction.objects.using('other').all().copy_to_incoming_transaction('default')
+        IncomingTransaction.objects.filter(
+            is_consumed=False).deserialize(custom_device=device, check_hostname=False)
         self.assertEqual(0, IncomingTransaction.objects.filter(is_consumed=False).count())
         test_model.save()
-        for obj in OutgoingTransaction.objects.using('other').all():
-            obj.copy_to_incoming_transaction('default')
-        messages = IncomingTransaction.objects.deserialize(custom_device=device, check_hostname=False)
+        OutgoingTransaction.objects.using('other').filter(
+            is_consumed_server=False).copy_to_incoming_transaction('default')
+        messages = IncomingTransaction.objects.filter(
+            is_consumed=False).deserialize(custom_device=device, check_hostname=False)
         self.assertEqual(2, len(messages))
         for message in messages:
             if message.tx_name == 'TestModel':
@@ -210,14 +202,83 @@ class TestSync(TransactionTestCase):
             [obj.tx_name for obj in OutgoingTransaction.objects.using('other').filter(action='I')],
             [u'TestModel', u'TestModelAudit', u'TestModelAudit'])
 
-    def test_complex_model(self):
+    def test_complex_model_works_for_fk(self):
         device = DeviceClass(device_id='99')
         for name in 'abcdefg':
             fk = Fk.objects.using('other').create(name=name)
         ComplexTestModel.objects.using('other').create(f1='1', fk=fk)
-        for obj in OutgoingTransaction.objects.using('other').all():
-            obj.copy_to_incoming_transaction('default')
-        print(IncomingTransaction.objects.all().count())
-        messages = IncomingTransaction.objects.deserialize(custom_device=device, check_hostname=False)
-        for message in messages:
-            print(message)
+        OutgoingTransaction.objects.using('other').all().copy_to_incoming_transaction('default')
+        IncomingTransaction.objects.using('default').filter(
+            is_consumed=False).deserialize(custom_device=device, check_hostname=False)
+        self.assertEqual(IncomingTransaction.objects.using('default').filter(
+            is_consumed=False).count(), 0)
+        ComplexTestModel.objects.using('default').get(f1='1', fk__name=fk.name)
+
+    def test_deserialization_messages_inserted(self):
+        device = DeviceClass(device_id='99')
+        for name in 'abcdefg':
+            fk = Fk.objects.using('other').create(name=name)
+        ComplexTestModel.objects.using('other').create(f1='1', fk=fk)
+        OutgoingTransaction.objects.using('other').all().copy_to_incoming_transaction('default')
+        messages = IncomingTransaction.objects.using('default').filter(
+            is_consumed=False).deserialize(custom_device=device, check_hostname=False)
+        self.assertEqual(sum([msg.inserted for msg in messages]), 9)
+
+    def test_deserialization_messages_updated(self):
+        device = DeviceClass(device_id='99')
+        for name in 'abcdefg':
+            fk = Fk.objects.using('other').create(name=name)
+        complex_test_model = ComplexTestModel.objects.using('other').create(f1='1', fk=fk)
+        OutgoingTransaction.objects.using('other').all().copy_to_incoming_transaction('default')
+        IncomingTransaction.objects.using('default').filter(
+            is_consumed=False).deserialize(custom_device=device, check_hostname=False)
+        complex_test_model.save()
+        OutgoingTransaction.objects.using('other').filter(
+            is_consumed_server=False).copy_to_incoming_transaction('default')
+        messages = IncomingTransaction.objects.using('default').filter(
+            is_consumed=False).deserialize(custom_device=device, check_hostname=False)
+        self.assertEqual(sum([msg.updated for msg in messages]), 1)
+
+    def test_deserialization_updates_incoming_is_consumed(self):
+        device = DeviceClass(device_id='99')
+        for name in 'abcdefg':
+            fk = Fk.objects.using('other').create(name=name)
+        ComplexTestModel.objects.using('other').create(f1='1', fk=fk)
+        OutgoingTransaction.objects.using('other').all().copy_to_incoming_transaction('default')
+        IncomingTransaction.objects.using('default').filter(
+            is_consumed=False).deserialize(custom_device=device, check_hostname=False)
+        self.assertEqual(IncomingTransaction.objects.using('default').filter(
+            is_consumed=False).count(), 0)
+
+    def test_deserialize_with_m2m(self):
+        device = DeviceClass(device_id='99')
+        for name in 'abcdefg':
+            fk = Fk.objects.using('other').create(name=name)
+        for name in 'hijklmnop':
+            M2m.objects.using('other').create(name=name)
+        complex_model = ComplexTestModel.objects.using('other').create(f1='1', fk=fk)
+        complex_model.m2m.add(M2m.objects.using('other').first())
+        complex_model.m2m.add(M2m.objects.using('other').last())
+        complex_model = ComplexTestModel.objects.using('other').get(f1='1')
+        self.assertEqual(complex_model.m2m.all().count(), 2)
+        OutgoingTransaction.objects.using('other').all().copy_to_incoming_transaction('default')
+        IncomingTransaction.objects.using('default').filter(
+            is_consumed=False).deserialize(custom_device=device, check_hostname=False)
+        complex_model = ComplexTestModel.objects.using('default').get(f1='1', fk__name=fk.name)
+        self.assertEqual(complex_model.m2m.all().count(), 2)
+
+    def test_deserialize_with_missing_m2m(self):
+        device = DeviceClass(device_id='99')
+        for name in 'abcdefg':
+            fk = Fk.objects.using('other').create(name=name)
+        for name in 'hijklmnop':
+            M2m.objects.using('other').create(name=name)
+        complex_model = ComplexTestModel.objects.using('other').create(f1='1', fk=fk)
+        complex_model.m2m.add(M2m.objects.using('other').first())
+        complex_model.m2m.add(M2m.objects.using('other').last())
+        complex_model = ComplexTestModel.objects.using('other').get(f1='1')
+        OutgoingTransaction.objects.using('other').all().copy_to_incoming_transaction('default')
+        IncomingTransaction.objects.using('default').filter(
+            is_consumed=False).deserialize(custom_device=device, check_hostname=False)
+        complex_model = ComplexTestModel.objects.using('default').get(f1='1', fk__name=fk.name)
+        self.assertEqual(complex_model.m2m.all().count(), 2)

@@ -64,7 +64,7 @@ class ComplexTestModel(SyncModelMixin, BaseUuidModel):
 
     fk = models.ForeignKey(Fk)
 
-    m2m = models.ManyToManyField(M2m)
+    m2m = models.ManyToManyField(M2m, null=True)
 
     objects = ComplexTestModelManager()
 
