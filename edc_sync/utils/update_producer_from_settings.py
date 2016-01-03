@@ -17,7 +17,7 @@ def update_producer_from_settings(producer=None):
         update_producer(producer)
     except Producer.DoesNotExist:
         raise SyncProducerError('Unable to update Producer \'{}\'. Producer is not '
-                            'active (is_active=False).'.format(producer))
+                                'active (is_active=False).'.format(producer))
     return Producer.objects.get(pk=producer.pk)
 
 

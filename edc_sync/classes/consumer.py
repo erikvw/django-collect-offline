@@ -1,6 +1,5 @@
 from __future__ import print_function
 
-from django.db.models import get_model
 
 from ..exceptions import TransactionConsumerError
 from ..models import OutgoingTransaction, IncomingTransaction

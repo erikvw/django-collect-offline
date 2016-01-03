@@ -28,15 +28,16 @@ def load_producer_db_settings(producer_name=None, refresh=None):
         if (producer.db_user_name is None or producer.db_user is None or
                 producer.db_password is None or producer.producer_ip is None or
                 producer.settings_key is None):
-            raise SyncProducerError('Producer {} is incorrectly defined in model Producer. '
-                                'Please correct or set is_active=False. Got settings_key={} '
-                                'db_name={} db_user={} db_password={} producer_ip={}'.format(
-                                    producer.name,
-                                    producer.settings_key,
-                                    producer.db_user_name,
-                                    producer.db_user,
-                                    '*****' if producer.db_password else None,
-                                    producer.producer_ip))
+            raise SyncProducerError(
+                'Producer {} is incorrectly defined in model Producer. '
+                'Please correct or set is_active=False. Got settings_key={} '
+                'db_name={} db_user={} db_password={} producer_ip={}'.format(
+                    producer.name,
+                    producer.settings_key,
+                    producer.db_user_name,
+                    producer.db_user,
+                    '*****' if producer.db_password else None,
+                    producer.producer_ip))
         if not settings.DATABASES.get(producer.settings_key, None):
             settings.DATABASES[producer.settings_key] = {
                 'ENGINE': 'django.db.backends.mysql',
