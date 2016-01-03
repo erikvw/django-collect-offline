@@ -41,9 +41,16 @@ It is also possible to use Django's DB router if connections are good and reliab
 
 To include a model add the `SyncModelMixin`. For example the base class for all CRFs in a module might look like this:
 
+    from edc_base.model.models import BaseUuidModel
+    from edc_consent.models RequiresConsentMixin
+    from edc_offstudy.models import OffStudyMixin
+    from edc_sync.models import SyncModelMixin
+    from edc_visit_tracking.models import CrfModelMixin
+    
+    from .maternal_consent import MaternalConsent
 
     class MaternalCrfModel(CrfModelMixin, SyncModelMixin, OffStudyMixin,
-                                      RequiresConsentMixin, BaseUuidModel):
+                           RequiresConsentMixin, BaseUuidModel):
     
         consent_model = MaternalConsent
     
@@ -86,14 +93,14 @@ If data is entered on 'client' and needs to be synchronized to 'server', your `s
         }
     }
       
-As data is entered on `client`, the data is serialized in order into model `OutgoingTransaction` on `client`. The outgoing transactions on `client` are copied to `server` like this:
+As data is entered on `client`, the data is serialized into model `OutgoingTransaction` on `client`. The outgoing transactions on `client` are copied to `server` like this:
 
     OutgoingTransaction.objects.using('client').filter(
             is_consumed_server=False).copy_to_incoming_transaction('server') 
 
 Once the transactions are on `server` they are deserialized like this:
 
-    messages = IncomingTransaction.objects.filter(
+    messages = IncomingTransaction.objects.using('server').filter(
         is_consumed=False).deserialize(custom_device=device, check_hostname=False)
 
 ### Settings
