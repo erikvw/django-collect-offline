@@ -11,8 +11,9 @@ from edc_sync.exceptions import SyncError
 from edc_sync.models import SyncModelMixin, OutgoingTransaction
 from edc_sync.models.incoming_transaction import IncomingTransaction
 
-from .test_models import TestModel, ComplexTestModel, Fk, M2m
+from .test_models import TestModel, ComplexTestModel, Fk, M2m, TestEncryptedModel
 from edc_sync.models.producer import Producer
+from edc_crypto_fields.models import Crypt
 
 
 class BadTestModel(SyncModelMixin, BaseUuidModel):
@@ -305,3 +306,21 @@ class TestSync(TestCase):
             self.assertEqual(Producer.objects.using('client').all().count(), 1)
             Producer.objects.using('client').get(name='{}-{}'.format(socket.gethostname(), 'client'))
             OutgoingTransaction.objects.using('client').all().copy_to_incoming_transaction('default')
+
+    def test_crypt(self):
+        with override_settings(DEVICE_ID='10', EDC_CRYPTO_FIELDS_CLIENT_USING='client'):
+            TestEncryptedModel.objects.using('client').create(f1='1', encrypted='erik')
+            self.assertEqual(Crypt.objects.using('default').all().count(), 0)
+            self.assertEqual(Crypt.objects.using('client').all().count(), 1)
+            encrypted_model = TestEncryptedModel.objects.using('client').get(f1='1')
+            encrypted_model.save(using='client')
+            self.assertEqual(Crypt.objects.using('client').all().count(), 1)
+            self.assertEqual(Crypt.objects.using('default').all().count(), 0)
+            OutgoingTransaction.objects.using('client').all().copy_to_incoming_transaction('default')
+        with override_settings(DEVICE_ID='99', EDC_CRYPTO_FIELDS_USING='client'):
+            IncomingTransaction.objects.using('default').filter(
+                is_consumed=False).deserialize(check_hostname=False)
+            encrypted_model = TestEncryptedModel.objects.using('default').get(f1='1')
+            self.assertEqual(encrypted_model.encrypted, 'erik')
+            self.assertEqual(Crypt.objects.using('default').all().count(), 1)
+            self.assertEqual(Crypt.objects.using('client').all().count(), 1)

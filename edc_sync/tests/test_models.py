@@ -4,6 +4,7 @@ from edc_sync.models import SyncModelMixin
 from edc_base.model.models import BaseUuidModel
 from edc_base.audit_trail import AuditTrail
 from edc_base.model.models.base_list_model import BaseListModel
+from edc_base.encrypted_fields import EncryptedCharField
 
 
 class TestModelManager(models.Manager):
@@ -15,6 +16,23 @@ class TestModelManager(models.Manager):
 class TestModel(SyncModelMixin, BaseUuidModel):
 
     f1 = models.CharField(max_length=10, unique=True)
+
+    objects = TestModelManager()
+
+    history = AuditTrail()
+
+    def natural_key(self):
+        return (self.f1, )
+
+    class Meta:
+        app_label = 'edc_sync'
+
+
+class TestEncryptedModel(SyncModelMixin, BaseUuidModel):
+
+    f1 = models.CharField(max_length=10, unique=True)
+
+    encrypted = EncryptedCharField(max_length=10, unique=True)
 
     objects = TestModelManager()
 
