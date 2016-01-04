@@ -55,13 +55,9 @@ class IncomingTransaction(BaseTransaction):
                     self.is_ignored = False
                     self.is_consumed = True
                     self.consumed_datetime = timezone.now()
-                    self.consumer = self.sync_consumer(using)
+                    self.consumer = '{}-{}'.format(socket.gethostname(), using)
                     self.save(using=using)
         return inserted, updated, deleted
-
-    def sync_consumer(self, using, tx_name=None):
-        hostname = socket.gethostname()
-        return '{}-{}'.format(hostname, using)[:200]
 
     def deserialize_insert_tx(self, obj, using):
         with transaction.atomic(using):

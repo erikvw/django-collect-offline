@@ -10,6 +10,8 @@ from ..models import OutgoingTransaction
 
 class OutgoingTransactionAdmin (admin.ModelAdmin):
 
+    ordering = ('-timestamp', )
+
     list_display = (
         'tx_name', 'render', 'producer', 'is_consumed_middleman',
         'is_consumed_server', 'is_error', 'consumer',

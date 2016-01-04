@@ -10,6 +10,8 @@ from ..models import IncomingTransaction
 
 class IncomingTransactionAdmin (admin.ModelAdmin):
 
+    ordering = ('-timestamp', )
+
     list_display = (
         'tx_name', 'render', 'producer', 'is_consumed', 'is_error',
         'is_ignored', 'consumer', 'consumed_datetime', 'action',
