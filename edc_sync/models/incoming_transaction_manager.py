@@ -3,7 +3,7 @@ from collections import namedtuple
 from django.db import models
 from django.db.models.query import QuerySet
 
-from edc_device import device as site_device
+from edc_device import Device
 
 from ..exceptions import SyncError
 
@@ -14,7 +14,7 @@ class CustomQuerySet(QuerySet):
 
     def deserialize(self, check_hostname=None, ignore_device_id=None, custom_device=None):
         """Deserialize new incoming transactions."""
-        device = custom_device or site_device
+        device = custom_device or Device()
         check_hostname = True if check_hostname is None else check_hostname
         if not device.is_server:
             if not ignore_device_id:

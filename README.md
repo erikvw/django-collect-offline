@@ -108,3 +108,9 @@ to disable the `SyncModelMixin` add this to your settings.py
 
 ALLOW_MODEL_SERIALIZATION = False  # (default: True)
 
+
+## TODO
+
+* handle proxy models
+* producer
+* handle deleted transactions

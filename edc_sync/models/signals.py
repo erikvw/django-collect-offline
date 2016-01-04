@@ -9,7 +9,6 @@ from ..exceptions import SyncError
 
 from .incoming_transaction import IncomingTransaction
 from .outgoing_transaction import OutgoingTransaction
-from .transaction_producer import transaction_producer
 
 
 @receiver(post_save, weak=False, dispatch_uid="deserialize_to_inspector_on_post_save")
@@ -46,35 +45,11 @@ def serialize_on_save(sender, instance, raw, created, using, **kwargs):
                 raise AttributeError(str(e))
 
 
-@receiver(post_save, sender=IncomingTransaction, dispatch_uid="deserialize_on_post_save")
-def deserialize_on_post_save(sender, instance, raw, created, using, **kwargs):
-    pass
-    """ Callback to deserialize an incoming transaction.
-
-    as long as the transaction is not consumed or in error"""
-
-
 @receiver(post_delete, weak=False, dispatch_uid="serialize_on_post_delete")
 def serialize_on_post_delete(sender, instance, using, **kwargs):
     """Creates a serialized OutgoingTransaction when a model instance is deleted."""
     try:
-        if instance.is_serialized() or instance._meta.proxy:
-            json_obj = serializers.serialize("json", [instance, ], ensure_ascii=False, use_natural_keys=True)
-            try:
-                # encrypt before saving to OutgoingTransaction
-                json_tx = FieldCryptor('aes', 'local').encrypt(json_obj)
-            except NameError:
-                pass
-            except AttributeError:
-                pass
-            OutgoingTransaction.objects.using(using).create(
-                tx_name=instance._meta.object_name,
-                tx_pk=instance.pk,
-                tx=json_tx,
-                timestamp=timezone.now().strftime('%Y%m%d%H%M%S%f'),
-                producer=transaction_producer,
-                action='D',
-                using=using or 'default')
+        instance.to_outgoing_transaction(using, created=False, deleted=True)
     except AttributeError as e:
-        if 'is_serialized' not in str(e):
-            raise SyncError(str(e))
+        if 'to_outgoing_transaction' not in str(e):
+            raise AttributeError(str(e))

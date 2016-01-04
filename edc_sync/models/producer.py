@@ -4,9 +4,16 @@ from edc_base.encrypted_fields import EncryptedCharField
 from edc_base.model.models import BaseUuidModel
 
 from .password_field import PasswordModelField
+from .sync_model_mixin import SyncModelMixin
 
 
-class Producer(BaseUuidModel):
+class ProducerManager(models.Manager):
+
+    def get_by_natural_key(self, name):
+        return self.get(name=name)
+
+
+class Producer(SyncModelMixin, BaseUuidModel):
 
     name = models.CharField(
         max_length=50,
@@ -77,10 +84,13 @@ class Producer(BaseUuidModel):
         null=True,
         blank=True)
 
-    objects = models.Manager()
+    objects = ProducerManager()
 
     def __unicode__(self):
         return self.name
+
+    def natural_key(self):
+        return (self.name, )
 
     class Meta:
         app_label = 'edc_sync'

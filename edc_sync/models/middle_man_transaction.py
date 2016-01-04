@@ -5,7 +5,7 @@ from django.db import models
 from django.db.models import get_model
 from django.utils import timezone
 
-from edc_device import device
+from edc_device import Device
 from edc_base.encrypted_fields import FieldCryptor
 
 from ..exceptions import SyncError
@@ -29,7 +29,7 @@ class MiddleManTransaction(BaseTransaction):
     def save(self, *args, **kwargs):
         if self.is_consumed_server and not self.consumed_datetime:
             self.consumed_datetime = timezone.now()
-        if not device.is_middleman:
+        if not Device().is_middleman:
             raise SyncError(
                 '\'{0}\' is not configured to be a Middleman. '
                 'Transaction cannot be created.'.format(settings.DEVICE_ID))

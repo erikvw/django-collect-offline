@@ -3,8 +3,6 @@ from django.db import models
 
 from edc_base.model.models import BaseUuidModel
 
-from .transaction_producer import transaction_producer
-
 
 class BaseTransaction(BaseUuidModel):
 
@@ -20,18 +18,15 @@ class BaseTransaction(BaseUuidModel):
 
     producer = models.CharField(
         max_length=100,
-        default=transaction_producer,
         db_index=True,
         help_text='Producer name')
 
     action = models.CharField(
         max_length=1,
-        default='I',
         choices=(('I', 'Insert'), ('U', 'Update'), ('D', 'Delete')))
 
     timestamp = models.CharField(
         max_length=50,
-        null=True,
         db_index=True)
 
     consumed_datetime = models.DateTimeField(

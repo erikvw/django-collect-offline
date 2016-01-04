@@ -32,7 +32,7 @@ class CustomQuerySet(QuerySet):
                 except AttributeError:
                     pass
             IncomingTransaction.objects.using(using).create(**options)
-        self.update(is_consumed_server=True, consumed_datetime=timezone.now())
+        self.using(self._db).update(is_consumed_server=True, consumed_datetime=timezone.now())
 
 
 class OutgoingTransactionManager(models.Manager):

@@ -10,7 +10,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.shortcuts import redirect
 from django.core.urlresolvers import reverse
 
-from edc_device import device
+from edc_device import Device
 
 from ..models import Producer, RequestLog, IncomingTransaction, MiddleManTransaction, transaction_producer
 
@@ -23,7 +23,7 @@ class ConsumeTransactions(object):
         self.app_name = app_name
         self._producer = None
         self.producer = producer
-        self.device = device
+        self.device = Device()
         self.middleman = True if self.device.is_middleman else False
         try:
             api_key = request.user.api_key.key
@@ -63,7 +63,7 @@ class ConsumeTransactions(object):
             err = None
             try:
                 req = urllib2.Request(url=self.url)
-            except urllib2.URLError, err:
+            except urllib2.URLError as err:
                 req = None
                 self.producer.sync_status = err
                 self.producer.save()
@@ -72,7 +72,7 @@ class ConsumeTransactions(object):
                 try:
                     f = urllib2.urlopen(req)
                     req = None
-                except urllib2.HTTPError, err:
+                except urllib2.HTTPError as err:
                     self.producer.sync_status = err
                     self.producer.save()
                     messages.add_message(self.request, messages.ERROR, '[B] {0} {1}'.format(err, self.url))
@@ -82,7 +82,7 @@ class ConsumeTransactions(object):
                     if err.code == 404:
                         messages.add_message(self.request, messages.ERROR,
                                              'Unknown producer. Got {}.'.format(self.producer))
-                except urllib2.URLError, err:
+                except urllib2.URLError as err:
                     self.producer.sync_status = err
                     self.producer.save()
                     request_log.status = 'error'

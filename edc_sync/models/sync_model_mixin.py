@@ -1,7 +1,10 @@
+import socket
+
 from django.conf import settings
 from django.core import serializers
 from django.core.exceptions import ImproperlyConfigured
-from django.db import models
+from django.db import models, transaction
+from django.db.models.loading import get_model
 from django.utils import timezone
 
 from edc_base.encrypted_fields import FieldCryptor
@@ -9,7 +12,7 @@ from edc_base.encrypted_fields import FieldCryptor
 from ..exceptions import SyncError
 
 from .outgoing_transaction import OutgoingTransaction
-from .transaction_producer import transaction_producer
+from django.db.utils import IntegrityError
 
 
 class SyncModelMixin(models.Model):
@@ -30,23 +33,43 @@ class SyncModelMixin(models.Model):
                 self._meta.app_label, self._meta.model_name))
         super(SyncModelMixin, self).__init__(*args, **kwargs)
 
-    def to_outgoing_transaction(self, using, created=None):
+    def to_outgoing_transaction(self, using, created=None, deleted=None):
         """ Serializes the model instance to an encrypted json object
         and saves the json object to the OutgoingTransaction model."""
-        using = using or 'default'
         created = True if created is None else created
         action = 'I' if created else 'U'
+        if deleted:
+            action = 'D'
         outgoing_transaction = None
         if self.is_serialized():
+            assert using != 'default', self._meta.object_name
             outgoing_transaction = OutgoingTransaction.objects.using(using).create(
                 tx_name=self._meta.object_name,
                 tx_pk=self.id,
                 tx=self.encrypted_json(),
                 timestamp=timezone.now().strftime('%Y%m%d%H%M%S%f'),
-                producer=transaction_producer,
+                producer=self.sync_producer(using),
                 action=action,
                 using=using)
         return outgoing_transaction
+
+    def sync_producer(self, using):
+        Producer = get_model('edc_sync', 'producer')
+        hostname = socket.gethostname()
+        producer_name = '{}-{}'.format(hostname, using)
+        try:
+            Producer.objects.using(using).get(name=producer_name)
+        except Producer.DoesNotExist:
+            with transaction.atomic(using):
+                try:
+                    Producer.objects.using(using).create(
+                        name=producer_name,
+                        url='http://{}/'.format(hostname),
+                        is_active=True,
+                        settings_key=using)
+                except IntegrityError:
+                    pass
+        return producer_name
 
     def is_serialized(self):
         """Returns the value of the settings.ALLOW_MODEL_SERIALIZATION or True.
