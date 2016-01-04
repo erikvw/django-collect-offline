@@ -17,7 +17,7 @@ class BaseTransaction(BaseUuidModel):
         db_index=True)
 
     producer = models.CharField(
-        max_length=100,
+        max_length=200,
         db_index=True,
         help_text='Producer name')
 
@@ -34,7 +34,7 @@ class BaseTransaction(BaseUuidModel):
         blank=True)
 
     consumer = models.CharField(
-        max_length=150,
+        max_length=200,
         null=True,
         blank=True,
         db_index=True)

@@ -6,7 +6,7 @@ from edc_base.model.models import BaseUuidModel
 class Consumer(BaseUuidModel):
 
     name = models.CharField(
-        max_length=25)
+        max_length=200)
 
     ipaddress = models.CharField(
         max_length=64)

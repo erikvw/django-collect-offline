@@ -2,7 +2,6 @@ import socket
 
 from django.core import serializers
 from django.db import models, transaction
-from django.db.models import get_model
 from django.utils import timezone
 
 from edc_base.encrypted_fields import FieldCryptor
@@ -62,7 +61,7 @@ class IncomingTransaction(BaseTransaction):
 
     def sync_consumer(self, using, tx_name=None):
         hostname = socket.gethostname()
-        return '{}-{}'.format(hostname, using)
+        return '{}-{}'.format(hostname, using)[:200]
 
     def deserialize_insert_tx(self, obj, using):
         with transaction.atomic(using):

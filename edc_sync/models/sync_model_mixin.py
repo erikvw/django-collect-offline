@@ -55,7 +55,7 @@ class SyncModelMixin(models.Model):
     def sync_producer(self, using):
         Producer = get_model('edc_sync', 'producer')
         hostname = socket.gethostname()
-        producer_name = '{}-{}'.format(hostname, using)
+        producer_name = '{}-{}'.format(hostname, using)[:200]
         try:
             Producer.objects.using(using).get(name=producer_name)
         except Producer.DoesNotExist:
@@ -65,7 +65,7 @@ class SyncModelMixin(models.Model):
                         name=producer_name,
                         url='http://{}/'.format(hostname),
                         is_active=True,
-                        settings_key=using)
+                        settings_key=using[:200])
                 except IntegrityError:
                     pass
         return producer_name
