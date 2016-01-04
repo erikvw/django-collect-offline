@@ -92,21 +92,24 @@ WSGI_APPLICATION = 'edc_sync.wsgi.application'
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
 DATABASES = {
+    # required for tests when acting as a server that deserializes
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     },
+    # required for tests when acting as a server but not attempting to deserialize
     'server': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     },
+    # required for tests when acting as a client
     'client': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     },
 }
 
-EDC_CRYPTO_FIELDS_USING = 'client'
+EDC_CRYPTO_FIELDS_CLIENT_USING = 'client'
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/

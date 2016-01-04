@@ -93,8 +93,10 @@ class TestSync(TestCase):
             test_model.save(using='client')
             with self.assertRaises(OutgoingTransaction.DoesNotExist):
                 try:
-                    OutgoingTransaction.objects.using('client').get(tx_pk=test_model.pk, tx_name='TestModel', action='I')
-                    OutgoingTransaction.objects.using('client').get(tx_pk=test_model.pk, tx_name='TestModel', action='U')
+                    OutgoingTransaction.objects.using('client').get(
+                        tx_pk=test_model.pk, tx_name='TestModel', action='I')
+                    OutgoingTransaction.objects.using('client').get(
+                        tx_pk=test_model.pk, tx_name='TestModel', action='U')
                 except OutgoingTransaction.DoesNotExist:
                     pass
                 else:
