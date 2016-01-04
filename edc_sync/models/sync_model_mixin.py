@@ -42,33 +42,16 @@ class SyncModelMixin(models.Model):
             action = 'D'
         outgoing_transaction = None
         if self.is_serialized():
+            hostname = socket.gethostname()
             outgoing_transaction = OutgoingTransaction.objects.using(using).create(
                 tx_name=self._meta.object_name,
                 tx_pk=self.id,
                 tx=self.encrypted_json(),
                 timestamp=timezone.now().strftime('%Y%m%d%H%M%S%f'),
-                producer=self.sync_producer(using),
+                producer='{}-{}'.format(hostname, using),
                 action=action,
                 using=using)
         return outgoing_transaction
-
-    def sync_producer(self, using):
-        Producer = get_model('edc_sync', 'producer')
-        hostname = socket.gethostname()
-        producer_name = '{}-{}'.format(hostname, using)[:200]
-        try:
-            Producer.objects.using(using).get(name=producer_name)
-        except Producer.DoesNotExist:
-            with transaction.atomic(using):
-                try:
-                    Producer.objects.using(using).create(
-                        name=producer_name,
-                        url='http://{}/'.format(hostname),
-                        is_active=True,
-                        settings_key=using[:200])
-                except IntegrityError:
-                    pass
-        return producer_name
 
     def is_serialized(self):
         """Returns the value of the settings.ALLOW_MODEL_SERIALIZATION or True.
@@ -93,7 +76,10 @@ class SyncModelMixin(models.Model):
         """Returns an encrypted json serialized from self."""
         json = serializers.serialize(
             "json", [self, ], ensure_ascii=False, use_natural_keys=True)
-        return FieldCryptor('aes', 'local').encrypt(json)
+        encrypted_json = FieldCryptor('aes', 'local').encrypt(json)
+        from edc_crypto_fields.models import Crypt
+        print(Crypt.objects.all())
+        return encrypted_json
 
     def skip_saving_criteria(self):
         """Returns True to skip saving, False to save (default).

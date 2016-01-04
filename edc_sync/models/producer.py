@@ -32,21 +32,18 @@ class Producer(SyncModelMixin, BaseUuidModel):
         verbose_name="Producer host name.",
         null=True,
         blank=True,
-        db_index=True,
         help_text=("provide the IP address / hostname of the producer."))
 
     db_user = EncryptedCharField(
         verbose_name="Database username in Django settings.",
         default='root',
         null=True,
-        db_index=True,
         help_text=("provide the database username of the producer."))
 
     # TODO: change this in next revision! should be db_name
     db_name = EncryptedCharField(
         verbose_name="Database name in Django settings.",
         null=True,
-        db_index=True,
         help_text=("provide the database name of the producer."))
 
     port = EncryptedCharField(
@@ -60,7 +57,6 @@ class Producer(SyncModelMixin, BaseUuidModel):
         verbose_name="Database password.",
         max_length=250,
         null=True,
-        db_index=True,
         help_text=("provide the password to database on the producer."))
 
     is_active = models.BooleanField(

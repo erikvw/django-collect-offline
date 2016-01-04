@@ -8,7 +8,7 @@ from ..models import Producer
 class ProducerAdmin(admin.ModelAdmin):
 
     list_display = (
-        'name', 'url', 'producer_ip', 'is_active',
+        'name', 'url', 'db_host', 'is_active',
         'sync_datetime', 'sync_status', 'comment')
 
     list_filter = ('is_active', 'sync_datetime', 'sync_status',)
