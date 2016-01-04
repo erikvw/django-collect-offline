@@ -1,6 +1,3 @@
-from __future__ import print_function
-
-
 from ..exceptions import TransactionConsumerError
 from ..models import OutgoingTransaction, IncomingTransaction
 

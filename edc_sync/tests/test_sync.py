@@ -1,5 +1,3 @@
-import socket
-
 from django.core.exceptions import MultipleObjectsReturned
 from django.db import models
 from django.test.testcases import TestCase
@@ -12,7 +10,6 @@ from edc_sync.models import SyncModelMixin, OutgoingTransaction
 from edc_sync.models.incoming_transaction import IncomingTransaction
 
 from .test_models import TestModel, ComplexTestModel, Fk, M2m, TestEncryptedModel
-from edc_sync.models.producer import Producer
 from edc_crypto_fields.models import Crypt
 
 
@@ -153,7 +150,7 @@ class TestSync(TestCase):
             OutgoingTransaction.objects.using('client').all().copy_to_incoming_transaction('default')
             messages = IncomingTransaction.objects.using('default').filter(
                 is_consumed=False).deserialize(check_hostname=False)
-            self.assertEqual(3, len(messages))
+            self.assertEqual(2, len(messages))
             for message in messages:
                 self.assertEqual((1, 0, 0), (message.inserted, message.updated, message.deleted))
             with self.assertRaises(TestModel.DoesNotExist):
@@ -195,7 +192,7 @@ class TestSync(TestCase):
         TestModel.objects.using('client').create(f1='erik')
         self.assertListEqual(
             [obj.tx_name for obj in OutgoingTransaction.objects.using('client').all()],
-            [u'TestModel', u'Producer', u'TestModelAudit'])
+            [u'TestModel', u'TestModelAudit'])
         self.assertListEqual([obj.tx_name for obj in OutgoingTransaction.objects.using('server').all()], [])
         self.assertRaises(OutgoingTransaction.DoesNotExist,
                           OutgoingTransaction.objects.using('server').get, tx_name='TestModel')
@@ -208,7 +205,7 @@ class TestSync(TestCase):
         test_model = TestModel.objects.using('client').create(f1='erik')
         self.assertListEqual(
             [obj.tx_name for obj in OutgoingTransaction.objects.using('client').filter(action='I')],
-            [u'TestModel', u'Producer', u'TestModelAudit'])
+            [u'TestModel', u'TestModelAudit'])
         self.assertListEqual(
             [obj.tx_name for obj in OutgoingTransaction.objects.using('client').filter(action='U')],
             [])
@@ -218,7 +215,7 @@ class TestSync(TestCase):
             [u'TestModel'])
         self.assertListEqual(
             [obj.tx_name for obj in OutgoingTransaction.objects.using('client').filter(action='I')],
-            [u'TestModel', u'Producer', u'TestModelAudit', u'TestModelAudit'])
+            [u'TestModel', u'TestModelAudit', u'TestModelAudit'])
 
     def test_complex_model_works_for_fk(self):
         with override_settings(DEVICE_ID='99'):
@@ -241,7 +238,7 @@ class TestSync(TestCase):
             OutgoingTransaction.objects.using('client').all().copy_to_incoming_transaction('default')
             messages = IncomingTransaction.objects.using('default').filter(
                 is_consumed=False).deserialize(check_hostname=False)
-            self.assertEqual(sum([msg.inserted for msg in messages]), 10)
+            self.assertEqual(sum([msg.inserted for msg in messages]), 9)
 
     def test_deserialization_messages_updated(self):
         with override_settings(DEVICE_ID='99'):
@@ -305,8 +302,6 @@ class TestSync(TestCase):
     def test_creates_producer(self):
         with override_settings(DEVICE_ID='99'):
             TestModel.objects.using('client').create(f1='erik')
-            self.assertEqual(Producer.objects.using('client').all().count(), 1)
-            Producer.objects.using('client').get(name='{}-{}'.format(socket.gethostname(), 'client'))
             OutgoingTransaction.objects.using('client').all().copy_to_incoming_transaction('default')
 
     def test_crypt(self):

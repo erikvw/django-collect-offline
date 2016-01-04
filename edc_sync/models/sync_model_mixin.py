@@ -3,8 +3,7 @@ import socket
 from django.conf import settings
 from django.core import serializers
 from django.core.exceptions import ImproperlyConfigured
-from django.db import models, transaction
-from django.db.models.loading import get_model
+from django.db import models
 from django.utils import timezone
 
 from edc_base.encrypted_fields import FieldCryptor
@@ -12,7 +11,6 @@ from edc_base.encrypted_fields import FieldCryptor
 from ..exceptions import SyncError
 
 from .outgoing_transaction import OutgoingTransaction
-from django.db.utils import IntegrityError
 
 
 class SyncModelMixin(models.Model):
@@ -77,8 +75,6 @@ class SyncModelMixin(models.Model):
         json = serializers.serialize(
             "json", [self, ], ensure_ascii=False, use_natural_keys=True)
         encrypted_json = FieldCryptor('aes', 'local').encrypt(json)
-        from edc_crypto_fields.models import Crypt
-        print(Crypt.objects.all())
         return encrypted_json
 
     def skip_saving_criteria(self):
