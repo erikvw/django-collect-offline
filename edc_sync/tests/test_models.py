@@ -36,7 +36,6 @@ class M2m(SyncModelMixin, BaseListModel):
 class FkManager(models.Manager):
 
     def get_by_natural_key(self, name):
-        print('get_by_natural_key={}'.format(self._db))
         return self.get(name=name)
 
 

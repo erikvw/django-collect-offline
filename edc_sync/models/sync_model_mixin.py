@@ -42,7 +42,6 @@ class SyncModelMixin(models.Model):
             action = 'D'
         outgoing_transaction = None
         if self.is_serialized():
-            assert using != 'default', self._meta.object_name
             outgoing_transaction = OutgoingTransaction.objects.using(using).create(
                 tx_name=self._meta.object_name,
                 tx_pk=self.id,

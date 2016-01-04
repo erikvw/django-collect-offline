@@ -48,137 +48,144 @@ class TestSync(TestCase):
         return self.create_apikey(username=self.username, api_key=self.api_client_key)
 
     def test_raises_on_missing_natural_key(self):
-        with self.assertRaises(SyncError) as cm:
-            BadTestModel.objects.using('client').create()
-        self.assertIn('natural_key', str(cm.exception))
+        with override_settings(DEVICE_ID='10'):
+            with self.assertRaises(SyncError) as cm:
+                BadTestModel.objects.using('client').create()
+            self.assertIn('natural_key', str(cm.exception))
 
     def test_raises_on_missing_get_by_natural_key(self):
-        with self.assertRaises(SyncError) as cm:
-            AnotherBadTestModel.objects.using('client').create()
-        self.assertIn('get_by_natural_key', str(cm.exception))
+        with override_settings(DEVICE_ID='10'):
+            with self.assertRaises(SyncError) as cm:
+                AnotherBadTestModel.objects.using('client').create()
+            self.assertIn('get_by_natural_key', str(cm.exception))
 
     def test_creates_outgoing_on_add(self):
-        test_model = TestModel.objects.using('client').create(f1='erik')
-        with self.assertRaises(OutgoingTransaction.DoesNotExist):
-            try:
-                OutgoingTransaction.objects.using('client').get(
-                    tx_pk=test_model.pk, tx_name='TestModel', action='I')
-            except OutgoingTransaction.DoesNotExist:
-                pass
-            else:
-                raise OutgoingTransaction.DoesNotExist()
-        with self.assertRaises(OutgoingTransaction.DoesNotExist):
-            try:
-                OutgoingTransaction.objects.using('client').get(
-                    tx_pk=test_model.pk, tx_name='TestModelAudit', action='I')
-            except OutgoingTransaction.DoesNotExist:
-                pass
-            else:
-                raise OutgoingTransaction.DoesNotExist()
+        with override_settings(DEVICE_ID='10'):
+            test_model = TestModel.objects.using('client').create(f1='erik')
+            with self.assertRaises(OutgoingTransaction.DoesNotExist):
+                try:
+                    OutgoingTransaction.objects.using('client').get(
+                        tx_pk=test_model.pk, tx_name='TestModel', action='I')
+                except OutgoingTransaction.DoesNotExist:
+                    pass
+                else:
+                    raise OutgoingTransaction.DoesNotExist()
+            with self.assertRaises(OutgoingTransaction.DoesNotExist):
+                try:
+                    OutgoingTransaction.objects.using('client').get(
+                        tx_pk=test_model.pk, tx_name='TestModelAudit', action='I')
+                except OutgoingTransaction.DoesNotExist:
+                    pass
+                else:
+                    raise OutgoingTransaction.DoesNotExist()
 
     @override_settings(ALLOW_MODEL_SERIALIZATION=False)
     def test_does_not_create_outgoing(self):
-        test_model = TestModel.objects.using('client').create(f1='erik')
-        with self.assertRaises(OutgoingTransaction.DoesNotExist):
-            OutgoingTransaction.objects.using('client').get(tx_pk=test_model.pk)
+        with override_settings(DEVICE_ID='10', ALLOW_MODEL_SERIALIZATION=False):
+            test_model = TestModel.objects.using('client').create(f1='erik')
+            with self.assertRaises(OutgoingTransaction.DoesNotExist):
+                OutgoingTransaction.objects.using('client').get(tx_pk=test_model.pk)
 
     def test_creates_outgoing_on_change(self):
-        test_model = TestModel.objects.using('client').create(f1='erik')
-        test_model.save(using='client')
-        with self.assertRaises(OutgoingTransaction.DoesNotExist):
-            try:
-                OutgoingTransaction.objects.using('client').get(tx_pk=test_model.pk, tx_name='TestModel', action='I')
-                OutgoingTransaction.objects.using('client').get(tx_pk=test_model.pk, tx_name='TestModel', action='U')
-            except OutgoingTransaction.DoesNotExist:
-                pass
-            else:
-                raise OutgoingTransaction.DoesNotExist()
-        self.assertEqual(
-            2, OutgoingTransaction.objects.using('client').filter(
-                tx_pk=test_model.pk, tx_name='TestModelAudit', action='I').count())
+        with override_settings(DEVICE_ID='10'):
+            test_model = TestModel.objects.using('client').create(f1='erik')
+            test_model.save(using='client')
+            with self.assertRaises(OutgoingTransaction.DoesNotExist):
+                try:
+                    OutgoingTransaction.objects.using('client').get(tx_pk=test_model.pk, tx_name='TestModel', action='I')
+                    OutgoingTransaction.objects.using('client').get(tx_pk=test_model.pk, tx_name='TestModel', action='U')
+                except OutgoingTransaction.DoesNotExist:
+                    pass
+                else:
+                    raise OutgoingTransaction.DoesNotExist()
+            self.assertEqual(
+                2, OutgoingTransaction.objects.using('client').filter(
+                    tx_pk=test_model.pk, tx_name='TestModelAudit', action='I').count())
 
     def test_timestamp_is_default_order(self):
-        test_model = TestModel.objects.using('client').create(f1='erik')
-        test_model.save(using='client')
-        last = 0
-        for obj in OutgoingTransaction.objects.using('client').all():
-            self.assertGreater(int(obj.timestamp), last)
-            last = int(obj.timestamp)
+        with override_settings(DEVICE_ID='10'):
+            test_model = TestModel.objects.using('client').create(f1='erik')
+            test_model.save(using='client')
+            last = 0
+            for obj in OutgoingTransaction.objects.using('client').all():
+                self.assertGreater(int(obj.timestamp), last)
+                last = int(obj.timestamp)
 
     def test_deserialize_fails_not_server(self):
-        device = Device(device_id='10')
-        self.assertFalse(device.is_server)
-        TestModel.objects.using('client').create(f1='erik')
-        self.assertRaises(
-            SyncError,
-            IncomingTransaction.objects.using('server').filter(
-                is_consumed=False).deserialize, custom_device=device)
+        with override_settings(DEVICE_ID='10'):
+            device = Device()
+            self.assertFalse(device.is_server)
+            TestModel.objects.using('client').create(f1='erik')
+            self.assertRaises(
+                SyncError,
+                IncomingTransaction.objects.using('default').filter(
+                    is_consumed=False).deserialize, check_hostname=False)
 
     def test_deserialize_succeeds_as_server(self):
-        device = Device(device_id='99')
-        self.assertTrue(device.is_server)
-        TestModel.objects.using('client').create(f1='erik')
-        with self.assertRaises(SyncError):
-            try:
-                IncomingTransaction.objects.using('server').filter(
-                    is_consumed=False).deserialize(custom_device=device)
-            except:
-                pass
-            else:
-                raise SyncError()
+        with override_settings(DEVICE_ID='99'):
+            device = Device()
+            self.assertTrue(device.is_server)
+            TestModel.objects.using('client').create(f1='erik')
+            with self.assertRaises(SyncError):
+                try:
+                    IncomingTransaction.objects.using('default').filter(
+                        is_consumed=False).deserialize(check_hostname=False)
+                except:
+                    pass
+                else:
+                    raise SyncError()
 
     def test_copy_db_to_db(self):
         TestModel.objects.using('client').create(f1='erik')
         self.assertEqual(
-            IncomingTransaction.objects.using('server').all().count(), 0)
-        OutgoingTransaction.objects.using('client').all().copy_to_incoming_transaction('server')
+            IncomingTransaction.objects.using('default').all().count(), 0)
+        OutgoingTransaction.objects.using('client').all().copy_to_incoming_transaction('default')
         self.assertEquals(
             OutgoingTransaction.objects.using('client').all().count(),
-            IncomingTransaction.objects.using('server').all().count())
+            IncomingTransaction.objects.using('default').all().count())
 
     def test_deserialize_insert(self):
-        device = Device(device_id='99')
-        TestModel.objects.using('client').create(f1='erik')
-        OutgoingTransaction.objects.using('client').all().copy_to_incoming_transaction('server')
-        messages = IncomingTransaction.objects.using('server').filter(
-            is_consumed=False).deserialize(custom_device=device, check_hostname=False)
-        self.assertEqual(3, len(messages))
-        for message in messages:
-            self.assertEqual((1, 0, 0), (message.inserted, message.updated, message.deleted))
-        with self.assertRaises(TestModel.DoesNotExist):
-            try:
-                TestModel.objects.using('server').get(f1='erik')
-            except:
-                pass
-            else:
-                raise TestModel.DoesNotExist
+        with override_settings(DEVICE_ID='99'):
+            TestModel.objects.using('client').create(f1='erik')
+            OutgoingTransaction.objects.using('client').all().copy_to_incoming_transaction('default')
+            messages = IncomingTransaction.objects.using('default').filter(
+                is_consumed=False).deserialize(check_hostname=False)
+            self.assertEqual(3, len(messages))
+            for message in messages:
+                self.assertEqual((1, 0, 0), (message.inserted, message.updated, message.deleted))
+            with self.assertRaises(TestModel.DoesNotExist):
+                try:
+                    TestModel.objects.using('default').get(f1='erik')
+                except:
+                    pass
+                else:
+                    raise TestModel.DoesNotExist
 
     def test_deserialize_update(self):
-        device = Device(device_id='99')
-        test_model = TestModel.objects.using('client').create(f1='erik')
-        OutgoingTransaction.objects.using('client').all().copy_to_incoming_transaction('server')
-        IncomingTransaction.objects.using('server').filter(
-            is_consumed=False).deserialize(custom_device=device, check_hostname=False)
-        self.assertEqual(0, IncomingTransaction.objects.using('server').filter(is_consumed=False).count())
-        test_model.save(using='client')
-        OutgoingTransaction.objects.using('client').filter(
-            is_consumed_server=False).copy_to_incoming_transaction('server')
-        messages = IncomingTransaction.objects.using('server').filter(
-            is_consumed=False).deserialize(custom_device=device, check_hostname=False)
-        self.assertEqual(2, len(messages))
-        for message in messages:
-            if message.tx_name == 'TestModel':
-                self.assertEqual((0, 1, 0), (message.inserted, message.updated, message.deleted))
-            if message.tx_name == 'TestModelAudit':
-                self.assertEqual((1, 0, 0), (message.inserted, message.updated, message.deleted))
-
-        with self.assertRaises(TestModel.DoesNotExist):
-            try:
-                TestModel.objects.using('server').get(f1='erik')
-            except:
-                pass
-            else:
-                raise TestModel.DoesNotExist
+        with override_settings(DEVICE_ID='99'):
+            test_model = TestModel.objects.using('client').create(f1='erik')
+            OutgoingTransaction.objects.using('client').all().copy_to_incoming_transaction('default')
+            IncomingTransaction.objects.using('default').filter(
+                is_consumed=False).deserialize(check_hostname=False)
+            self.assertEqual(0, IncomingTransaction.objects.using('default').filter(is_consumed=False).count())
+            test_model.save(using='client')
+            OutgoingTransaction.objects.using('client').filter(
+                is_consumed_server=False).copy_to_incoming_transaction('default')
+            messages = IncomingTransaction.objects.using('default').filter(
+                is_consumed=False).deserialize(check_hostname=False)
+            self.assertEqual(2, len(messages))
+            for message in messages:
+                if message.tx_name == 'TestModel':
+                    self.assertEqual((0, 1, 0), (message.inserted, message.updated, message.deleted))
+                if message.tx_name == 'TestModelAudit':
+                    self.assertEqual((1, 0, 0), (message.inserted, message.updated, message.deleted))
+            with self.assertRaises(TestModel.DoesNotExist):
+                try:
+                    TestModel.objects.using('default').get(f1='erik')
+                except:
+                    pass
+                else:
+                    raise TestModel.DoesNotExist
 
     def test_created_obj_serializes_to_correct_db(self):
         """Asserts that the obj and the audit obj serialize to the correct DB in a multi-database environment."""
@@ -212,91 +219,89 @@ class TestSync(TestCase):
 
     def test_complex_model_works_for_fk(self):
         with override_settings(DEVICE_ID='99'):
-            device = Device(device_id='99')
             for name in 'abcdefg':
                 fk = Fk.objects.using('client').create(name=name)
             ComplexTestModel.objects.using('client').create(f1='1', fk=fk)
             OutgoingTransaction.objects.using('client').filter(
-                is_consumed_server=False).copy_to_incoming_transaction('server')
-            IncomingTransaction.objects.using('server').filter(
-                is_consumed=False).deserialize(custom_device=device, check_hostname=False)
-            self.assertEqual(IncomingTransaction.objects.using('server').filter(
+                is_consumed_server=False).copy_to_incoming_transaction('default')
+            IncomingTransaction.objects.using('default').filter(
+                is_consumed=False).deserialize(check_hostname=False)
+            self.assertEqual(IncomingTransaction.objects.using('default').filter(
                 is_consumed=False).count(), 0)
-            ComplexTestModel.objects.using('server').get(f1='1', fk__name=fk.name)
+            ComplexTestModel.objects.using('default').get(f1='1', fk__name=fk.name)
 
     def test_deserialization_messages_inserted(self):
-        device = Device(device_id='99')
-        for name in 'abcdefg':
-            fk = Fk.objects.using('client').create(name=name)
-        ComplexTestModel.objects.using('client').create(f1='1', fk=fk)
-        OutgoingTransaction.objects.using('client').all().copy_to_incoming_transaction('server')
-        messages = IncomingTransaction.objects.using('server').filter(
-            is_consumed=False).deserialize(custom_device=device, check_hostname=False)
-        self.assertEqual(sum([msg.inserted for msg in messages]), 10)
+        with override_settings(DEVICE_ID='99'):
+            for name in 'abcdefg':
+                fk = Fk.objects.using('client').create(name=name)
+            ComplexTestModel.objects.using('client').create(f1='1', fk=fk)
+            OutgoingTransaction.objects.using('client').all().copy_to_incoming_transaction('default')
+            messages = IncomingTransaction.objects.using('default').filter(
+                is_consumed=False).deserialize(check_hostname=False)
+            self.assertEqual(sum([msg.inserted for msg in messages]), 10)
 
     def test_deserialization_messages_updated(self):
-        device = Device(device_id='99')
-        for name in 'abcdefg':
-            fk = Fk.objects.using('client').create(name=name)
-        complex_test_model = ComplexTestModel.objects.using('client').create(f1='1', fk=fk)
-        OutgoingTransaction.objects.using('client').all().copy_to_incoming_transaction('server')
-        IncomingTransaction.objects.using('server').filter(
-            is_consumed=False).deserialize(custom_device=device, check_hostname=False)
-        complex_test_model.save(using='client')
-        OutgoingTransaction.objects.using('client').filter(
-            is_consumed_server=False).copy_to_incoming_transaction('server')
-        messages = IncomingTransaction.objects.using('server').filter(
-            is_consumed=False).deserialize(custom_device=device, check_hostname=False)
-        self.assertEqual(sum([msg.updated for msg in messages]), 1)
+        with override_settings(DEVICE_ID='99'):
+            for name in 'abcdefg':
+                fk = Fk.objects.using('client').create(name=name)
+            complex_test_model = ComplexTestModel.objects.using('client').create(f1='1', fk=fk)
+            OutgoingTransaction.objects.using('client').all().copy_to_incoming_transaction('default')
+            IncomingTransaction.objects.using('default').filter(
+                is_consumed=False).deserialize(check_hostname=False)
+            complex_test_model.save(using='client')
+            OutgoingTransaction.objects.using('client').filter(
+                is_consumed_server=False).copy_to_incoming_transaction('default')
+            messages = IncomingTransaction.objects.using('default').filter(
+                is_consumed=False).deserialize(check_hostname=False)
+            self.assertEqual(sum([msg.updated for msg in messages]), 1)
 
     def test_deserialization_updates_incoming_is_consumed(self):
-        device = Device(device_id='99')
-        for name in 'abcdefg':
-            fk = Fk.objects.using('client').create(name=name)
-        ComplexTestModel.objects.using('client').create(f1='1', fk=fk)
-        OutgoingTransaction.objects.using('client').all().copy_to_incoming_transaction('server')
-        IncomingTransaction.objects.using('server').filter(
-            is_consumed=False).deserialize(custom_device=device, check_hostname=False)
-        self.assertEqual(IncomingTransaction.objects.using('server').filter(
-            is_consumed=False).count(), 0)
+        with override_settings(DEVICE_ID='99'):
+            for name in 'abcdefg':
+                fk = Fk.objects.using('client').create(name=name)
+            ComplexTestModel.objects.using('client').create(f1='1', fk=fk)
+            OutgoingTransaction.objects.using('client').all().copy_to_incoming_transaction('default')
+            IncomingTransaction.objects.using('default').filter(
+                is_consumed=False).deserialize(check_hostname=False)
+            self.assertEqual(IncomingTransaction.objects.using('default').filter(
+                is_consumed=False).count(), 0)
 
     def test_deserialize_with_m2m(self):
-        device = Device(device_id='99')
-        for name in 'abcdefg':
-            fk = Fk.objects.using('client').create(name=name)
-        for name in 'hijklmnop':
-            M2m.objects.using('client').create(name=name)
-        complex_model = ComplexTestModel.objects.using('client').create(f1='1', fk=fk)
-        complex_model.m2m.add(M2m.objects.using('client').first())
-        complex_model.m2m.add(M2m.objects.using('client').last())
-        complex_model = ComplexTestModel.objects.using('client').get(f1='1')
-        self.assertEqual(complex_model.m2m.using('client').all().count(), 2)
-        OutgoingTransaction.objects.using('client').all().copy_to_incoming_transaction('server')
-        IncomingTransaction.objects.using('server').filter(
-            is_consumed=False).deserialize(custom_device=device, check_hostname=False)
-        complex_model = ComplexTestModel.objects.using('server').get(f1='1', fk__name=fk.name)
-        self.assertEqual(complex_model.m2m.using('client').all().count(), 2)
+        with override_settings(DEVICE_ID='99'):
+            for name in 'abcdefg':
+                fk = Fk.objects.using('client').create(name=name)
+            for name in 'hijklmnop':
+                M2m.objects.using('client').create(name=name)
+            complex_model = ComplexTestModel.objects.using('client').create(f1='1', fk=fk)
+            complex_model.m2m.add(M2m.objects.using('client').first())
+            complex_model.m2m.add(M2m.objects.using('client').last())
+            complex_model = ComplexTestModel.objects.using('client').get(f1='1')
+            self.assertEqual(complex_model.m2m.using('client').all().count(), 2)
+            OutgoingTransaction.objects.using('client').all().copy_to_incoming_transaction('default')
+            IncomingTransaction.objects.using('default').filter(
+                is_consumed=False).deserialize(check_hostname=False)
+            complex_model = ComplexTestModel.objects.using('default').get(f1='1', fk__name=fk.name)
+            self.assertEqual(complex_model.m2m.using('client').all().count(), 2)
 
     def test_deserialize_with_missing_m2m(self):
-        device = Device(device_id='99')
-        for name in 'abcdefg':
-            fk = Fk.objects.using('client').create(name=name)
-        for name in 'hijklmnop':
-            M2m.objects.using('client').create(name=name)
-        complex_model = ComplexTestModel.objects.using('client').create(f1='1', fk=fk)
-        complex_model.m2m.add(M2m.objects.using('client').first())
-        complex_model.m2m.add(M2m.objects.using('client').last())
-        complex_model = ComplexTestModel.objects.using('client').get(f1='1')
-        OutgoingTransaction.objects.using('client').all().copy_to_incoming_transaction('server')
-        IncomingTransaction.objects.using('server').filter(
-            is_consumed=False).deserialize(custom_device=device, check_hostname=False)
-        complex_model = ComplexTestModel.objects.using('server').get(f1='1', fk__name=fk.name)
-        self.assertEqual(complex_model.m2m.all().count(), 2)
+        with override_settings(DEVICE_ID='99'):
+            for name in 'abcdefg':
+                fk = Fk.objects.using('client').create(name=name)
+            for name in 'hijklmnop':
+                M2m.objects.using('client').create(name=name)
+            complex_model = ComplexTestModel.objects.using('client').create(f1='1', fk=fk)
+            complex_model.m2m.add(M2m.objects.using('client').first())
+            complex_model.m2m.add(M2m.objects.using('client').last())
+            complex_model = ComplexTestModel.objects.using('client').get(f1='1')
+            OutgoingTransaction.objects.using('client').all().copy_to_incoming_transaction('default')
+            IncomingTransaction.objects.using('default').filter(
+                is_consumed=False).deserialize(check_hostname=False)
+            complex_model = ComplexTestModel.objects.using('default').get(f1='1', fk__name=fk.name)
+            self.assertEqual(complex_model.m2m.all().count(), 2)
 
     def test_creates_producer(self):
-        device = Device(device_id='99')
-        TestModel.objects.using('client').create(f1='erik')
-        self.assertEqual(Producer.objects.using('client').all().count(), 1)
-        print(Producer.objects.using('client').first().__dict__)
-        Producer.objects.using('client').get(name='{}-{}'.format(socket.gethostname(), 'client'))
-        # OutgoingTransaction.objects.using('client').all().copy_to_incoming_transaction('server')
+        with override_settings(DEVICE_ID='99'):
+            TestModel.objects.using('client').create(f1='erik')
+            self.assertEqual(Producer.objects.using('client').all().count(), 1)
+            Producer.objects.using('client').get(name='{}-{}'.format(socket.gethostname(), 'client'))
+            OutgoingTransaction.objects.using('client').all().copy_to_incoming_transaction('default')

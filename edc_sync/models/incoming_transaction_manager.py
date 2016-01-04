@@ -10,16 +10,21 @@ from ..exceptions import SyncError
 MessageTuple = namedtuple('Message', 'index, total, inserted updated deleted producer tx_name tx_pk success')
 
 
-class CustomQuerySet(QuerySet):
+class IncomingTransactionQuerySet(QuerySet):
 
-    def deserialize(self, check_hostname=None, ignore_device_id=None, custom_device=None):
-        """Deserialize new incoming transactions."""
-        device = custom_device or Device()
+    def deserialize(self, check_hostname=None):
+        """Deserialize all objects in the queryset.
+
+        Since 'get_by_natural_key' assumes using='default', this may only
+        be called on a server where the database is \'default\'.
+        """
+        device = Device()
         check_hostname = True if check_hostname is None else check_hostname
         if not device.is_server:
-            if not ignore_device_id:
-                raise SyncError('Transactions can only be deserialized on a host that is a server. '
-                                'Got device id {}'.format(device.device_id))
+            raise SyncError('Objects may only be deserialized on a server. Got device=\'{}\' \'{}\'.'.format(
+                device.device_role(device.device_id), device))
+        if self._db != 'default':
+            raise SyncError('Server database key may only be \'default\'. Got \'{}\''.format(self._db))
         total = self.count()
         messages = []
         for index, incoming_transaction in enumerate(self):
@@ -37,7 +42,7 @@ class CustomQuerySet(QuerySet):
 class IncomingTransactionManager(models.Manager):
 
     def get_queryset(self):
-        qs = CustomQuerySet(self.model)
+        qs = IncomingTransactionQuerySet(self.model)
         if self._db is not None:
             qs = qs.using(self._db)
         return qs

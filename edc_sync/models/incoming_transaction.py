@@ -36,7 +36,7 @@ class IncomingTransaction(BaseTransaction):
                 device.device_role(device.device_id), device))
         if using != 'default':
             # get_by_natural_key onl works on default
-            raise SyncError('Server database must be \'default\'. Got \'{}\''.format(using))
+            raise SyncError('Server database key must be \'default\'. Got \'{}\''.format(using))
         inserted, updated, deleted = 0, 0, 0
         check_hostname = True if check_hostname is None else check_hostname
         decrypted_transaction = FieldCryptor('aes', 'local').decrypt(self.tx)
@@ -66,7 +66,6 @@ class IncomingTransaction(BaseTransaction):
 
     def deserialize_insert_tx(self, obj, using):
         with transaction.atomic(using):
-            print(using, obj.object._meta.model_name, 'deserialize_insert_tx')
             obj.save(using=using)
         return 1
 
