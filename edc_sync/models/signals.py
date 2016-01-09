@@ -1,14 +1,5 @@
-from django.core import serializers
 from django.db.models.signals import post_save, m2m_changed, post_delete
 from django.dispatch import receiver
-from django.utils import timezone
-
-from edc_base.encrypted_fields import FieldCryptor
-
-from ..exceptions import SyncError
-
-from .incoming_transaction import IncomingTransaction
-from .outgoing_transaction import OutgoingTransaction
 
 
 @receiver(post_save, weak=False, dispatch_uid="deserialize_to_inspector_on_post_save")
