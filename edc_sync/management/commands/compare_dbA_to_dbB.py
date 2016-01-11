@@ -1,11 +1,6 @@
 from django.db.models import get_models, get_app
 from django.core.management.base import BaseCommand
 
-from edc.subject.lab_tracker.classes import site_lab_tracker
-
-
-site_lab_tracker.autodiscover()
-
 
 class Command(BaseCommand):
     '''arguments
