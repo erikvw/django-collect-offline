@@ -5,10 +5,7 @@ from django.contrib.auth.models import User
 from tastypie.models import ApiKey
 from tastypie.test import ResourceTestCase
 
-from edc_sync.models import OutgoingTransaction
-
-from .test_models import TestModel
-from edc_sync.views import consume_transactions, ConsumeTransactions
+from edc_sync.views import ConsumeTransactions
 from django.test.client import RequestFactory
 from edc_sync.models.producer import Producer
 from django.test.utils import override_settings
@@ -16,7 +13,7 @@ from edc_sync.exceptions import SyncError
 
 
 class TestConsumeRest(ResourceTestCase):
-
+    """Not ready...."""
     def setUp(self):
         super(TestConsumeRest, self).setUp()
 
@@ -42,7 +39,7 @@ class TestConsumeRest(ResourceTestCase):
 
     @override_settings(DEVICE_ID='99')
     def test_rest_init(self):
-        consume_transactions = ConsumeTransactions(
+        ConsumeTransactions(
             self.request, self.producer_name)
 
     @override_settings(DEVICE_ID='99')

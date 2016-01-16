@@ -25,9 +25,9 @@ urlpatterns = [
 urlpatterns += patterns(
     '',
     (r'^api/', include(api.urls)),
-#     (r'^api_otmr/', include(outgoing_transaction_middle_man_resource.urls)),
-#     (r'^api_otsr/', include(outgoing_transaction_server_resource.urls)),
-#     (r'^api_otssr/', include(outgoing_transaction_site_server_resource.urls)),
+    #     (r'^api_otmr/', include(outgoing_transaction_middle_man_resource.urls)),
+    #     (r'^api_otsr/', include(outgoing_transaction_server_resource.urls)),
+    #     (r'^api_otssr/', include(outgoing_transaction_site_server_resource.urls)),
 )
 
 # The order is important, referred to from sync.urls and {app_name}_dispatch.urls
