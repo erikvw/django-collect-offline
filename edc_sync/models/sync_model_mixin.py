@@ -139,9 +139,5 @@ class SyncModelMixin(models.Model):
         raise ImproperlyConfigured('Method deserialize_get_missing_fk() must '
                                    'be overridden on model class {0}'.format(self._meta.object_name))
 
-    def save_to_inspector(self, fields, instance_pk, using):
-        """Override in concrete class."""
-        return False
-
     class Meta:
         abstract = True

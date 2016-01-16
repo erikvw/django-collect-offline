@@ -1,6 +1,5 @@
 from django.db import models
 
-from edc_base.encrypted_fields import EncryptedCharField
 from edc_base.model.models import BaseUuidModel
 
 from .password_field import PasswordModelField
@@ -27,27 +26,29 @@ class Producer(SyncModelMixin, BaseUuidModel):
 
     url = models.CharField(max_length=64)
 
-    # TODO: change this in next revision! should be db_host
-    db_host = EncryptedCharField(
+    db_host = models.CharField(
         verbose_name="Producer host name.",
+        max_length=200,
         null=True,
         blank=True,
         help_text=("provide the IP address / hostname of the producer."))
 
-    db_user = EncryptedCharField(
+    db_user = models.CharField(
         verbose_name="Database username in Django settings.",
+        max_length=25,
         default='root',
         null=True,
         help_text=("provide the database username of the producer."))
 
-    # TODO: change this in next revision! should be db_name
-    db_name = EncryptedCharField(
+    db_name = models.CharField(
         verbose_name="Database name in Django settings.",
+        max_length=25,
         null=True,
         help_text=("provide the database name of the producer."))
 
-    port = EncryptedCharField(
+    port = models.CharField(
         verbose_name="Database port.",
+        max_length=25,
         default='',
         blank=True,
         null=True,

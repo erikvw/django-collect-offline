@@ -1,3 +1,1 @@
-from .resource import (
-    OutgoingTransactionMiddleManResource, OutgoingTransactionServerResource,
-    MiddleManTransactionResource, OutgoingTransactionSiteServerResource)
+from .resource import OutgoingTransactionResource

@@ -3,12 +3,12 @@ from django.dispatch import receiver
 
 
 @receiver(post_save, weak=False, dispatch_uid="deserialize_to_inspector_on_post_save")
-def deserialize_to_inspector_on_post_save(sender, instance, raw, created, using, **kwargs):
+def to_inspector_on_post_save(sender, instance, raw, created, using, **kwargs):
     if not raw:
         try:
-            instance.deserialize_to_inspector_on_post_save(instance, raw, created, using, **kwargs)
+            instance.to_inspector_on_post_save(instance, raw, created, using, **kwargs)
         except AttributeError as e:
-            if 'deserialize_to_inspector_on_post_save' not in str(e):
+            if 'to_inspector_on_post_save' not in str(e):
                 raise AttributeError(str(e))
 
 

@@ -1,17 +1,17 @@
 from django.contrib import admin
 from django.conf.urls import patterns, url, include
-
-from .api import (OutgoingTransactionMiddleManResource, OutgoingTransactionServerResource,
-                  MiddleManTransactionResource, OutgoingTransactionSiteServerResource)
-from .views import (index, view_transaction, consume_transactions,
-                    export_outgoing_to_file, ConsumeFromUsbView)
-from edc_sync.api.resource import OutgoingTransactionResource
 from tastypie.api import Api
 
-outgoing_transaction_middle_man_resource = OutgoingTransactionMiddleManResource()
-outgoing_transaction_server_resource = OutgoingTransactionServerResource()
-outgoing_transaction_site_server_resource = OutgoingTransactionSiteServerResource()
-middle_man_transaction_resource = MiddleManTransactionResource()
+from edc_sync.api.resource import OutgoingTransactionResource
+
+# from .api import (OutgoingTransactionMiddleManResource, OutgoingTransactionServerResource,
+#                   OutgoingTransactionSiteServerResource)
+from .views import (index, view_transaction, consume_transactions,
+                    export_outgoing_to_file, ConsumeFromUsbView)
+
+# outgoing_transaction_middle_man_resource = OutgoingTransactionMiddleManResource()
+# outgoing_transaction_server_resource = OutgoingTransactionServerResource()
+# outgoing_transaction_site_server_resource = OutgoingTransactionSiteServerResource()
 
 api = Api(api_name='v1')
 api.register(OutgoingTransactionResource())
@@ -24,10 +24,10 @@ urlpatterns = [
 
 urlpatterns += patterns(
     '',
-    (r'^api_otmr/', include(outgoing_transaction_middle_man_resource.urls)),
-    (r'^api_otsr/', include(outgoing_transaction_server_resource.urls)),
-    (r'^api_otssr/', include(outgoing_transaction_site_server_resource.urls)),
-    (r'^api_mmtr/', include(middle_man_transaction_resource.urls)),
+    (r'^api/', include(api.urls)),
+#     (r'^api_otmr/', include(outgoing_transaction_middle_man_resource.urls)),
+#     (r'^api_otsr/', include(outgoing_transaction_server_resource.urls)),
+#     (r'^api_otssr/', include(outgoing_transaction_site_server_resource.urls)),
 )
 
 # The order is important, referred to from sync.urls and {app_name}_dispatch.urls

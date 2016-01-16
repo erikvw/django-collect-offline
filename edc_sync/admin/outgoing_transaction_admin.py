@@ -1,8 +1,6 @@
 from django.contrib import admin
 
 from ..actions import (
-    reset_outgoing_transaction_middle_as_consumed,
-    reset_outgoing_transaction_middle_as_not_consumed,
     reset_outgoing_transaction_server_as_consumed,
     reset_outgoing_transaction_server_as_not_consumed)
 from ..models import OutgoingTransaction
@@ -26,8 +24,6 @@ class OutgoingTransactionAdmin (admin.ModelAdmin):
     search_fields = ('tx_pk', 'tx', 'timestamp', 'error')
 
     actions = [
-        reset_outgoing_transaction_middle_as_consumed,
-        reset_outgoing_transaction_middle_as_not_consumed,
         reset_outgoing_transaction_server_as_consumed,
         reset_outgoing_transaction_server_as_not_consumed]
 
