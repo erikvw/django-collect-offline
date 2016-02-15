@@ -28,7 +28,7 @@ class IncomingTransaction(BaseTransaction):
 
     objects = IncomingTransactionManager()
 
-    def deserialize_transaction(self, using, check_hostname=None):
+    def deserialize_transaction(self, using, check_hostname=None, commit=True):
         device = Device()
         if not device.is_server:
             raise SyncError('Objects may only be deserialized on a server. Got device={} {}.'.format(
@@ -42,7 +42,7 @@ class IncomingTransaction(BaseTransaction):
         for obj in serializers.deserialize("json", decrypted_transaction):
             if obj.object.hostname_modified == socket.gethostname() and check_hostname:
                 raise SyncError('Incoming transactions exist that are from this host.')
-            else:
+            elif commit:
                 if self.action == 'D':
                     deleted = self.deserialize_delete_tx(obj, using)
                 elif self.action == 'I':
@@ -57,6 +57,8 @@ class IncomingTransaction(BaseTransaction):
                     self.consumed_datetime = timezone.now()
                     self.consumer = '{}-{}'.format(socket.gethostname(), using)
                     self.save(using=using)
+            else:
+                return obj
         return inserted, updated, deleted
 
     def deserialize_insert_tx(self, obj, using):
