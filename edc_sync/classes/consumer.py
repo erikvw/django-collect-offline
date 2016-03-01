@@ -54,17 +54,6 @@ class Consumer(object):
     def post_sync(self, using=None, lock_name=None, **kwargs):
         pass
 
-    def get_consume_feedback(self):
-        today = datetime.now()
-        margin = timedelta(days=1)
-        consumed_today = IncomingTransaction.objects.filter(created__range=(today - margin, today + margin), is_consumed=True)
-        not_consumed_today = IncomingTransaction.objects.filter(created__range=(today - margin, today + margin), is_consumed=False)
-        not_consumed_not_ignored_today = not_consumed_today.filter(is_ignored=True)
-        message = ('\'{0}\' transactions where CONSUMED today, \n \'{1}\' transactions FAILED to consume '
-                   'today, \n \'{2}\' of those that failed to consume have been set as IGNORED.').format(
-                       consumed_today.count(), not_consumed_today.count(), not_consumed_not_ignored_today.count())
-        return message
-
     def fetch_outgoing(self, using_source, using_destination=None):
         """Fetches all OutgoingTransactions not consumed from a source
         and saves them locally (default).
