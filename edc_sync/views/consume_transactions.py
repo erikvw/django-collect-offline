@@ -48,8 +48,7 @@ class ConsumeTransactions(object):
 
     def consume(self):
         response = requests.get(self.url)
-        print(response)
-        json_response = json.loads(r.data)
+        json_response = json.loads(response.data)
         return None
 #             # response is limited to 20 objects, if there are more
 #             # next will the the url with offset to fetch next 20 (&limit=20&offset=20)
@@ -210,4 +209,4 @@ def consume_transactions(request, **kwargs):
             raise ValueError(e)
     if request.user and consume_transactions:
         return redirect(consume_transactions.redirect_url)
-    return redirect(reverse('bcpp_sync_url'))
+    return redirect(reverse('sync_index_url'))
