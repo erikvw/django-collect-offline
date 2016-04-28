@@ -1,7 +1,10 @@
 from datetime import datetime
+
 from django.db import models
-from edc.base.model.models import BaseUuidModel
-from sync_old import Producer
+
+from edc_base.model.models import BaseUuidModel
+
+from .producer import Producer
 
 
 class RequestLog(BaseUuidModel):
@@ -21,5 +24,4 @@ class RequestLog(BaseUuidModel):
         blank=True)
 
     class Meta:
-        app_label = 'sync_old'
-        db_table = 'bhp_sync_requestlog'
+        app_label = 'edc_sync'

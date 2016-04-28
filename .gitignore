@@ -4,6 +4,11 @@ test-*
 *.py[cod]
 .project
 .pydevproject
+.settings
+db.sqlite3
+migrations/
+sync_old/
+
 # C extensions
 *.so
 
