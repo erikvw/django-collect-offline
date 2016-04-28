@@ -7,6 +7,7 @@ class ProducerForm(forms.ModelForm):
 
     class Meta:
         model = Producer
+        fields = '__all__'
 
 
 class UsbForm(forms.Form):

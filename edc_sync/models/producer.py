@@ -56,7 +56,7 @@ class Producer(SyncModelMixin, BaseUuidModel):
 
     db_password = PasswordModelField(
         verbose_name="Database password.",
-        max_length=250,
+        max_length=213,
         null=True,
         help_text=("provide the password to database on the producer."))
 

@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.db.models import TextField
-from django.db.models import get_model
+from django.apps import apps
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
@@ -13,7 +13,7 @@ def view_transaction(request, **kwargs):
     app_label = kwargs.get('app_label', 'edc_sync')
     model_name = kwargs.get('model_name')
     pk = kwargs.get('pk')
-    model = get_model(app_label, model_name)
+    model = apps.get_model(app_label, model_name)
     model_instance = model.objects.get(pk=pk)
     textfields = {}
     charfields = {}

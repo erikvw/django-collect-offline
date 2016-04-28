@@ -73,7 +73,7 @@ class SyncModelMixin(models.Model):
     def encrypted_json(self):
         """Returns an encrypted json serialized from self."""
         json = serializers.serialize(
-            "json", [self, ], ensure_ascii=False, use_natural_keys=True)
+            "json", [self, ], ensure_ascii=True, use_natural_foreign_keys=True)
         encrypted_json = FieldCryptor('aes', 'local').encrypt(json)
         return encrypted_json
 

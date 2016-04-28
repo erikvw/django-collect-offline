@@ -2,7 +2,7 @@ import socket
 
 from datetime import datetime, timedelta, date
 
-from django.db.models import get_model
+from django.apps import apps
 
 
 class TransactionUpload(object):
@@ -51,8 +51,8 @@ class TransactionUpload(object):
         message = ""
         for producer in Producer.objects.filter(is_active=True):
             producer_identifier = producer.name.split('.')[0]
-            UploadTransactionFile = get_model('import', 'UploadTransactionFile')
-            UploadSkipDays = get_model('import', 'UploadSkipDays')
+            UploadTransactionFile = apps.get_model('import', 'UploadTransactionFile')
+            UploadSkipDays = apps.get_model('import', 'UploadSkipDays')
             latest_upload_file_date = UploadTransactionFile.objects.filter(
                 identifier__iexact=producer_identifier).order_by('-file_date')
             if latest_upload_file_date.exists():
