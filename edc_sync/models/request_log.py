@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.db import models
+from django.utils import timezone
 
 from edc_base.model.models import BaseUuidModel
 
@@ -12,7 +13,7 @@ class RequestLog(BaseUuidModel):
     producer = models.ForeignKey(Producer)
 
     request_datetime = models.DateTimeField(
-        default=datetime.today())
+        default=timezone.now)
 
     status = models.CharField(
         max_length=25,
