@@ -6,7 +6,7 @@ from edc_base.model.models import BaseUuidModel
 
 class BaseTransaction(BaseUuidModel):
 
-    tx = models.TextField()
+    tx = models.BinaryField()
 
     tx_name = models.CharField(
         max_length=64,
