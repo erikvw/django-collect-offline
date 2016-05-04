@@ -1,6 +1,3 @@
-from datetime import datetime, timedelta
-
-
 from ..exceptions import TransactionConsumerError
 from ..models import OutgoingTransaction, IncomingTransaction
 

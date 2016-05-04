@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.conf.urls import patterns, url, include
+from django.conf.urls import url, include
 from tastypie.api import Api
 
 from edc_sync.api.resource import OutgoingTransactionResource
@@ -22,17 +22,15 @@ urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
 ]
 
-urlpatterns += patterns(
-    '',
-    (r'^api/', include(api.urls)),
-    #     (r'^api_otmr/', include(outgoing_transaction_middle_man_resource.urls)),
-    #     (r'^api_otsr/', include(outgoing_transaction_server_resource.urls)),
-    #     (r'^api_otssr/', include(outgoing_transaction_site_server_resource.urls)),
-)
+urlpatterns += [
+    url(r'^api/', include(api.urls)),
+    #     url(r'^api_otmr/', include(outgoing_transaction_middle_man_resource.urls)),
+    #     url(r'^api_otsr/', include(outgoing_transaction_server_resource.urls)),
+    #     url(r'^api_otssr/', include(outgoing_transaction_site_server_resource.urls)),
+]
 
 # The order is important, referred to from sync.urls and {app_name}_dispatch.urls
-urlpatterns += patterns(
-    '',
+urlpatterns += [
     url(r'^usb_consume/(?P<app_name>[a-z0-9\-\_\.]+)/',
         ConsumeFromUsbView.as_view()),
     url(r'^export_outgoing/',
@@ -53,7 +51,5 @@ urlpatterns += patterns(
     url(r'^consumed/(?P<selected_producer>[a-z0-9\-\_\.]+)/',
         index,
         name='sync_consumed'),
-    url(r'^$',
-        index,
-        name='sync_index_url'),
-)
+    url(r'^$', index, name='sync_index_url'),
+]

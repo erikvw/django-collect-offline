@@ -2,7 +2,8 @@ from ..models import IncomingTransaction, OutgoingTransaction
 
 
 def out_to_incoming(self):
-    """ Sample code to take outgoing transactions from an external DB and save as incoming to the default DB. """
+    """ Sample code to take outgoing transactions from an external DB
+    and save as incoming to the default DB. """
     instances = []
     outgoing_transactions = OutgoingTransaction.objects.using('mpp40').filter(
         is_consumed=False).exclude(tx_name__icontains='bucket')

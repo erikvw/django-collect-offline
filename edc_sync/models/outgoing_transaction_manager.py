@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models.query import QuerySet
 from django.utils import timezone
+
 from edc_sync.exceptions import SyncError
 
 

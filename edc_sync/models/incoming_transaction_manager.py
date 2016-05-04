@@ -21,8 +21,9 @@ class IncomingTransactionQuerySet(QuerySet):
         device = Device()
         check_hostname = True if check_hostname is None else check_hostname
         if not device.is_server:
-            raise SyncError('Objects may only be deserialized on a server. Got device=\'{}\' \'{}\'.'.format(
-                device.device_role(device.device_id), device))
+            raise SyncError('Objects may only be deserialized on a server. '
+                            'Got device=\'{}\' \'{}\'.'.format(
+                                device.device_role(device.device_id), device))
         if self._db != 'default':
             raise SyncError('Server database key may only be \'default\'. Got \'{}\''.format(self._db))
         total = self.count()

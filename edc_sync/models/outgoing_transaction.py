@@ -1,8 +1,10 @@
 from django.db import models
 from django.utils import timezone
 
-from edc_sync.exceptions import SyncError
+
 from edc_base.model.constants import DEFAULT_BASE_FIELDS
+
+from ..exceptions import SyncError
 
 from .base_transaction import BaseTransaction
 from .incoming_transaction import IncomingTransaction
@@ -11,8 +13,7 @@ from .outgoing_transaction_manager import OutgoingTransactionManager
 
 class OutgoingTransaction(BaseTransaction):
 
-    """ Transactions produced locally to be consumed/sent to a queue or consumer """
-    # harmlessly here in case you are using edc_middleman
+    """ Transactions produced locally to be consumed/sent to a queue or consumer. """
 
     is_consumed_middleman = models.BooleanField(
         default=False,

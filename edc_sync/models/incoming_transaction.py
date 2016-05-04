@@ -3,8 +3,8 @@ import socket
 from django.core import serializers
 from django.db import models, transaction
 from django.utils import timezone
+from django_crypto_fields.classes import FieldCryptor
 
-from edc_base.encrypted_fields import FieldCryptor
 from edc_device import Device
 
 from ..exceptions import SyncError

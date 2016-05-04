@@ -5,6 +5,7 @@ from ..actions import (
 from ..models import Producer
 
 
+@admin.register(Producer)
 class ProducerAdmin(admin.ModelAdmin):
 
     list_display = (
@@ -17,5 +18,3 @@ class ProducerAdmin(admin.ModelAdmin):
         reset_producer_status,
         update_producer_from_settings_file,
         toggle_producer_is_active]
-
-admin.site.register(Producer, ProducerAdmin)

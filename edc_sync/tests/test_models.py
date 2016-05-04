@@ -4,7 +4,7 @@ from edc_sync.models import SyncModelMixin
 from edc_base.model.models import BaseUuidModel
 from edc_base.audit_trail import AuditTrail
 from edc_base.model.models.base_list_model import BaseListModel
-from edc_base.encrypted_fields import EncryptedCharField
+from django_crypto_fields.fields import EncryptedCharField
 
 
 class TestModelManager(models.Manager):

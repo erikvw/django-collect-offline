@@ -8,6 +8,7 @@ from ..actions import (
 from ..models import IncomingTransaction
 
 
+@admin.register(IncomingTransaction)
 class IncomingTransactionAdmin (admin.ModelAdmin):
 
     ordering = ('-timestamp', )
@@ -32,5 +33,3 @@ class IncomingTransactionAdmin (admin.ModelAdmin):
         reset_incomingtransaction_ignore_status,
         set_incomingtransaction_audits_to_ignored,
         reset_incomingtransaction_audits]
-
-admin.site.register(IncomingTransaction, IncomingTransactionAdmin)

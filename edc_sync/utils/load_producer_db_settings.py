@@ -1,7 +1,6 @@
 from django.conf import settings
 
 from ..exceptions import SyncProducerError
-
 from ..models import Producer
 
 

@@ -1,19 +1,13 @@
-import json
-import requests
-
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.serializers.json import DjangoJSONEncoder
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
-from django.utils import timezone
 
 from edc_device import Device
-from edc_sync.api.resource import OutgoingTransactionResource
 
 from ..exceptions import SyncError
-from ..models import Producer, RequestLog, transaction_producer
+from ..models import Producer, RequestLog
 
 
 class ConsumeTransactions(object):
@@ -47,8 +41,8 @@ class ConsumeTransactions(object):
         self.producer.save()
 
     def consume(self):
-        response = requests.get(self.url)
-        json_response = json.loads(response.data)
+        #         response = requests.get(self.url)
+        #         json_response = json.loads(response.data)
         return None
 #             # response is limited to 20 objects, if there are more
 #             # next will the the url with offset to fetch next 20 (&limit=20&offset=20)
@@ -165,31 +159,31 @@ class ConsumeTransactions(object):
         else:
             return reverse('sync_consumed', args=(self.producer.name, ))
 
-    def get_request(self):
-        try:
-            request = urllib2.Request(url=self.url)
-        except urllib2.URLError as err:
-            request = None
-            self.producer.sync_status = err
-            self.producer.save()
-            messages.add_message(self.request, messages.ERROR, '[A] {0} {1}'.format(err, self.url))
-        return request
-
-    def get_url_data(self, request):
-        try:
-            url_data = urllib2.urlopen(request)
-        except urllib2.HTTPError as err:
-            self.producer.sync_status = err
-            self.producer.save()
-            messages.add_message(self.request, messages.ERROR, '[B] {0} {1}'.format(err, self.url))
-            if err.code == 404:
-                messages.add_message(self.request, messages.ERROR,
-                                     'Unknown producer. Got {}.'.format(self.producer))
-        except urllib2.URLError as err:
-            self.producer.sync_status = err
-            self.producer.save()
-            messages.add_message(self.request, messages.ERROR, '[C] {0} {1}'.format(err, self.url))
-        return url_data
+#     def get_request(self):
+#         try:
+#             request = urllib2.Request(url=self.url)
+#         except urllib2.URLError as err:
+#             request = None
+#             self.producer.sync_status = err
+#             self.producer.save()
+#             messages.add_message(self.request, messages.ERROR, '[A] {0} {1}'.format(err, self.url))
+#         return request
+#
+#     def get_url_data(self, request):
+#         try:
+#             url_data = urllib2.urlopen(request)
+#         except urllib2.HTTPError as err:
+#             self.producer.sync_status = err
+#             self.producer.save()
+#             messages.add_message(self.request, messages.ERROR, '[B] {0} {1}'.format(err, self.url))
+#             if err.code == 404:
+#                 messages.add_message(self.request, messages.ERROR,
+#                                      'Unknown producer. Got {}.'.format(self.producer))
+#         except urllib2.URLError as err:
+#             self.producer.sync_status = err
+#             self.producer.save()
+#             messages.add_message(self.request, messages.ERROR, '[C] {0} {1}'.format(err, self.url))
+#         return url_data
 
 
 @login_required

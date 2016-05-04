@@ -6,6 +6,7 @@ from ..actions import (
 from ..models import OutgoingTransaction
 
 
+@admin.register(OutgoingTransaction)
 class OutgoingTransactionAdmin (admin.ModelAdmin):
 
     ordering = ('-timestamp', )
@@ -26,5 +27,3 @@ class OutgoingTransactionAdmin (admin.ModelAdmin):
     actions = [
         reset_outgoing_transaction_server_as_consumed,
         reset_outgoing_transaction_server_as_not_consumed]
-
-admin.site.register(OutgoingTransaction, OutgoingTransactionAdmin)

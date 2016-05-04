@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
-import django
+import sys
 from unipath import Path
 
 # BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -39,27 +39,30 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_crypto_fields',
     'tastypie',
-    'edc_appointment',
-    'edc_base',
-    'edc_configuration',
-    'edc_consent',
-    'edc_content_type_map',
-    'edc_data_manager',
-    'edc_lab.lab_clinic_api',
-    'edc_lab.lab_clinic_reference',
-    'edc_meta_data',
-    'edc_quota',
-    'edc_registration',
-    'edc_sync',
-    'edc_testing',
-    'edc_visit_schedule',
-    'lab_requisition',
+    'edc_sync'
 ]
 
-if float(django.get_version()) > 1.6:
-    INSTALLED_APPS.append('django_crypto_fields')
-    INSTALLED_APPS.append('simple_history')
+if 'test' in sys.argv:
+    INSTALLED_APPS = INSTALLED_APPS + [
+        'edc_appointment',
+        'edc_base',
+        'edc_configuration',
+        'edc_consent',
+        'edc_content_type_map',
+        'edc_data_manager',
+        'edc_lab.lab_clinic_api',
+        'edc_lab.lab_clinic_reference',
+        'edc_meta_data',
+        'edc_quota',
+        'edc_registration',
+        'edc_sync',
+        'edc_testing',
+        'edc_visit_schedule',
+        'lab_requisition',
+        'simple_history'
+    ]
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
