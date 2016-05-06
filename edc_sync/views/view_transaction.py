@@ -3,8 +3,7 @@ import json
 from django.contrib.auth.decorators import login_required
 from django.db.models import BinaryField
 from django.apps import apps as django_apps
-from django.shortcuts import render_to_response
-from django.template import RequestContext
+from django.shortcuts import render
 
 from django_crypto_fields.classes import FieldCryptor
 
@@ -21,6 +20,5 @@ def view_transaction(request, **kwargs):
         if isinstance(field, BinaryField):
             decrypted_value = cryptor.decrypt(getattr(obj, field.name))
     obj = json.loads(decrypted_value)[0]
-    return render_to_response(
-        'transaction.html', {'obj': obj, 'is_popup': True},
-        context_instance=RequestContext(request))
+    return render(
+        request, 'transaction.html', {'obj': obj, 'is_popup': True}, content_type="text/html")
