@@ -35,6 +35,7 @@ git+https://github.com/botswana-harvard/edc-rule-groups@master#egg=edc-rule-grou
 git+https://github.com/botswana-harvard/edc-testing@master#egg=edc-testing
 git+https://github.com/botswana-harvard/edc-visit-schedule@master#egg=edc-visit-schedule
 git+https://github.com/botswana-harvard/edc-visit-tracking@master#egg=edc-visit-tracking
+git+https://github.com/botswana-harvard/getresults-identifier@master#egg=getresults-identifier
 git+https://github.com/botswana-harvard/lab-requisition@master#egg=lab-requisition
 git+https://github.com/botswana-harvard/lis@master#egg=lis
 git+https://github.com/erikvw/django-revision@master#egg=django-revision
