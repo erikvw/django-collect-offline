@@ -2,7 +2,7 @@ from django.db import models
 
 from edc_sync.models import SyncModelMixin
 from edc_base.model.models import BaseUuidModel
-from edc_base.audit_trail import AuditTrail
+from simple_history.models import HistoricalRecords as AuditTrail
 from edc_base.model.models.base_list_model import BaseListModel
 from django_crypto_fields.fields import EncryptedCharField
 

@@ -1,4 +1,3 @@
-from django.contrib import admin
 from django.conf.urls import url, include
 from tastypie.api import Api
 
@@ -13,16 +12,13 @@ from .views import (index, view_transaction, consume_transactions,
 # outgoing_transaction_server_resource = OutgoingTransactionServerResource()
 # outgoing_transaction_site_server_resource = OutgoingTransactionSiteServerResource()
 
+from .admin import edc_sync_admin
+
 api = Api(api_name='v1')
 api.register(OutgoingTransactionResource())
 
-admin.autodiscover()
 
 urlpatterns = [
-    url(r'^admin/', include(admin.site.urls)),
-]
-
-urlpatterns += [
     url(r'^api/', include(api.urls)),
     #     url(r'^api_otmr/', include(outgoing_transaction_middle_man_resource.urls)),
     #     url(r'^api_otsr/', include(outgoing_transaction_server_resource.urls)),
@@ -51,5 +47,6 @@ urlpatterns += [
     url(r'^consumed/(?P<selected_producer>[a-z0-9\-\_\.]+)/',
         index,
         name='sync_consumed'),
-    url(r'^$', index, name='sync_index_url'),
+    url(r'^', include(edc_sync_admin.urls)),
+    # url(r'^$', index, name='sync_index_url'),
 ]
