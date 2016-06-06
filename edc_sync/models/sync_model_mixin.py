@@ -6,7 +6,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.db import models
 from django.utils import timezone
 
-from django_crypto_fields.classes import FieldCryptor
+from django_crypto_fields.field_cryptor import FieldCryptor
 
 from ..exceptions import SyncError
 

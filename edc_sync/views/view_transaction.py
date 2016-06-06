@@ -5,13 +5,14 @@ from django.db.models import BinaryField
 from django.apps import apps as django_apps
 from django.shortcuts import render
 
-from django_crypto_fields.classes import FieldCryptor
+from django_crypto_fields.field_cryptor import FieldCryptor
+from django_crypto_fields.constants import AES, LOCAL_MODE
 
 
 @login_required
 def view_transaction(request, **kwargs):
     app_label = 'edc_sync'
-    cryptor = FieldCryptor('aes', 'local')
+    cryptor = FieldCryptor(AES, LOCAL_MODE)
     model_name = kwargs.get('model_name')
     pk = kwargs.get('pk')
     model = django_apps.get_model(app_label, model_name)
