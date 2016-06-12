@@ -47,7 +47,7 @@ In settings.py:
     ...]
 
 ### Encryption
-Transactions are serialized to JSON, encrypted, and stored in models such as `IncomingTransaction` and `OutgoingTransaction`. Module `django_crypto_fields` needs to know a bit about the database configuration when determining the `using` parameter for model object creating, updating and fetching. If the `default` database is not named `default` in `settings.DATABASES` then you need to import `django_crypto_fields.apps.DjangoCryptoFieldsAppConfig` and set the `crypto_model_using` attribute. For example, in your `example.apps.py`: 
+Transactions are serialized to JSON, encrypted, and stored in models such as `IncomingTransaction` and `OutgoingTransaction`. Module `django_crypto_fields` needs to know a bit about the database configuration when determining the `using` parameter for model object creating, updating and fetching. In the rare case that the `default` database is not named `default` in `settings.DATABASES` you will need to import `django_crypto_fields.apps.DjangoCryptoFieldsAppConfig` and set the `crypto_model_using` attribute. For example, in your `example.apps.py`: 
 
     from django_crypto_fields.apps import DjangoCryptoFieldsAppConfig
 
