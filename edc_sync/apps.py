@@ -10,3 +10,4 @@ class EdcSyncAppConfig(AppConfig):
 class DjangoCryptoFieldsApp(DjangoCryptoFieldsAppConfig):
     name = 'django_crypto_fields'
     model = ('example', 'crypt')
+    crypt_model_using = 'default'

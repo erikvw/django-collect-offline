@@ -1,10 +1,10 @@
 import socket
-import uuid
 
 from django.conf import settings
 from django.core import serializers
 from django.core.exceptions import ImproperlyConfigured
 from django.db import models
+from django.db.models.fields import UUIDField, AutoField
 from django.utils import timezone
 from django.utils.timezone import now
 from simple_history.models import HistoricalRecords
@@ -12,12 +12,9 @@ from simple_history.models import HistoricalRecords
 from django_crypto_fields.constants import LOCAL_MODE
 from django_crypto_fields.cryptor import Cryptor
 
-from edc_base.model.fields.uuid_auto_field import UUIDAutoField
-
 from ..exceptions import SyncModelError
 
 from .outgoing_transaction import OutgoingTransaction
-from django.db.models.fields import UUIDField, AutoField
 
 
 class SyncMixin:

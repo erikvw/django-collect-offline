@@ -36,6 +36,38 @@ __edc-sync__ uses either the REST API or FILE transfer:
 It is also possible to use Django's DB router if connections are good and reliable.
 
 
+### Installation
+
+In settings.py:
+
+    INSTALLED_APPS = [
+    ...
+    'django_crypto_fields.apps.DjangoCryptoFieldsAppConfig',
+    'edc_sync.apps.EdcSyncAppConfig',
+    ...]
+
+### Encryption
+Transactions are serialized to JSON, encrypted, and stored in models such as `IncomingTransaction` and `OutgoingTransaction`. Module `django_crypto_fields` needs to know a bit about the database configuration when determining the `using` parameter for model object creating, updating and fetching. If the `default` database is not named `default` in `settings.DATABASES` then you need to import `django_crypto_fields.apps.DjangoCryptoFieldsAppConfig` and set the `crypto_model_using` attribute. For example, in your `example.apps.py`: 
+
+    from django_crypto_fields.apps import DjangoCryptoFieldsAppConfig
+
+    class DjangoCryptoFieldsApp(DjangoCryptoFieldsAppConfig):
+        name = 'django_crypto_fields'
+        model = ('example', 'crypt')
+        crypt_model_using = 'client'
+
+then in settings:
+
+    INSTALLED_APPS = [
+    ...
+    'edc_sync.apps.DjangoCryptoFieldsApp',
+    'edc_sync.apps.EdcSyncAppConfig',
+    ...]
+ 
+
+### Audit trail manager on models
+Edc apps use `django_simple_history` to keep a full audit trail of data modifications. For an audit trail to synchronize with `edc_sync`, use class `edc_sync.models.SyncHistoricalRecords` in place of `simple_history.model.HistoricalRecords`. See section below on configuring a model. 
+
 ###Configure a model for synchronization
 
 To include a model add the `SyncModelMixin`. For example the base class for all CRFs in a module might look like this:
@@ -43,7 +75,7 @@ To include a model add the `SyncModelMixin`. For example the base class for all 
     from edc_base.model.models import BaseUuidModel
     from edc_consent.models RequiresConsentMixin
     from edc_offstudy.models import OffStudyMixin
-    from edc_sync.models import SyncModelMixin
+    from edc_sync.models import SyncModelMixin, SyncHistoricalRecords
     from edc_visit_tracking.models import CrfModelMixin
     
     from .maternal_consent import MaternalConsent
@@ -57,7 +89,7 @@ To include a model add the `SyncModelMixin`. For example the base class for all 
     
         maternal_visit = models.OneToOneField(MaternalVisit)
     
-        history = AuditTrail()
+        history = SyncHistoricalRecords()
     
         entry_meta_data_manager = CrfMetaDataManager(MaternalVisit)
     
@@ -65,8 +97,8 @@ To include a model add the `SyncModelMixin`. For example the base class for all 
             return (self.maternal_visit.natural_key(), )
         natural_key.dependencies = ['mb_maternal.maternal_visit']
     
-        def __unicode__(self):
-            return unicode(self.get_visit())
+        def __str__(self):
+            return str(self.get_visit())
     
         class Meta:
             abstract = True
