@@ -46,8 +46,29 @@ In settings.py:
     'edc_sync.apps.EdcSyncAppConfig',
     ...]
 
-### Encryption
-Transactions are serialized to JSON, encrypted, and stored in models such as `IncomingTransaction` and `OutgoingTransaction`. Module `django_crypto_fields` needs to know a bit about the database configuration when determining the `using` parameter for model object creating, updating and fetching. In the rare case that the `default` database is not named `default` in `settings.DATABASES` you will need to import `django_crypto_fields.apps.DjangoCryptoFieldsAppConfig` and set the `crypto_model_using` attribute. For example, in your `example.apps.py`: 
+### Encryption and `edc_sync`
+To use `edc_sync` and `django_crypto_fields` together requires additional configuration.
+
+#### Model `Crypt`
+Although transactions are serialized to JSON, encrypted, and stored in models such as `IncomingTransaction` and `OutgoingTransaction`, the JSON objects use AES encryption and do not update the reference model in `django_crypto_fields`, `django_crypto_fields.models.crypt`. However, it is very likely that your app has models that use encrypted fields and do update the `Crypt` model. If so, the `Crypt` model must also be synchronized so that the receiving database can decrypt. To enable this, you need to declare the model in your app with the `SyncModelMixin` and used the `BaseUuidModel` to change the `primary_key` from an `IntegerField` to a `UUIDField`, for example: 
+    
+    from django_crypto_fields.crypt_model_mixin import CryptModelMixin
+    from edc_base.model.models import BaseUuidModel
+    from edc_sync.models import SyncModelMixin
+
+    class Crypt(CryptModelMixin, SyncModelMixin, BaseUuidModel):
+
+    class Meta:
+        app_label = 'example'
+        unique_together = (('hash', 'algorithm', 'mode'),)
+        
+#### DATABASES attribute in `settings`
+Using `edc_sync` implies a multi-database environment. In the rare case that the default database named in your `settings.DATABASES` is not named `default`, you need to tell the `django_crypto_fields` using the app config attribute `crypto_model_using`. 
+
+
+#### A sample AppConfig
+
+For example, in your `example.apps.py`: 
 
     from django_crypto_fields.apps import DjangoCryptoFieldsAppConfig
 
@@ -63,7 +84,7 @@ then in settings:
     'edc_sync.apps.DjangoCryptoFieldsApp',
     'edc_sync.apps.EdcSyncAppConfig',
     ...]
- 
+
 
 ### Audit trail manager on models
 Edc apps use `django_simple_history` to keep a full audit trail of data modifications. For an audit trail to synchronize with `edc_sync`, use class `edc_sync.models.SyncHistoricalRecords` in place of `simple_history.model.HistoricalRecords`. See section below on configuring a model. 
