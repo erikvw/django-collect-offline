@@ -88,6 +88,7 @@ For example, in your `example.apps.py`:
     class DjangoCryptoFieldsApp(DjangoCryptoFieldsAppConfig):
         name = 'django_crypto_fields'
         model = ('example', 'crypt')
+        crypt_model_using = 'client'
 
 ### Audit trail manager on models
 Edc apps use `django_simple_history` to keep a full audit trail of data modifications. For an audit trail to synchronize with `edc_sync`, use class `edc_sync.models.SyncHistoricalRecords` in place of `simple_history.model.HistoricalRecords`. See section below on configuring a model. 
