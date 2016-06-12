@@ -33,7 +33,7 @@ __edc-sync__ uses either the REST API or FILE transfer:
 - field client ---REST---> middleman (and model inspector) ---REST---> community server
 - site server ---FILE---> central server
 
-It is also possible to use Django's DB router if connections are good and reliable.
+It is also possible to use Django's DB router if connections are good and reliable (this option may be removed in future).
 
 
 ### Installation
@@ -63,7 +63,7 @@ Although transactions are serialized to JSON, encrypted, and stored in models su
         unique_together = (('hash', 'algorithm', 'mode'),)
         
 #### DATABASES attribute in `settings`
-Using `edc_sync` implies a multi-database environment. In the rare case that the default database named in your `settings.DATABASES` is not named `default`, you need to tell the `django_crypto_fields` using the app config attribute `crypto_model_using`. 
+Using `edc_sync` suggests a multi-database environment. In the rare case that the default database named in your `settings.DATABASES` is not named `default`, you need to tell `django_crypto_fields` to get the `using` value from the app config attribute `crypto_model_using`. This attribute only affects access to the `Crypt` model.
 
 
 #### A sample AppConfig
