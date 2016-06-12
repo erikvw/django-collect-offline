@@ -59,9 +59,9 @@ For example:
 
     class Crypt(CryptModelMixin, SyncModelMixin, BaseUuidModel):
 
-    class Meta:
-        app_label = 'example'
-        unique_together = (('hash', 'algorithm', 'mode'),)
+        class Meta:
+            app_label = 'example'
+            unique_together = (('hash', 'algorithm', 'mode'),)
 
 then in your `example.apps.py`: 
 
