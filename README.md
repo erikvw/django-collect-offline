@@ -50,7 +50,8 @@ In settings.py:
 To use `edc_sync` and `django_crypto_fields` together requires additional configuration.
 
 #### Model `Crypt`
-Although transactions are serialized to JSON, encrypted, and stored in models such as `IncomingTransaction` and `OutgoingTransaction`, the JSON objects use AES encryption and do not update the reference model in `django_crypto_fields`, `django_crypto_fields.models.crypt`. However, it is very likely that your app has models that use encrypted fields and do update the `Crypt` model. If so, the `Crypt` model must also be synchronized so that the receiving database can decrypt. To enable this, you need to declare the model in your app with the `SyncModelMixin` and used the `BaseUuidModel` to change the `primary_key` from an `IntegerField` to a `UUIDField`, for example: 
+Although transactions are serialized to JSON, encrypted, and stored in models such as `IncomingTransaction` and `OutgoingTransaction`, the JSON objects use AES encryption and do not update the reference model in `django_crypto_fields`, `django_crypto_fields.models.crypt`. However, it is very likely that your app has models that use encrypted fields and do update the `Crypt` model. If so, the `Crypt` model must also be synchronized so that the receiving database can decrypt. To enable this, you need to declare the model in your app with the `SyncModelMixin` and used the `BaseUuidModel` to change the `primary_key` from an `IntegerField` to a `UUIDField`. 
+For example: 
     
     from django_crypto_fields.crypt_model_mixin import CryptModelMixin
     from edc_base.model.models import BaseUuidModel
@@ -62,7 +63,7 @@ Although transactions are serialized to JSON, encrypted, and stored in models su
         app_label = 'example'
         unique_together = (('hash', 'algorithm', 'mode'),)
 
-For example, in your `example.apps.py`: 
+then in your `example.apps.py`: 
 
     from django_crypto_fields.apps import DjangoCryptoFieldsAppConfig
 
