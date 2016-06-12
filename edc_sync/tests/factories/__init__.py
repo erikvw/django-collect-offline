@@ -1,3 +1,2 @@
-from .producer_factory import ProducerFactory
 from .base_transaction_factory import BaseTransactionFactory
-from .middle_man_factory import MiddleManTransactionFactory
+from .producer_factory import ProducerFactory

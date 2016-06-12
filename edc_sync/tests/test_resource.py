@@ -1,14 +1,14 @@
 from django.contrib.auth.models import User
 
 from tastypie.models import ApiKey
-from tastypie.test import ResourceTestCase
+from tastypie.test import ResourceTestCaseMixin
 
 from edc_sync.models import OutgoingTransaction
 
-from .test_models import TestModel
+from example.models import TestModel
 
 
-class TestResource(ResourceTestCase):
+class TestResource(ResourceTestCaseMixin):
 
     def setUp(self):
         super(TestResource, self).setUp()

@@ -1,10 +1,44 @@
 from django.db import models
 
-from edc_sync.models import SyncModelMixin
-from edc_base.model.models import BaseUuidModel
-from simple_history.models import HistoricalRecords as AuditTrail
-from edc_base.model.models.base_list_model import BaseListModel
 from django_crypto_fields.fields import EncryptedCharField
+from django_crypto_fields.crypt_model_mixin import CryptModelMixin
+from edc_sync.models import SyncHistoricalRecords as AuditTrail
+# from simple_history.models import HistoricalRecords as AuditTrail
+from edc_base.model.models import BaseUuidModel
+from edc_sync.models import SyncModelMixin
+from edc_base.model.models.list_model_mixin import ListModelMixin
+from edc_base.model.models.base_model import BaseModel
+
+
+class Crypt(CryptModelMixin, SyncModelMixin, BaseUuidModel):
+
+    class Meta:
+        app_label = 'example'
+
+
+class BadTestModel(SyncModelMixin, BaseUuidModel):
+    """A test model that is missing natural_key and get_by_natural_key."""
+
+    f1 = models.CharField(max_length=10, default='f1')
+
+    objects = models.Manager()
+
+    class Meta:
+        app_label = 'example'
+
+
+class AnotherBadTestModel(SyncModelMixin, BaseUuidModel):
+    """A test model that is missing get_by_natural_key."""
+
+    f1 = models.CharField(max_length=10, default='f1')
+
+    objects = models.Manager()
+
+    def natural_key(self):
+        return (self.f1, )
+
+    class Meta:
+        app_label = 'example'
 
 
 class TestModelManager(models.Manager):
@@ -25,7 +59,14 @@ class TestModel(SyncModelMixin, BaseUuidModel):
         return (self.f1, )
 
     class Meta:
-        app_label = 'edc_sync'
+        app_label = 'example'
+
+
+class TestModelProxy(TestModel):
+
+    class Meta:
+        app_label = 'example'
+        proxy = True
 
 
 class TestEncryptedModel(SyncModelMixin, BaseUuidModel):
@@ -42,13 +83,13 @@ class TestEncryptedModel(SyncModelMixin, BaseUuidModel):
         return (self.f1, )
 
     class Meta:
-        app_label = 'edc_sync'
+        app_label = 'example'
 
 
-class M2m(SyncModelMixin, BaseListModel):
+class M2m(ListModelMixin, BaseModel):
 
     class Meta:
-        app_label = 'edc_sync'
+        app_label = 'example'
 
 
 class FkManager(models.Manager):
@@ -67,7 +108,7 @@ class Fk(SyncModelMixin, BaseUuidModel):
         return (self.name, )
 
     class Meta:
-        app_label = 'edc_sync'
+        app_label = 'example'
 
 
 class ComplexTestModelManager(models.Manager):
@@ -82,7 +123,7 @@ class ComplexTestModel(SyncModelMixin, BaseUuidModel):
 
     fk = models.ForeignKey(Fk)
 
-    m2m = models.ManyToManyField(M2m, null=True)
+    m2m = models.ManyToManyField(M2m)
 
     objects = ComplexTestModelManager()
 
@@ -90,8 +131,8 @@ class ComplexTestModel(SyncModelMixin, BaseUuidModel):
 
     def natural_key(self):
         return (self.f1, ) + self.fk.natural_key()
-    natural_key.dependencies = ['edc_sync.fk']
+    natural_key.dependencies = ['example.fk']
 
     class Meta:
-        app_label = 'edc_sync'
+        app_label = 'example'
         unique_together = ('f1', 'fk')

@@ -39,30 +39,32 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_crypto_fields',
+    'simple_history',
     'tastypie',
-    'edc_sync'
+    'example',
+    'edc_sync.apps.DjangoCryptoFieldsApp',
+    'edc_sync.apps.EdcSyncAppConfig'
 ]
 
-if 'test' in sys.argv:
-    INSTALLED_APPS = INSTALLED_APPS + [
-        'edc_appointment',
-        'edc_base',
-        'edc_configuration',
-        'edc_consent',
-        'edc_content_type_map',
-        'edc_data_manager',
-        'edc_lab.lab_clinic_api',
-        'edc_lab.lab_clinic_reference',
-        'edc_meta_data',
-        'edc_quota',
-        'edc_registration',
-        'edc_sync',
-        'edc_testing',
-        'edc_visit_schedule',
-        'lab_requisition',
-        'simple_history'
-    ]
+# if 'test' in sys.argv:
+#     INSTALLED_APPS = INSTALLED_APPS + [
+#         'edc_appointment',
+#         'edc_base',
+#         'edc_configuration',
+#         'edc_consent',
+#         'edc_content_type_map',
+#         'edc_data_manager',
+#         'edc_lab.lab_clinic_api',
+#         'edc_lab.lab_clinic_reference',
+#         'edc_meta_data',
+#         'edc_quota',
+#         'edc_registration',
+#         'edc_sync',
+#         'edc_testing',
+#         'edc_visit_schedule',
+#         'lab_requisition',
+#         'simple_history'
+#     ]
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',

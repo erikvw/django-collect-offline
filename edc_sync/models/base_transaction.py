@@ -12,8 +12,7 @@ class BaseTransaction(BaseUuidModel):
         max_length=64,
         db_index=True)
 
-    tx_pk = models.CharField(
-        max_length=36,
+    tx_pk = models.UUIDField(
         db_index=True)
 
     producer = models.CharField(
@@ -58,7 +57,10 @@ class BaseTransaction(BaseUuidModel):
 
     batch_id = models.IntegerField(null=True, blank=True)
 
-    def __unicode__(self):
+    def __repr__(self):
+        return '<{}: {}>'.format(self.__class__.__name__, self.tx_name)
+
+    def __str__(self):
         return '{0} {1} {2}'.format(self.tx_name, self.producer, self.action)
 
     def render(self):

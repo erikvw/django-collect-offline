@@ -1,41 +1,19 @@
+from django.apps import apps as django_apps
 from django.core.exceptions import MultipleObjectsReturned
-from django.db import models
 from django.test.testcases import TestCase
 from django.test.utils import override_settings
 
-from edc_base.model.models import BaseUuidModel
+# from django_crypto_fields.models import Crypt
+
 from edc_device import Device
-from edc_sync.exceptions import SyncError
-from edc_sync.models import SyncModelMixin, OutgoingTransaction
+from edc_sync.exceptions import SyncModelError, SyncError
+from edc_sync.models import OutgoingTransaction
 from edc_sync.models.incoming_transaction import IncomingTransaction
 
-from .test_models import TestModel, ComplexTestModel, Fk, M2m, TestEncryptedModel
-from edc_crypto_fields.models import Crypt
+from example.models import (
+    TestModel, ComplexTestModel, Fk, M2m, TestEncryptedModel, BadTestModel, AnotherBadTestModel)
 
-
-class BadTestModel(SyncModelMixin, BaseUuidModel):
-    """A test model that is missing natural_key and get_by_natural_key."""
-
-    f1 = models.CharField(max_length=10, default='f1')
-
-    objects = models.Manager()
-
-    class Meta:
-        app_label = 'edc_sync'
-
-
-class AnotherBadTestModel(SyncModelMixin, BaseUuidModel):
-    """A test model that is missing get_by_natural_key."""
-
-    f1 = models.CharField(max_length=10, default='f1')
-
-    objects = models.Manager()
-
-    def natural_key(self):
-        return (self.f1, )
-
-    class Meta:
-        app_label = 'edc_sync'
+Crypt = django_apps.get_model(*django_apps.get_app_config('django_crypto_fields').model)
 
 
 class TestSync(TestCase):
@@ -47,13 +25,13 @@ class TestSync(TestCase):
 
     def test_raises_on_missing_natural_key(self):
         with override_settings(DEVICE_ID='10'):
-            with self.assertRaises(SyncError) as cm:
+            with self.assertRaises(SyncModelError) as cm:
                 BadTestModel.objects.using('client').create()
             self.assertIn('natural_key', str(cm.exception))
 
     def test_raises_on_missing_get_by_natural_key(self):
         with override_settings(DEVICE_ID='10'):
-            with self.assertRaises(SyncError) as cm:
+            with self.assertRaises(SyncModelError) as cm:
                 AnotherBadTestModel.objects.using('client').create()
             self.assertIn('get_by_natural_key', str(cm.exception))
 
@@ -68,10 +46,11 @@ class TestSync(TestCase):
                     pass
                 else:
                     raise OutgoingTransaction.DoesNotExist()
+            history_obj = test_model.history.using('client').get(id=test_model.id)
             with self.assertRaises(OutgoingTransaction.DoesNotExist):
                 try:
                     OutgoingTransaction.objects.using('client').get(
-                        tx_pk=test_model.pk, tx_name='TestModelAudit', action='I')
+                        tx_pk=history_obj.history_id, tx_name='HistoricalTestModel', action='I')
                 except OutgoingTransaction.DoesNotExist:
                     pass
                 else:
@@ -100,7 +79,7 @@ class TestSync(TestCase):
                     raise OutgoingTransaction.DoesNotExist()
             self.assertEqual(
                 2, OutgoingTransaction.objects.using('client').filter(
-                    tx_pk=test_model.pk, tx_name='TestModelAudit', action='I').count())
+                    tx_name='HistoricalTestModel', action='I').count())
 
     def test_timestamp_is_default_order(self):
         with override_settings(DEVICE_ID='10'):
@@ -177,7 +156,7 @@ class TestSync(TestCase):
             for message in messages:
                 if message.tx_name == 'TestModel':
                     self.assertEqual((0, 1, 0), (message.inserted, message.updated, message.deleted))
-                if message.tx_name == 'TestModelAudit':
+                if message.tx_name == 'HistoricalTestModel':
                     self.assertEqual((1, 0, 0), (message.inserted, message.updated, message.deleted))
             with self.assertRaises(TestModel.DoesNotExist):
                 try:
@@ -192,7 +171,7 @@ class TestSync(TestCase):
         TestModel.objects.using('client').create(f1='erik')
         self.assertListEqual(
             [obj.tx_name for obj in OutgoingTransaction.objects.using('client').all()],
-            [u'TestModel', u'TestModelAudit'])
+            [u'TestModel', u'HistoricalTestModel'])
         self.assertListEqual([obj.tx_name for obj in OutgoingTransaction.objects.using('server').all()], [])
         self.assertRaises(OutgoingTransaction.DoesNotExist,
                           OutgoingTransaction.objects.using('server').get, tx_name='TestModel')
@@ -205,7 +184,7 @@ class TestSync(TestCase):
         test_model = TestModel.objects.using('client').create(f1='erik')
         self.assertListEqual(
             [obj.tx_name for obj in OutgoingTransaction.objects.using('client').filter(action='I')],
-            [u'TestModel', u'TestModelAudit'])
+            [u'TestModel', u'HistoricalTestModel'])
         self.assertListEqual(
             [obj.tx_name for obj in OutgoingTransaction.objects.using('client').filter(action='U')],
             [])
@@ -215,7 +194,7 @@ class TestSync(TestCase):
             [u'TestModel'])
         self.assertListEqual(
             [obj.tx_name for obj in OutgoingTransaction.objects.using('client').filter(action='I')],
-            [u'TestModel', u'TestModelAudit', u'TestModelAudit'])
+            [u'TestModel', u'HistoricalTestModel', u'HistoricalTestModel'])
 
     def test_complex_model_works_for_fk(self):
         with override_settings(DEVICE_ID='99'):
@@ -281,7 +260,7 @@ class TestSync(TestCase):
             IncomingTransaction.objects.using('default').filter(
                 is_consumed=False).deserialize(check_hostname=False)
             complex_model = ComplexTestModel.objects.using('default').get(f1='1', fk__name=fk.name)
-            self.assertEqual(complex_model.m2m.using('client').all().count(), 2)
+            self.assertEqual(complex_model.m2m.using('default').all().count(), 2)
 
     def test_deserialize_with_missing_m2m(self):
         with override_settings(DEVICE_ID='99'):
@@ -305,19 +284,23 @@ class TestSync(TestCase):
             OutgoingTransaction.objects.using('client').all().copy_to_incoming_transaction('default')
 
     def test_crypt(self):
-        with override_settings(DEVICE_ID='10', EDC_CRYPTO_FIELDS_CLIENT_USING='client'):
+        app_config = django_apps.get_app_config('django_crypto_fields')
+        crypt_model_using = app_config.crypt_model_using
+        app_config.crypt_model_using = 'client'
+        with override_settings(DEVICE_ID='10'):
             TestEncryptedModel.objects.using('client').create(f1='1', encrypted='erik')
-            self.assertEqual(Crypt.objects.using('default').all().count(), 0)
             self.assertEqual(Crypt.objects.using('client').all().count(), 1)
+            self.assertEqual(Crypt.objects.using('default').all().count(), 0)
             encrypted_model = TestEncryptedModel.objects.using('client').get(f1='1')
             encrypted_model.save(using='client')
             self.assertEqual(Crypt.objects.using('client').all().count(), 1)
             self.assertEqual(Crypt.objects.using('default').all().count(), 0)
             OutgoingTransaction.objects.using('client').all().copy_to_incoming_transaction('default')
-        with override_settings(DEVICE_ID='99', EDC_CRYPTO_FIELDS_USING='client'):
+        with override_settings(DEVICE_ID='99'):
             IncomingTransaction.objects.using('default').filter(
                 is_consumed=False).deserialize(check_hostname=False)
             encrypted_model = TestEncryptedModel.objects.using('default').get(f1='1')
             self.assertEqual(encrypted_model.encrypted, 'erik')
             self.assertEqual(Crypt.objects.using('default').all().count(), 1)
             self.assertEqual(Crypt.objects.using('client').all().count(), 1)
+        app_config.crypt_model_using = crypt_model_using
