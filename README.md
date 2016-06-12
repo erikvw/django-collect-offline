@@ -61,12 +61,6 @@ Although transactions are serialized to JSON, encrypted, and stored in models su
     class Meta:
         app_label = 'example'
         unique_together = (('hash', 'algorithm', 'mode'),)
-        
-#### DATABASES attribute in `settings`
-Using `edc_sync` suggests a multi-database environment. In the rare case that the default database named in your `settings.DATABASES` is not named `default`, you need to tell `django_crypto_fields` to get the `using` value from the app config attribute `crypto_model_using`. This attribute only affects access to the `Crypt` model.
-
-
-#### A sample AppConfig
 
 For example, in your `example.apps.py`: 
 
@@ -75,7 +69,6 @@ For example, in your `example.apps.py`:
     class DjangoCryptoFieldsApp(DjangoCryptoFieldsAppConfig):
         name = 'django_crypto_fields'
         model = ('example', 'crypt')
-        crypt_model_using = 'client'
 
 then in settings:
 
@@ -84,7 +77,17 @@ then in settings:
     'edc_sync.apps.DjangoCryptoFieldsApp',
     'edc_sync.apps.EdcSyncAppConfig',
     ...]
+        
+#### DATABASES attribute in `settings`
+Using `edc_sync` suggests a multi-database environment. In the rare case that the default database named in your `settings.DATABASES` is not named `default`, you need to tell `django_crypto_fields` to get the `using` value from the app config attribute `crypto_model_using`. This attribute only affects access to the `Crypt` model.
 
+For example, in your `example.apps.py`: 
+
+    from django_crypto_fields.apps import DjangoCryptoFieldsAppConfig
+
+    class DjangoCryptoFieldsApp(DjangoCryptoFieldsAppConfig):
+        name = 'django_crypto_fields'
+        model = ('example', 'crypt')
 
 ### Audit trail manager on models
 Edc apps use `django_simple_history` to keep a full audit trail of data modifications. For an audit trail to synchronize with `edc_sync`, use class `edc_sync.models.SyncHistoricalRecords` in place of `simple_history.model.HistoricalRecords`. See section below on configuring a model. 
