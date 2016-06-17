@@ -1,5 +1,8 @@
 from django.contrib import admin
 from django.contrib.admin.sites import AdminSite
+from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.models import User
+from tastypie.admin import ApiKeyInline
 
 from .actions import (
     reset_transaction_as_not_consumed, reset_transaction_as_consumed,
@@ -19,6 +22,13 @@ class EdcSyncAdminSite(AdminSite):
     site_url = '/edc_sync/'
 
 edc_sync_admin = EdcSyncAdminSite(name='edc_sync_admin')
+
+
+class UserModelAdmin(UserAdmin):
+    inlines = UserAdmin.inlines + [ApiKeyInline]
+
+admin.site.unregister(User)
+admin.site.register(User, UserModelAdmin)
 
 
 @admin.register(IncomingTransaction, site=edc_sync_admin)

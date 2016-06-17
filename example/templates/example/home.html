@@ -10,11 +10,25 @@
     <div id="div-home-middle" class="col-md-4">
         <div class="panel panel-default">
             <div class="panel-heading">Administration</div>
-            <ul id="nav-pill-home" class="nav nav-pills nav-stacked">
-                <li><a href="{% url 'admin:index' %}">{{ example_admin.index_title }}</a></li>
+            <ul id="nav-pill-admin" class="nav nav-pills nav-stacked">
+                <li><a href="{% url 'example_admin:index' %}">{{ example_admin.index_title }}</a></li>
                 <li><a href="{% url 'edc_sync_admin:index'%} ">{{ edc_sync_admin.index_title }}</a></li>
             </ul>
         </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">API</div>
+                {% if user.is_authenticated and api_key == "" %}
+                    <div class="alert alert-danger text-center">{{ user.username }} does not have an API Key. Check the user account.</div>
+                {% endif %}
+                <ul id="nav-pill-api" class="nav nav-pills nav-stacked">
+                <li><a href="{% url 'admin:app_list' 'auth' %}">Administration</a></li>
+                <li><a href="{% url 'api_v1_top_level' 'v1' %}?format=json">Top level API</a></li>
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'api_v1_top_level' 'v1' %}outgoingtransaction/?username={{ user.username }}&api_key={{ api_key }}&format=json">Outgoingtransaction (limit 20)</a></li>
+                {% endif %}
+                </ul>
+            </div>
+               
     </div><!-- div-home-middle -->
     
     <div id="div-home-right" class="col-md-4"></div>

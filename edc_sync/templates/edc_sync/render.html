@@ -1,0 +1,45 @@
+{% extends "edc_base/base.html" %}
+{% block title %}Render {{ obj.model }}{% endblock %}
+
+{% block extra-css %}
+<style>
+.edc-body {
+    padding-top: 0px;
+}
+</style>
+{% endblock extra-css %}
+
+{% block topbar %}{%endblock%}
+
+{% block main %}
+  <div class="container">
+
+  {% block transaction_metadata %}
+
+  {% endblock transaction_metadata %}
+
+  {% block transaction_object %}
+  <div class="container">
+  <div class="panel panel-info">
+    <div class="panel-heading">
+        <span class="text-muted">Transaction Object for {{ json_tx.model|title }}</span>
+    </div>
+
+    <div class="panel-body">
+
+    <table class="table table-hover">
+    <thead><tr><th>Field</th><th>Value</th></tr></thead>
+    <tbody>
+    {% for field, value in json_tx.fields.items %}
+        <tr class="{% cycle 'row1' 'row2' %}"><td>{{ field }}</td><td>{{ value }}</td></tr>
+    {% endfor%}
+    </tbody>
+    </table>
+    <span class="pull-right"><input class="btn btn-primary btn-sm" type="button" onclick="window.open('', '_self', ''); window.close();" value="Close"></span>    
+
+    </div>
+    </div><!-- div panel render -->
+    </div> <!-- div container render -->
+{% endblock transaction_object %}
+</div>
+{% endblock main %}

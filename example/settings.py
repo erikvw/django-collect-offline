@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_revision',
+    'tastypie',
     'crispy_forms',
     'simple_history',
     'edc_base',
