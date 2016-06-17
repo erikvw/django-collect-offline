@@ -11,10 +11,6 @@ from .views import (index, view_transaction, consume_transactions,
 # outgoing_transaction_middle_man_resource = OutgoingTransactionMiddleManResource()
 # outgoing_transaction_server_resource = OutgoingTransactionServerResource()
 # outgoing_transaction_site_server_resource = OutgoingTransactionSiteServerResource()
-from django_crypto_fields.admin import crypto_fields_admin
-from .admin import edc_sync_admin
-from django.contrib import admin
-from django.views.generic.base import RedirectView
 
 v1_api = Api(api_name='v1')
 v1_api.register(OutgoingTransactionResource())

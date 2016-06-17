@@ -41,24 +41,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_revision',
     'simple_history',
-    'crispy_forms',
-    'edc_templates',
-    'edc_base',
-    'edc_call_manager',
-    'edc_content_type_map',
-    'edc_device',
-    'edc_identifier',
-    'edc_map',
-    'edc_locator',
-    'edc_registration',
-    'edc_sync',
-    'edc_audio_recording.apps.AudioRecordingAppConfig',
-    'call_manager',
-    'registration',
-    'bcpp_interview.apps.DjangoCryptoFieldsApp',
-    'bcpp_interview.apps.ConsentAppConfig',
-    'bcpp_interview.apps.BcppInterviewMapAppConfig',
-    'bcpp_interview.apps.BcppInterviewAppConfig',
+    'example.apps.ExampleAppConfig',
+    'edc_sync.apps.DjangoCryptoFieldsApp',
+    'edc_sync.apps.EdcSyncAppConfig',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -73,7 +58,7 @@ MIDDLEWARE_CLASSES = [
     'simple_history.middleware.HistoryRequestMiddleware',
 ]
 
-ROOT_URLCONF = 'bcpp_interview.urls'
+ROOT_URLCONF = 'edc_sync.urls'
 
 TEMPLATES = [
     {
@@ -92,7 +77,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'bcpp_interview.wsgi.application'
+WSGI_APPLICATION = 'edc_sync.wsgi.application'
 
 
 # Database
