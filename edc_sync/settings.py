@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_revision',
+    'tastypie',
     'simple_history',
     'example.apps.ExampleAppConfig',
     'edc_sync.apps.DjangoCryptoFieldsApp',
