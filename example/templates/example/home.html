@@ -1,0 +1,23 @@
+{% extends 'edc_base/base.html' %}
+
+{% load staticfiles %}
+
+{% block main %}
+
+<div>
+    <div id="div-home-left" class="col-md-4"></div>
+    
+    <div id="div-home-middle" class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">Administration</div>
+            <ul id="nav-pill-home" class="nav nav-pills nav-stacked">
+                <li><a href="{% url 'admin:index' %}">{{ example_admin.index_title }}</a></li>
+                <li><a href="{% url 'edc_sync_admin:index'%} ">{{ edc_sync_admin.index_title }}</a></li>
+            </ul>
+        </div>
+    </div><!-- div-home-middle -->
+    
+    <div id="div-home-right" class="col-md-4"></div>
+</div> <!-- my div -->
+
+{% endblock main %}
