@@ -6,11 +6,13 @@
 
 Deploy a Django app as a client on laptop that is offline and sync the data with your server when you get back online.
 
+    pip install git+https://github.com/botswana-harvard/edc-sync@develop#egg=edc_sync
 
-urlpatterns += patterns(
-    '',
-    (r'^bhp_sync/', include('edc_sync.urls')),
-)
+Add the pattern for access to the REST API:
+
+    urlpatterns = [
+        url(r'^edc-sync/', include('edc_sync.urls')),
+    )
 
 
 Description

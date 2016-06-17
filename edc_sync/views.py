@@ -1,10 +1,28 @@
 import json
 from django.apps import apps as django_apps
+from django.contrib.auth.models import User
 from django.views.generic.base import TemplateView
 from django_crypto_fields.cryptor import Cryptor
 from django_crypto_fields.constants import LOCAL_MODE
 from edc_base.views.edc_base_view_mixin import EdcBaseViewMixin
 from django.core.serializers.json import Serializer
+
+
+class EdcSyncViewMixin:
+
+    def get_api_key(self, username):
+        try:
+            api_key = User.objects.get(username=username).api_key.key
+        except User.DoesNotExist:
+            api_key = None
+        return api_key
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(
+            api_key=self.get_api_key(self.request.user),
+        )
+        return context
 
 
 class RenderView(EdcBaseViewMixin, TemplateView):
