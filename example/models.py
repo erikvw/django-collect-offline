@@ -3,11 +3,9 @@ from django.db import models
 from django_crypto_fields.fields import EncryptedCharField
 from django_crypto_fields.crypt_model_mixin import CryptModelMixin
 from edc_sync.models import SyncHistoricalRecords as AuditTrail
-# from simple_history.models import HistoricalRecords as AuditTrail
 from edc_base.model.models import BaseUuidModel
 from edc_sync.models import SyncModelMixin
 from edc_base.model.models.list_model_mixin import ListModelMixin
-from edc_base.model.models.base_model import BaseModel
 
 
 class Crypt(CryptModelMixin, SyncModelMixin, BaseUuidModel):

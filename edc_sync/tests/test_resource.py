@@ -6,13 +6,13 @@ from tastypie.test import ResourceTestCaseMixin
 from edc_sync.models import OutgoingTransaction
 
 from example.models import TestModel
+from django.test.testcases import TestCase
 
 
-class TestResource(ResourceTestCaseMixin):
+class TestResource(ResourceTestCaseMixin, TestCase):
 
     def setUp(self):
         super(TestResource, self).setUp()
-
         self.username = 'erik'
         self.password = 'pass'
         self.user = User.objects.create_user(
@@ -30,31 +30,30 @@ class TestResource(ResourceTestCaseMixin):
         TestModel.objects.create(f1='f1')
         self.assertEqual(TestModel.objects.count(), 1)
         self.assertEqual(OutgoingTransaction.objects.filter(tx_name='TestModel').count(), 1)
-        resource_data = {
-            'target': 30,
-            'is_consumed': False}
+        pk = OutgoingTransaction.objects.filter(tx_name='TestModel')[0].pk
         resp = self.api_client.get(
-            '/api/v1/outgoingtransaction/',
+            '/api/v1/outgoingtransaction/' + str(pk) + '/',
             format='json',
-            data=resource_data,
             authentication=self.get_credentials()
         )
         self.assertValidJSONResponse(resp)
         self.assertKeys(self.deserialize(resp), ['meta', 'objects'])
-        for obj in self.deserialize(resp)['objects']:
-            self.assertTrue(obj['tx_name'].startswith('TestModel'))
 
     def test_get_paginates(self):
         for n in range(0, 20):
             TestModel.objects.create(f1='f{}'.format(n))
         self.assertEqual(TestModel.objects.count(), 20)
-        self.assertEqual(OutgoingTransaction.objects.filter(tx_name__icontains='TestModel').count(), 40)
+        self.assertEqual(OutgoingTransaction.objects.filter(
+            tx_name__icontains='TestModel', is_consumed_server=False).count(), 40)
+        resource_data = {'target': 2}
         resp = self.api_client.get(
             '/api/v1/outgoingtransaction/',
             format='json',
-            data={},
+            # data={},
             authentication=self.get_credentials()
         )
+        self.assertValidJSONResponse(resp)
+        print(resp.__dict__)
         self.assertEqual(len(self.deserialize(resp)['objects']), 20)
 
     def test_get_is_consumed_middleman(self):

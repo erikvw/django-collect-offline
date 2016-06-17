@@ -17,11 +17,11 @@ class OutgoingTransactionResource(ModelResource):
         resource_name = 'outgoingtransaction'
         authentication = ApiKeyAuthentication()
         authorization = DjangoAuthorization()
-        allowed_methods = ['get', 'post', 'put', ]
+        allowed_methods = ['get', 'post', 'put', 'patch']
         filtering = {
             'is_consumed_middleman': ALL,
         }
-        serializer = Serializer(formats=['json'])
+        serializer = Serializer(formats=['json', 'xml'])
         paginator = Paginator
 
 

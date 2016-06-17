@@ -1,13 +1,17 @@
-from django.test import TestCase
+from django.test.testcases import TestCase
 
-from ..models import OutgoingTransaction
-from edc_sync.models.incoming_transaction import IncomingTransaction
+from edc_sync.models import OutgoingTransaction, IncomingTransaction
 
 
 class TestSerializeDeserialize(TestCase):
 
+    multi_db = True
+
     def setUp(self):
         pass
+
+    def get_credentials(self):
+        return self.create_apikey(username=self.username, api_key=self.api_client_key)
 
     def test_serialization(self):
         instances = self.get_model_instances()
