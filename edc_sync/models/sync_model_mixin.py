@@ -219,8 +219,9 @@ class SyncModelMixin(SyncMixin, models.Model):
         except AttributeError:
             pass
         if self.primary_key_field.get_internal_type() != 'UUIDField':
-            raise SyncModelError('Expected Model \'{}.{}\' primary key to be a UUIDField (e.g. AutoUUIDField). Got {}.'.format(
-                self._meta.app_label, self._meta.model_name, self.primary_key_field.get_internal_type()))
+            raise SyncModelError(
+                'Expected Model \'{}.{}\' primary key to be a UUIDField (e.g. AutoUUIDField). Got {}.'.format(
+                    self._meta.app_label, self._meta.model_name, self.primary_key_field.get_internal_type()))
         super(SyncModelMixin, self).__init__(*args, **kwargs)
 
     class Meta:

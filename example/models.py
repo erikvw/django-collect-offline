@@ -87,7 +87,7 @@ class TestEncryptedModel(SyncModelMixin, BaseUuidModel):
         app_label = 'example'
 
 
-class M2m(ListModelMixin, BaseModel):
+class M2m(SyncModelMixin, ListModelMixin, BaseUuidModel):
 
     class Meta:
         app_label = 'example'

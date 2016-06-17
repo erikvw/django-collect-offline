@@ -245,22 +245,45 @@ class TestSync(TestCase):
             self.assertEqual(IncomingTransaction.objects.using('default').filter(
                 is_consumed=False).count(), 0)
 
-    def test_deserialize_with_m2m(self):
+    def test_m2m(self):
+        for name in ['m2m_name' + str(x) for x in range(0, 10)]:
+            M2m.objects.using('client').create(name=name)
+
+    def test_deserialize_with_m2m_incoming(self):
         with override_settings(DEVICE_ID='99'):
-            for name in 'abcdefg':
+            for name in ['fk_name' + str(x) for x in range(0, 10)]:
                 fk = Fk.objects.using('client').create(name=name)
-            for name in 'hijklmnop':
+            for name in ['m2m_name' + str(x) for x in range(0, 10)]:
                 M2m.objects.using('client').create(name=name)
             complex_model = ComplexTestModel.objects.using('client').create(f1='1', fk=fk)
-            complex_model.m2m.add(M2m.objects.using('client').first())
-            complex_model.m2m.add(M2m.objects.using('client').last())
-            complex_model = ComplexTestModel.objects.using('client').get(f1='1')
-            self.assertEqual(complex_model.m2m.using('client').all().count(), 2)
+            complex_model.m2m.add(
+                M2m.objects.using('client').get(name='m2m_name1'),
+                M2m.objects.using('client').get(name='m2m_name2'),
+                M2m.objects.using('client').get(name='m2m_name3'))
+            complex_model = ComplexTestModel.objects.using('client').get(f1='1', fk=fk)
+            self.assertEqual(complex_model.m2m.using('client').all().count(), 3)
+            OutgoingTransaction.objects.using('client').all().copy_to_incoming_transaction('default')
+            self.assertEqual(IncomingTransaction.objects.using('default').filter(
+                is_consumed=False).count(), 23)
+
+    def test_deserialize_with_m2m(self):
+        with override_settings(DEVICE_ID='99'):
+            for name in ['fk_name' + str(x) for x in range(0, 10)]:
+                fk = Fk.objects.using('client').create(name=name)
+            for name in ['m2m_name' + str(x) for x in range(0, 10)]:
+                M2m.objects.using('client').create(name=name)
+            complex_model = ComplexTestModel.objects.using('client').create(f1='1', fk=fk)
+            complex_model.m2m.add(
+                M2m.objects.using('client').get(name='m2m_name1'),
+                M2m.objects.using('client').get(name='m2m_name2'),
+                M2m.objects.using('client').get(name='m2m_name3'))
+            complex_model = ComplexTestModel.objects.using('client').get(f1='1', fk=fk)
+            self.assertEqual(complex_model.m2m.using('client').all().count(), 3)
             OutgoingTransaction.objects.using('client').all().copy_to_incoming_transaction('default')
             IncomingTransaction.objects.using('default').filter(
                 is_consumed=False).deserialize(check_hostname=False)
             complex_model = ComplexTestModel.objects.using('default').get(f1='1', fk__name=fk.name)
-            self.assertEqual(complex_model.m2m.using('default').all().count(), 2)
+            self.assertEqual(complex_model.m2m.using('default').all().count(), 3)
 
     def test_deserialize_with_missing_m2m(self):
         with override_settings(DEVICE_ID='99'):
