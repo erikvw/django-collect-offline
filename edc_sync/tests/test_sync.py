@@ -3,12 +3,9 @@ from django.core.exceptions import MultipleObjectsReturned
 from django.test.testcases import TestCase
 from django.test.utils import override_settings
 
-# from django_crypto_fields.models import Crypt
-
 from edc_device import Device
 from edc_sync.exceptions import SyncModelError, SyncError
-from edc_sync.models import OutgoingTransaction
-from edc_sync.models.incoming_transaction import IncomingTransaction
+from edc_sync.models import OutgoingTransaction, IncomingTransaction
 
 from example.models import (
     TestModel, ComplexTestModel, Fk, M2m, TestEncryptedModel, BadTestModel, AnotherBadTestModel)

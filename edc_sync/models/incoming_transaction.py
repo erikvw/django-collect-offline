@@ -36,7 +36,8 @@ class IncomingTransaction(BaseTransaction):
                     device.device_role(device.device_id), device))
         if using != 'default':
             # get_by_natural_key only works on default
-            raise SyncError('Server database key must be \'default\'. Got \'{}\''.format(using))
+            raise SyncError('Deserialization target database key must be \'default\' '
+                            '(Client->Server). Got \'{}\''.format(using))
         inserted, updated, deleted = 0, 0, 0
         check_hostname = True if check_hostname is None else check_hostname
         decrypted_transaction = Cryptor().aes_decrypt(self.tx, 'local')
