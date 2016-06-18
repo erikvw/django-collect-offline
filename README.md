@@ -14,6 +14,16 @@ Add the pattern for access to the REST API:
         url(r'^edc-sync/', include('edc_sync.urls')),
     )
 
+Try the `example` app in the repo. For example:
+
+    mkvirtualenv -p /usr/local/bin/python3 --so-site-packages
+    cd edc-sync/example
+    pip install -r requirements.txt -U
+    cd edc-sync
+    python manage.py --settings='example.settings' migrate
+    python manage.py --settings='example.settings' createsuperuser
+    python manage.py --settings='example.settings' runserver
+
 
 Description
 ===========
