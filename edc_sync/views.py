@@ -1,3 +1,4 @@
+import requests
 import json
 from django.apps import apps as django_apps
 from django.contrib.auth.models import User
@@ -6,14 +7,56 @@ from django_crypto_fields.cryptor import Cryptor
 from django_crypto_fields.constants import LOCAL_MODE
 from edc_base.views.edc_base_view_mixin import EdcBaseViewMixin
 from django.core.serializers.json import Serializer
+from django.core.exceptions import ObjectDoesNotExist
+from requests.exceptions import RequestException
+
+from edc_sync.models.host import Client, Server
+from json.decoder import JSONDecodeError
+from edc_sync.constants import SERVER, CLIENT
 
 
 class EdcSyncViewMixin:
 
+    @property
+    def role(self):
+        edc_sync_app = django_apps.get_app_config('edc_sync')
+        return edc_sync_app.role
+
+    @property
+    def host_model(self):
+        if self.role == SERVER:
+            host_model = Client
+        if self.role == CLIENT:
+            host_model = Server
+        return host_model
+
+    @property
+    def resource(self):
+        if self.role == SERVER:
+            resource = 'outgoingtransaction'
+        if self.role == CLIENT:
+            resource = 'incomingtransaction'
+        return resource
+
+    @property
+    def hosts(self):
+        hosts = {}
+        for host in self.host_model.objects.filter(is_active=True):
+            try:
+                url = '{url}?format=json'.format(url=host.url)
+                r = requests.get(url)
+                list_endpoint = r.json().get(self.resource).get('list_endpoint')
+                hosts.update({str(host): list_endpoint})
+            except RequestException:
+                pass
+            except JSONDecodeError:
+                pass
+        return hosts
+
     def get_api_key(self, username):
         try:
             api_key = User.objects.get(username=username).api_key.key
-        except User.DoesNotExist:
+        except (User.DoesNotExist, ObjectDoesNotExist):
             api_key = None
         return api_key
 
@@ -21,6 +64,8 @@ class EdcSyncViewMixin:
         context = super().get_context_data(**kwargs)
         context.update(
             api_key=self.get_api_key(self.request.user),
+            hosts=json.dumps(self.hosts),
+            resource=self.resource,
         )
         return context
 

@@ -15,6 +15,7 @@ class BaseTransaction(BaseUuidModel):
     tx_pk = models.UUIDField(
         db_index=True)
 
+    # remove this
     producer = models.CharField(
         max_length=200,
         db_index=True,
@@ -41,7 +42,6 @@ class BaseTransaction(BaseUuidModel):
     is_ignored = models.BooleanField(
         default=False,
         db_index=True,
-        help_text='Ignore if update'
     )
 
     is_error = models.BooleanField(

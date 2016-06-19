@@ -1,5 +1,10 @@
 from django.db.models.signals import post_save, m2m_changed, post_delete
 from django.dispatch import receiver
+from django.contrib.auth.models import User
+from django.db.models import signals
+from tastypie.models import create_api_key
+
+signals.post_save.connect(create_api_key, sender=User)
 
 
 @receiver(post_save, weak=False, dispatch_uid="deserialize_to_inspector_on_post_save")

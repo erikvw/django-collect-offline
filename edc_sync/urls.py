@@ -1,7 +1,7 @@
 from django.conf.urls import url, include
 from tastypie.api import Api
 
-from edc_sync.api.resource import OutgoingTransactionResource
+from edc_sync.api.resource import OutgoingTransactionResource, IncomingTransactionResource
 
 # from .api import (OutgoingTransactionMiddleManResource, OutgoingTransactionServerResource,
 #                   OutgoingTransactionSiteServerResource)
@@ -15,6 +15,7 @@ from edc_sync.views import RenderView
 
 v1_api = Api(api_name='v1')
 v1_api.register(OutgoingTransactionResource())
+v1_api.register(IncomingTransactionResource())
 
 
 urlpatterns = [

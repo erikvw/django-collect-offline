@@ -1,12 +1,12 @@
 from tastypie.constants import ALL
 from tastypie.authentication import ApiKeyAuthentication
-from tastypie.authorization import DjangoAuthorization
+from tastypie.authorization import DjangoAuthorization, Authorization
 from tastypie.resources import ModelResource
 from tastypie.serializers import Serializer
 from tastypie.paginator import Paginator
 
 
-from ..models import OutgoingTransaction
+from ..models import OutgoingTransaction, IncomingTransaction
 
 
 class OutgoingTransactionResource(ModelResource):
@@ -17,10 +17,28 @@ class OutgoingTransactionResource(ModelResource):
         resource_name = 'outgoingtransaction'
         authentication = ApiKeyAuthentication()
         authorization = DjangoAuthorization()
+        allowed_methods = ['get', 'put', 'patch']
+        always_return_data = True
+#         filtering = {
+#             'is_consumed_middleman': ALL,
+#         }
+        serializer = Serializer(formats=['json', 'xml'])
+        paginator = Paginator
+
+
+class IncomingTransactionResource(ModelResource):
+
+    class Meta:
+        queryset = IncomingTransaction.objects.filter(
+            is_consumed=False).order_by('timestamp')
+        resource_name = 'incomingtransaction'
+        authentication = ApiKeyAuthentication()
+        authorization = DjangoAuthorization()
+        always_return_data = True
         allowed_methods = ['get', 'post', 'put', 'patch']
-        filtering = {
-            'is_consumed_middleman': ALL,
-        }
+#         filtering = {
+#             'is_consumed_middleman': ALL,
+#         }
         serializer = Serializer(formats=['json', 'xml'])
         paginator = Paginator
 

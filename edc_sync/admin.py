@@ -1,3 +1,4 @@
+from django.apps import apps as django_apps
 from django.contrib import admin
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.admin import UserAdmin
@@ -10,15 +11,19 @@ from .actions import (
     set_incomingtransaction_as_ignore_status, set_incomingtransaction_audits_to_ignored,
     reset_incomingtransaction_audits,
     reset_outgoing_transaction_server_as_consumed,
-    reset_outgoing_transaction_server_as_not_consumed,
-    reset_producer_status, toggle_producer_is_active, update_producer_from_settings_file)
-from .models import IncomingTransaction, OutgoingTransaction, Producer, RequestLog
+    reset_outgoing_transaction_server_as_not_consumed, )
+
+from .constants import SERVER, CLIENT
+from .models import IncomingTransaction, OutgoingTransaction, Client, Server
+
+
+edc_sync_app = django_apps.get_app_config('edc_sync')
 
 
 class EdcSyncAdminSite(AdminSite):
-    site_header = 'Data Synchronization'
-    site_title = 'Data Synchronization'
-    index_title = 'Data Synchronization Admin'
+    site_header = edc_sync_app.verbose_name
+    site_title = edc_sync_app.verbose_name
+    index_title = edc_sync_app.verbose_name + ' ' + 'Admin'
     site_url = '/edc_sync/'
 
 edc_sync_admin = EdcSyncAdminSite(name='edc_sync_admin')
@@ -81,22 +86,26 @@ class OutgoingTransactionAdmin (admin.ModelAdmin):
         reset_outgoing_transaction_server_as_not_consumed]
 
 
-@admin.register(Producer, site=edc_sync_admin)
-class ProducerAdmin(admin.ModelAdmin):
+class HostAdmin(admin.ModelAdmin):
 
-    list_display = (
-        'name', 'url', 'db_host', 'is_active',
-        'sync_datetime', 'sync_status', 'comment')
+        list_display = (
+            'hostname', 'port', 'is_active',
+            'last_sync_datetime', 'last_sync_status', 'comment')
 
-    list_filter = ('is_active', 'sync_datetime', 'sync_status',)
+        list_filter = ('is_active', 'last_sync_datetime', 'last_sync_status',)
 
-    actions = [
-        reset_producer_status,
-        update_producer_from_settings_file,
-        toggle_producer_is_active]
+#         actions = [
+#             reset_producer_status,
+#             update_producer_from_settings_file,
+#             toggle_producer_is_active]
 
 
-@admin.register(RequestLog, site=edc_sync_admin)
-class RequestLogAdmin(admin.ModelAdmin):
+if edc_sync_app.role == SERVER:
+    @admin.register(Client, site=edc_sync_admin)
+    class ClientAdmin(HostAdmin):
+        pass
 
-    list_display = ('producer', 'request_datetime', 'status', 'comment')
+if edc_sync_app.role == CLIENT:
+    @admin.register(Server, site=edc_sync_admin)
+    class ServerAdmin(HostAdmin):
+        pass

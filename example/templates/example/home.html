@@ -2,10 +2,13 @@
 
 {% load staticfiles %}
 
-{% block main %}
+{% block extra-scripts %}
+{{ block.super }}
+<script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/edc_sync.js" %}"></script>
+{% endblock extra-scripts %}
 
-    <div id="div-home-left" class="col-md-4"></div>
-    
+{% block main %}
+        
     <div id="div-home-middle" class="col-md-4">
         <div class="panel panel-default">
             <div class="panel-heading">Administration</div>
@@ -16,19 +19,41 @@
         </div>
         <div class="panel panel-default">
             <div class="panel-heading">API</div>
-                {% if user.is_authenticated and api_key == "" %}
-                    <div class="alert alert-danger text-center">{{ user.username }} does not have an API Key. Check the user account.</div>
+                {% if user.is_authenticated and api_key == None %}
+                    <div class="alert alert-danger text-center">Current user '{{ user.username }}' missing API Key.</div>
                 {% endif %}
                 <ul id="nav-pill-api" class="nav nav-pills nav-stacked">
                 <li><a href="{% url 'admin:app_list' 'auth' %}">Administration</a></li>
-                <li><a href="{% url 'api_v1_top_level' 'v1' %}?format=json">Top level API</a></li>
+                <li><a href="{% url 'api_v1_top_level' 'v1' %}?format=json">Show my top level API</a></li>
                 {% if user.is_authenticated %}
-                    <li><a href="{% url 'api_v1_top_level' 'v1' %}outgoingtransaction/?username={{ user.username }}&api_key={{ api_key }}&format=json">Outgoingtransaction (limit 20)</a></li>
+                    <li><a href="{% url 'api_v1_top_level' 'v1' %}outgoingtransaction/?username={{ user.username }}&api_key={{ api_key }}&format=json">Show my outgoingtransaction (limit 20)</a></li>
                 {% endif %}
                 </ul>
             </div>
     </div><!-- div-home-middle -->
 
-    <div id="div-home-right" class="col-md-4"></div>
+    <div id="div-home-right" class="col-md-8">
+        <div class="panel panel-default">
+            <div class="panel-heading">Remote Resources</div>
+                <div id="id-div-resource-alert"></div>
+                {% if user.is_authenticated %}
+                <ul id="id-nav-pill-resources" class="nav nav-pills nav-stacked">
+                </ul>
+                {% endif %}
+            </div>
+        <div id="id-div-json"></div>    
+    </div>
 
 {% endblock main %}
+
+{% block extra-scripts-bottom %}
+{{ block.super }}
+
+<script type="text/javascript" charset="utf8" class="init">
+    $(document).ready( function() { 
+        updateResourceTags('{{ hosts|escapejs }}', '{{ user.username }}', '{{ user.api_key.key }}');
+    });
+
+</script>
+
+{% endblock extra-scripts-bottom %}

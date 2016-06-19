@@ -16,6 +16,7 @@ from django.utils import timezone
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(os.path.dirname(os.path.realpath(__file__)))
+APP_LABEL = 'example'
 
 
 # Quick-start development settings - unsuitable for production
@@ -26,31 +27,39 @@ SECRET_KEY = '4w#xs+=lrx4$mmqv+vzy^9i!(sni2eh=q_-9(#w4r20sv($2af'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+TASTYPIE_FULL_DEBUG = True
 ALLOWED_HOSTS = ['localhost']
 
 
 # Application definition
 
-INSTALLED_APPS = [
+DEPENDENCY_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'django_revision',
     'tastypie',
     'crispy_forms',
     'simple_history',
     'edc_base',
-    'edc_sync.apps.EdcSyncAppConfig',
+]
+
+EXAMPLE_APPS = [
+    'example.apps.SyncAppConfig',
     'example.apps.DjangoCryptoFieldsApp',
     'example.apps.ExampleAppConfig',
 ]
 
+INSTALLED_APPS = DEPENDENCY_APPS + EXAMPLE_APPS
+
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -84,26 +93,26 @@ WSGI_APPLICATION = 'example.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
-
+SQLITE3_DBNAME = 'db.sqlite3'
 DATABASES = {
     # required for tests when acting as a server that deserializes
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': os.path.join(BASE_DIR, SQLITE3_DBNAME),
     },
     # required for tests when acting as a server but not attempting to deserialize
     'server': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': os.path.join(BASE_DIR, SQLITE3_DBNAME),
     },
     # required for tests when acting as a client
     'client': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': os.path.join(BASE_DIR, SQLITE3_DBNAME),
     },
     'test_server': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': os.path.join(BASE_DIR, SQLITE3_DBNAME),
     },
 }
 
@@ -159,7 +168,6 @@ STATICFILES_FINDERS = (
 
 GIT_DIR = BASE_DIR.ancestor(1)
 KEY_PATH = os.path.join(BASE_DIR.ancestor(1), 'crypto_fields')
-EDC_CRYPTO_FIELDS_CLIENT_USING = 'client'
 SHOW_CRYPTO_FORM_DATA = True
 STUDY_OPEN_DATETIME = timezone.datetime(2016, 1, 18)
 LANGUAGES = (
@@ -169,5 +177,11 @@ LANGUAGES = (
 DEVICE_ID = '15'
 SERVER_DEVICE_ID_LIST = ['99']
 # MIDDLEMAN_DEVICE_ID_LIST = []
-APP_LABEL = 'example'
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
+
+# django-cors-headers
+# CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_WHITELIST = (
+    'localhost:8000',
+    'localhost:8001',
+)

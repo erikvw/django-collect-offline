@@ -5,6 +5,7 @@ from django_crypto_fields.apps import DjangoCryptoFieldsAppConfig
 class EdcSyncAppConfig(AppConfig):
     name = 'edc_sync'
     verbose_name = 'Data Synchronization'
+    role = None
 
 
 class DjangoCryptoFieldsApp(DjangoCryptoFieldsAppConfig):
