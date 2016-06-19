@@ -7,7 +7,7 @@ test-*
 .settings
 db.sqlite3
 sync_old/
-edc_sync/static/
+edc_sync/static/admin/*
 example/static/
 # C extensions
 *.so
