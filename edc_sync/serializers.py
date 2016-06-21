@@ -11,35 +11,6 @@ from edc_sync.choices import ACTIONS
 from edc_sync.models import IncomingTransaction, OutgoingTransaction
 
 
-"""
-from django.utils import six
-from base64 import b64encode, b64decode
-from django.utils.encoding import force_bytes
-from django_crypto_fields.cryptor import Cryptor
-from rest_framework.renderers import JSONRenderer
-from rest_framework.parsers import JSONParser
-from django.utils.six import BytesIO
-from edc_sync.serializers import OutgoingTransactionSerializer
-from edc_sync.models import OutgoingTransaction
-obj = OutgoingTransaction.objects.last()
-serializer = OutgoingTransactionSerializer(obj)
-serializer.data
-
-
-content = JSONRenderer().render(serializer.data)
-content
-
-stream = BytesIO(content)
-data = JSONParser().parse(stream)
-data
-
-serializer = OutgoingTransactionSerializer(data=data)
-serializer.is_valid()
-serializer.errors
-serializer.validated_data
-
-"""
-
 class BinaryField(Field):
     default_error_messages = {
         'invalid': _('Value must be valid Binary.')
