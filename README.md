@@ -1,5 +1,6 @@
 
 In progress / issues:
+
     * converting edc_sync to use REST API exclusively (instead of `using=`)
     * remove tastypie, replace with rest_framework
     * finish edc_sync/js script
