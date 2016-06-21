@@ -4,6 +4,8 @@ from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 from tastypie.admin import ApiKeyInline
+from rest_framework.authtoken.admin import TokenAdmin
+from rest_framework.authtoken.models import Token
 
 from .actions import (
     reset_transaction_as_not_consumed, reset_transaction_as_consumed,
@@ -29,11 +31,19 @@ class EdcSyncAdminSite(AdminSite):
 edc_sync_admin = EdcSyncAdminSite(name='edc_sync_admin')
 
 
-class UserModelAdmin(UserAdmin):
-    inlines = UserAdmin.inlines + [ApiKeyInline]
+class TokenAdmin(admin.ModelAdmin):
+    raw_id_fields = ('user',)
+    list_display = ('key', 'user', 'created')
+    fields = ('user',)
+    ordering = ('-created',)
+admin.site.unregister(Token)
+admin.site.register(Token, TokenAdmin, site=edc_sync_admin)
 
-admin.site.unregister(User)
-admin.site.register(User, UserModelAdmin)
+# class UserModelAdmin(UserAdmin):
+#     inlines = UserAdmin.inlines + [ApiKeyInline]
+#
+# admin.site.unregister(User)
+# admin.site.register(User, UserModelAdmin)
 
 
 @admin.register(IncomingTransaction, site=edc_sync_admin)

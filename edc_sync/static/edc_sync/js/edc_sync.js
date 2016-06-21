@@ -1,47 +1,47 @@
-function updateResourceTags(hosts, userName, apiKey) {
+function updateResourceTags(hosts, userName, apiToken) {
 	/* prepare tags and hit the list_endpoint */
-	hosts = JSON.parse( hosts );
-	$.each( hosts, function( host, listEndpoint ) {
-        uri = resourceUri( host, listEndpoint, userName, apiKey );
-        divId = 'id-nav-pill-resources';
-        makeResourceLinkTags( divId, host, listEndpoint, uri, userName, apiKey )
+	var hosts = JSON.parse( hosts );
+	$.each( hosts, function( host, resourceName ) {
+        var divId = 'id-nav-pill-resources';
+		var listUrl = Urls[ resourceName + '-list' ]();        
+        makeResourceTags( divId, host, resourceName, listUrl, userName, apiToken )
     });
 }
 
-function makeResourceLinkTags ( divId, host, listEndpoint, uri, userName, apiKey ) {
+function makeResourceTags ( divId, host, resourceName, listUrl, userName, apiToken ) {
 	/* make and append links to the API */
+    var fullListUrl = 'http://' + host + listUrl + '?format=json';
     $.each( ['show', 'fetch'], function( index, label ){
-	    anchorId = 'id-link-' + label + '-' + host.replace( ':', '-' );
+	    var anchorId = 'id-link-' + label + '-' + host.replace( ':', '-' );
 	    var li = '<li><a id="' + anchorId + '">'+ label + ' resource on ' + host + '</a></li>';
     	$( '#id-nav-pill-resources' ).append( li );
-	    $( '#id-link-show-' + host.replace( ':', '-' ) ).attr( 'href', uri );
-	    $( '#id-link-fetch-' + host.replace( ':', '-' ) ).attr( 'href', '#' );
-	    $( '#id-link-fetch-' + host.replace( ':', '-' ) ).click( function (e) {
-	        e.preventDefault();
-			getData(uri, host, listEndpoint, userName, apiKey);
-	    });
     });
+	$( '#id-link-show-' + host.replace( ':', '-' ) ).attr( 'href', fullListUrl );
+	$( '#id-link-fetch-' + host.replace( ':', '-' ) ).attr( 'href', '#' );
+	$( '#id-link-fetch-' + host.replace( ':', '-' ) ).click( function (e) {
+	    e.preventDefault();
+		getData(fullListUrl, host, resourceName, listUrl, userName, apiToken);
+	});
+    
 }
 
-function getData( uri, host, listEndpoint, userName, apiKey ) {
+function getData( fullListUrl, host, resourceName, listUrl, userName, apiToken ) {
 	/* GET all data from the uri until next_uri == null */
 	var csrftoken = Cookies.get('csrftoken');
-	limit = 1;
 	$.ajaxSetup({
 	    beforeSend: function(xhr, settings) {
 	        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
 	            xhr.setRequestHeader("X-CSRFToken", csrftoken);
 	        };
-			xhr.setRequestHeader ("Authorization", "ApiKey " + userName + ":" + apiKey);
+			xhr.setRequestHeader("Authorization", "Token " + apiToken);
 	    }
 	});	
 	$.ajax({
-    	url: uri + '&limit=' + limit,
+    	url: fullListUrl,
     	type: 'GET',
     	dataType: 'json',
     	processData: false,
     	success: function( result, status, xhr ) {
-			console.log(result.meta);
 			$( '#id-resource-alert' ).remove();
 			alert_div = makeHostAlert( 'id-resource-alert', host, 'alert-success' );
 			$( '#id-div-resource-alert' ).append( alert_div );
@@ -49,7 +49,7 @@ function getData( uri, host, listEndpoint, userName, apiKey ) {
 			$( '#id-resource-alert-text' ).text( getDataAlertText( host, result ) );
         	$.each( result.objects, function( i, object ) {
             	var date = Date();
-            	createObject( host, object, userName, apiKey );
+            	createObject( host, object, userName, apiToken );
             	$.each( object, function( i, field ) {
             		$( '#id-div-show-json' ).append( i + ': ' + field + '</BR>' );	
             	})
@@ -59,7 +59,7 @@ function getData( uri, host, listEndpoint, userName, apiKey ) {
         	} else {
 				$( '#id-resource-alert-text' ).text( getDataAlertText( host, result ) );
 				console.log(result.meta.total_count);
-				getData( uri, host, listEndpoint, userName, apiKey);
+				getData( uri, host, listEndpoint, userName, apiToken);
         	};
         },
     	error: function( xhr, status, error ) {
@@ -90,16 +90,16 @@ function makeHostAlert( id, host, cssClass ) {
 	return alert_div
 }
 
-function resourceUri(host, listEndpoint, userName, apiKey) {
+function resourceUri(host, listEndpoint, userName, apiToken) {
 	uri = '';
 	if (host != '') {
-	 	params = $.param({'format': 'json', 'username': userName, 'api_key': apiKey})
+	 	params = $.param({'token': apiToken})
 	  	uri = 'http://' + host + listEndpoint + '?' + params;
 	}
 	return uri;
 }
 
-function createObject( remoteHost, object, userName, apiKey ) {
+function createObject( remoteHost, object, userName, apiToken ) {
 	/* save object to local incoming */
 	// convert JSON to incoming transaction
 	var csrftoken = Cookies.get('csrftoken');
@@ -121,18 +121,18 @@ function createObject( remoteHost, object, userName, apiKey ) {
 	        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
 	            xhr.setRequestHeader("X-CSRFToken", csrftoken);
 	        };
-			xhr.setRequestHeader ("Authorization", "ApiKey " + userName + ":" + apiKey);
+			xhr.setRequestHeader("Authorization", "Token " + apiToken);
 	    }
 	});	
 	$.ajax({
-		url: 'http://' + document.location.host + '/edc-sync/api/v1/incomingtransaction/',
+		url: 'http://' + document.location.host + '/edc-sync/api/incomingtransaction.json',
 		type: 'POST',
 		dataType: 'json',
 		contentType: 'application/json',
 		processData: false,
 		data: JSON.stringify( newObject ),
 		success: function() {
-			updateObjectOnSource( remoteHost, object, userName, apiKey );
+			updateObjectOnSource( remoteHost, object, userName, apiToken );
 		},
 		error: function( xhr, status, error ) {
 			console.log( status );
@@ -141,7 +141,7 @@ function createObject( remoteHost, object, userName, apiKey ) {
 	});
 } 
 
-function updateObjectOnSource ( remoteHost, object, userName, apiKey  ) {
+function updateObjectOnSource ( remoteHost, object, userName, apiToken  ) {
 	/* update source object as consumed */
 	// update audit fields
 	var csrftoken = Cookies.get('csrftoken');
@@ -165,7 +165,7 @@ function updateObjectOnSource ( remoteHost, object, userName, apiKey  ) {
 	$.ajaxSetup({
 	    beforeSend: function(xhr, settings) {
             xhr.setRequestHeader("X-CSRFToken", csrftoken);
-			xhr.setRequestHeader("Authorization", "ApiKey " + userName + ":" + apiKey);
+			xhr.setRequestHeader("Authorization", "Token " + apiToken);
 	    }
 	});	
 	$.ajax({

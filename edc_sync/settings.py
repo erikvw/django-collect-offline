@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_revision',
     'rest_framework',
+    'rest_framework.authtoken',
+    'django_js_reverse',
     'tastypie',
     'simple_history',
     'example.apps.ExampleAppConfig',
@@ -53,7 +55,7 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django-crossdomainxhr-middleware.XsSharing',
+    # 'django-crossdomainxhr-middleware.XsSharing',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -170,3 +172,13 @@ LANGUAGES = (
 DEVICE_ID = '15'
 SERVER_DEVICE_ID_LIST = ['99']
 # MIDDLEMAN_DEVICE_ID_LIST = []
+
+REST_FRAMEWORK = {
+    'PAGE_SIZE': 10,
+#     'DEFAULT_AUTHENTICATION_CLASSES': (
+#         'edc_sync.auth.EdcSyncSignatureAuthentication',
+#     ),
+#     'DEFAULT_PERMISSION_CLASSES': (
+#         'rest_framework.permissions.IsAuthenticated',
+#     )
+}

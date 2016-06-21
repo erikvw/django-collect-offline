@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.conf.urls import url, include
 from django.views.generic.base import RedirectView
-
+from django_js_reverse.views import urls_js
 from edc_sync.admin import edc_sync_admin
 
 from example.admin import example_admin
@@ -14,5 +14,6 @@ urlpatterns = [
     url(r'^admin/edc-sync/', edc_sync_admin.urls),
     url(r'^admin/django-admin/', admin.site.urls),
     url(r'home/', HomeView.as_view(), name='home_url'),
+    url(r'^jsreverse/$', urls_js, name='js_reverse'),
     url(r'', include('edc_base.urls')),
 ]

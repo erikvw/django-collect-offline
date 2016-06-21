@@ -10,7 +10,6 @@ from edc_device import Device
 from ..exceptions import SyncError
 
 from .base_transaction import BaseTransaction
-from .incoming_transaction_manager import IncomingTransactionManager
 
 
 class IncomingTransaction(BaseTransaction):
@@ -25,8 +24,6 @@ class IncomingTransaction(BaseTransaction):
     is_self = models.BooleanField(
         default=False,
         db_index=True)
-
-    # objects = IncomingTransactionManager()
 
     def deserialize_transaction(self, using, check_hostname=None, commit=True, check_device=True):
         device = Device()

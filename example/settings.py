@@ -40,6 +40,9 @@ DEPENDENCY_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'django_js_reverse',
     'corsheaders',
     'django_revision',
     'tastypie',
@@ -185,3 +188,13 @@ CORS_ORIGIN_WHITELIST = (
     'localhost:8000',
     'localhost:8001',
 )
+
+REST_FRAMEWORK = {
+    'PAGE_SIZE': 10,
+#     'DEFAULT_AUTHENTICATION_CLASSES': (
+#         'edc_sync.auth.EdcSyncSignatureAuthentication',
+#     ),
+#     'DEFAULT_PERMISSION_CLASSES': (
+#         'rest_framework.permissions.IsAuthenticated',
+#     )
+}

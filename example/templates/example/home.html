@@ -19,14 +19,14 @@
         </div>
         <div class="panel panel-default">
             <div class="panel-heading">API</div>
-                {% if user.is_authenticated and api_key == None %}
-                    <div class="alert alert-danger text-center">Current user '{{ user.username }}' missing API Key.</div>
+                {% if user.is_authenticated and api_token == None %}
+                    <div class="alert alert-danger text-center">Current user '{{ user.username }}' missing API token.</div>
                 {% endif %}
                 <ul id="nav-pill-api" class="nav nav-pills nav-stacked">
-                <li><a href="{% url 'admin:app_list' 'auth' %}">Administration</a></li>
-                <li><a href="{% url 'api_v1_top_level' 'v1' %}?format=json">Show my top level API</a></li>
+                <li><a href="{% url 'admin:index' %}">Administration</a></li>
+                <li><a href="">Show my top level API</a></li>
                 {% if user.is_authenticated %}
-                    <li><a href="{% url 'api_v1_top_level' 'v1' %}outgoingtransaction/?username={{ user.username }}&api_key={{ api_key }}&format=json">Show my outgoingtransaction (limit 20)</a></li>
+                    <li><a href="{% url 'outgoingtransaction-list' %}?format=json">Show my outgoingtransaction (limit 20)</a></li>
                 {% endif %}
                 </ul>
             </div>

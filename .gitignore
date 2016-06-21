@@ -5,7 +5,7 @@ test-*
 .project
 .pydevproject
 .settings
-db.sqlite3
+db.sqlite3*
 example/db.sqlite3.server
 sync_old/
 edc_sync/static/admin/*

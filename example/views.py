@@ -6,7 +6,7 @@ from django.views.generic import TemplateView
 
 from edc_base.views.edc_base_view_mixin import EdcBaseViewMixin
 from edc_sync.admin import edc_sync_admin
-from edc_sync.views import EdcSyncViewMixin
+from edc_sync.edc_sync_view_mixin import EdcSyncViewMixin
 from django.http.response import HttpResponse
 
 from example.admin import example_admin
@@ -25,6 +25,7 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
         context.update(
             example_admin=example_admin,
             edc_sync_admin=edc_sync_admin,
+            project_name=self.app.verbose_name + ': ' + self.role.title(),
         )
         return context
 
