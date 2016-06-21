@@ -26,7 +26,7 @@ class IncomingTransaction(BaseTransaction):
         default=False,
         db_index=True)
 
-    objects = IncomingTransactionManager()
+    # objects = IncomingTransactionManager()
 
     def deserialize_transaction(self, using, check_hostname=None, commit=True, check_device=True):
         device = Device()

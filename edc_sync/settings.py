@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_revision',
+    'rest_framework',
     'tastypie',
     'simple_history',
     'example.apps.ExampleAppConfig',

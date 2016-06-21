@@ -29,11 +29,13 @@ class BinaryField(ApiField):
 
     def dehydrate(self, bundle, for_list=True):
         value = getattr(bundle.obj, self.attribute)
+        print('dehydrate {}'.format(type(value)))
         return b64encode(force_bytes(value)).decode('ascii')
 
-    def hydrate(self, bundle, for_list=True):
-        value = getattr(bundle.obj, self.attribute)
-        return six.memoryview(b64decode(force_bytes(value)))
+#     def hydrate(self, bundle, for_list=True):
+#         value = getattr(bundle.obj, self.attribute)
+#         print('hydrate {}'.format(type(value)))
+#         return six.memoryview(b64decode(force_bytes(value)))
 
 
 class ModelResource(BaseModelResource):
