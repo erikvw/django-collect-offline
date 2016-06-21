@@ -5,6 +5,7 @@ In progress / issues:
     * remove tastypie, replace with rest_framework
     * finish edc_sync/js script
     * token authentication
+    * update README
     
 
 [![Build Status](https://travis-ci.org/botswana-harvard/edc-sync.svg?branch=develop)](https://travis-ci.org/botswana-harvard/edc-sync)
