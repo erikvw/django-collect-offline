@@ -44,7 +44,7 @@ class SyncMixin:
         if self.is_serialized():
             hostname = socket.gethostname()
             outgoing_transaction = OutgoingTransaction.objects.using(using).create(
-                tx_name=self._meta.object_name,
+                tx_name='{}.{}'.format(self._meta.app_label, self._meta.object_name.lower()),
                 tx_pk=getattr(self, self.primary_key_field.name),
                 tx=self.encrypted_json(),
                 timestamp=timezone.now().strftime('%Y%m%d%H%M%S%f'),

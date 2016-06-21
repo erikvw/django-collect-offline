@@ -4,11 +4,11 @@ function updateResourceTags(hosts, userName, apiKey) {
 	$.each( hosts, function( host, listEndpoint ) {
         uri = resourceUri( host, listEndpoint, userName, apiKey );
         divId = 'id-nav-pill-resources';
-        makeResourceLinkTags( divId, host, listEndpoint, uri, userName )
+        makeResourceLinkTags( divId, host, listEndpoint, uri, userName, apiKey )
     });
 }
 
-function makeResourceLinkTags ( divId, host, listEndpoint, uri, userName ) {
+function makeResourceLinkTags ( divId, host, listEndpoint, uri, userName, apiKey ) {
 	/* make and append links to the API */
     $.each( ['show', 'fetch'], function( index, label ){
 	    anchorId = 'id-link-' + label + '-' + host.replace( ':', '-' );
@@ -18,20 +18,21 @@ function makeResourceLinkTags ( divId, host, listEndpoint, uri, userName ) {
 	    $( '#id-link-fetch-' + host.replace( ':', '-' ) ).attr( 'href', '#' );
 	    $( '#id-link-fetch-' + host.replace( ':', '-' ) ).click( function (e) {
 	        e.preventDefault();
-			getData(uri, host, listEndpoint, userName);
+			getData(uri, host, listEndpoint, userName, apiKey);
 	    });
     });
-};
+}
 
-function getData( uri, host, listEndpoint, userName ) {
+function getData( uri, host, listEndpoint, userName, apiKey ) {
 	/* GET all data from the uri until next_uri == null */
 	var csrftoken = Cookies.get('csrftoken');
-	limit = 3;
+	limit = 1;
 	$.ajaxSetup({
 	    beforeSend: function(xhr, settings) {
 	        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
 	            xhr.setRequestHeader("X-CSRFToken", csrftoken);
-	        }
+	        };
+			xhr.setRequestHeader ("Authorization", "ApiKey " + userName + ":" + apiKey);
 	    }
 	});	
 	$.ajax({
@@ -48,25 +49,7 @@ function getData( uri, host, listEndpoint, userName ) {
 			$( '#id-resource-alert-text' ).text( getDataAlertText( host, result ) );
         	$.each( result.objects, function( i, object ) {
             	var date = Date();
-            	object.is_consumed_server = true;
-            	object.user_modified = userName;
-            	object.consumed_datetime = moment().utc().format("YYYY-MM-DDTHH:mm:ss.SSSZZ");
-            	object.consumer = host;
-            	$.ajax({
-            		url: listEndpoint + object.id + '/',
-            		type: 'PUT',
-            		dataType: 'json',
-            		contentType: 'application/json',
-            		// processData: false,
-            		data: JSON.stringify(object),
-            		success: function( result ) {
-            			console.log( result );
-            		},
-            		error: function( xhr, status, error ) {
-            			console.log( status );	
-            			console.log( error );	
-            		},
-         		});
+            	createObject( host, object, userName, apiKey );
             	$.each( object, function( i, field ) {
             		$( '#id-div-show-json' ).append( i + ': ' + field + '</BR>' );	
             	})
@@ -76,7 +59,7 @@ function getData( uri, host, listEndpoint, userName ) {
         	} else {
 				$( '#id-resource-alert-text' ).text( getDataAlertText( host, result ) );
 				console.log(result.meta.total_count);
-        		getData( result.meta.next, host, userName );
+				getData( uri, host, listEndpoint, userName, apiKey);
         	};
         },
     	error: function( xhr, status, error ) {
@@ -114,4 +97,90 @@ function resourceUri(host, listEndpoint, userName, apiKey) {
 	  	uri = 'http://' + host + listEndpoint + '?' + params;
 	}
 	return uri;
+}
+
+function createObject( remoteHost, object, userName, apiKey ) {
+	/* save object to local incoming */
+	// convert JSON to incoming transaction
+	var csrftoken = Cookies.get('csrftoken');
+
+	newObject = object;
+	delete newObject['using'];
+	delete newObject['is_consumed_middleman'];
+	delete newObject['is_consumed_server'];
+	newObject['resource_uri'] = newObject.resource_uri.replace('outgoingtransaction', 'incomingtransaction');
+	newObject['is_consumed'] = false;
+	newObject['is_self'] = false;
+	newObject.user_modified = userName;
+	newObject.modified = moment().utc().format("YYYY-MM-DDTHH:mm:ss.SSSZZ");
+	newObject.consumed_datetime = moment().utc().format("YYYY-MM-DDTHH:mm:ss.SSSZZ");
+	newObject.consumer = remoteHost;
+
+	$.ajaxSetup({
+	    beforeSend: function(xhr, settings) {
+	        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+	            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+	        };
+			xhr.setRequestHeader ("Authorization", "ApiKey " + userName + ":" + apiKey);
+	    }
+	});	
+	$.ajax({
+		url: 'http://' + document.location.host + '/edc-sync/api/v1/incomingtransaction/',
+		type: 'POST',
+		dataType: 'json',
+		contentType: 'application/json',
+		processData: false,
+		data: JSON.stringify( newObject ),
+		success: function() {
+			updateObjectOnSource( remoteHost, object, userName, apiKey );
+		},
+		error: function( xhr, status, error ) {
+			console.log( status );
+			console.log( error );
+		},
+	});
+} 
+
+function updateObjectOnSource ( remoteHost, object, userName, apiKey  ) {
+	/* update source object as consumed */
+	// update audit fields
+	var csrftoken = Cookies.get('csrftoken');
+	object.user_modified = userName;
+	object.modified = moment().utc().format("YYYY-MM-DDTHH:mm:ss.SSSZZ");
+	object.is_consumed_server = true;
+	object.consumed_datetime = moment().utc().format("YYYY-MM-DDTHH:mm:ss.SSSZZ");
+	object.consumer = remoteHost;
+	
+	var json_data = {};
+	json_data = {
+		'user_modified': userName,
+		'modified': moment().utc().format("YYYY-MM-DDTHH:mm:ss.SSSZZ"),
+		'is_consumed_server': true,
+		'consumed_datetime': moment().utc().format("YYYY-MM-DDTHH:mm:ss.SSSZZ"),
+		'consumer': remoteHost,
+	}
+
+
+	// PUT object on remote host
+	$.ajaxSetup({
+	    beforeSend: function(xhr, settings) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+			xhr.setRequestHeader("Authorization", "ApiKey " + userName + ":" + apiKey);
+	    }
+	});	
+	$.ajax({
+		url: 'http://' + remoteHost + '/edc-sync/api/v1/outgoingtransaction/' + object.id + '/',
+		type: 'PATCH',
+		dataType: 'json',
+		contentType: 'application/json',
+		processData: false,
+		data: JSON.stringify( json_data ),
+		success: function( result ) {
+			console.log( result );
+		},
+		error: function( xhr, status, error ) {
+			console.log( status );
+			console.log( error );	
+		},
+	});
 }

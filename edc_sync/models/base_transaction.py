@@ -15,7 +15,6 @@ class BaseTransaction(BaseUuidModel):
     tx_pk = models.UUIDField(
         db_index=True)
 
-    # remove this
     producer = models.CharField(
         max_length=200,
         db_index=True,
@@ -61,7 +60,16 @@ class BaseTransaction(BaseUuidModel):
         return '<{}: {}>'.format(self.__class__.__name__, self.tx_name)
 
     def __str__(self):
-        return '{0} {1} {2}'.format(self.tx_name, self.producer, self.action)
+        return '</{}.{}/{}/{}/{}/>'.format(self._meta.app_label, self._meta.model_name, self.id, self.tx_name, self.action)
+        # return '{0} {1} {2}'.format(self.tx_name, self.producer, self.action)
+
+    def save(self, *args, **kwargs):
+        try:
+            print(str(self))
+            self.tx = self.tx.encode()
+        except AttributeError:
+            pass
+        super(BaseTransaction, self).save(*args, **kwargs)
 
     def render(self):
         url = reverse('render_url',

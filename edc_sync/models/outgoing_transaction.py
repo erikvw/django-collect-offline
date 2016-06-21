@@ -27,9 +27,6 @@ class OutgoingTransaction(BaseTransaction):
 
     objects = OutgoingTransactionManager()
 
-    def __str__(self):
-        return self.tx_name
-
     def save(self, *args, **kwargs):
         if not self.using:
             raise ValueError('Value for \'{}.using\' cannot be None.'.format(self._meta.model_name))
