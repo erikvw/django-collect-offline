@@ -51,7 +51,7 @@
 
 <script type="text/javascript" charset="utf8" class="init">
     $(document).ready( function() { 
-        updateResourceTags('{{ hosts|escapejs }}', '{{ user.username }}', '{{ user.api_key.key }}');
+        edcSyncReady('{{ hosts|escapejs }}', '{{ user.username }}', '{{ api_token }}');
     });
 
 </script>

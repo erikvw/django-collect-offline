@@ -189,10 +189,11 @@ CORS_ORIGIN_WHITELIST = (
 )
 
 REST_FRAMEWORK = {
-    'PAGE_SIZE': 10,
-#     'DEFAULT_AUTHENTICATION_CLASSES': (
-#         'edc_sync.auth.EdcSyncSignatureAuthentication',
-#     ),
+    'PAGE_SIZE': 1,
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        # 'edc_sync.auth.EdcSyncSignatureAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ),
 #     'DEFAULT_PERMISSION_CLASSES': (
 #         'rest_framework.permissions.IsAuthenticated',
 #     )

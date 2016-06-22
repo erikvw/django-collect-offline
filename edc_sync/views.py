@@ -33,6 +33,9 @@ class OutgoingTransactionViewSet(viewsets.ModelViewSet):
     queryset = OutgoingTransaction.objects.all()
     serializer_class = OutgoingTransactionSerializer
 
+    def filter_queryset(self, queryset):
+        return self.queryset.filter(is_consumed_server=False)
+
 
 class IncomingTransactionViewSet(viewsets.ModelViewSet):
 

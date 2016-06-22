@@ -43,7 +43,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django_js_reverse',
-    'tastypie',
     'simple_history',
     'example.apps.ExampleAppConfig',
     'edc_sync.apps.DjangoCryptoFieldsApp',
@@ -175,9 +174,10 @@ SERVER_DEVICE_ID_LIST = ['99']
 
 REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
-#     'DEFAULT_AUTHENTICATION_CLASSES': (
-#         'edc_sync.auth.EdcSyncSignatureAuthentication',
-#     ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        # 'edc_sync.auth.EdcSyncSignatureAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ),
 #     'DEFAULT_PERMISSION_CLASSES': (
 #         'rest_framework.permissions.IsAuthenticated',
 #     )

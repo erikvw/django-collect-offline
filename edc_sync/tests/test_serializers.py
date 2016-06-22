@@ -1,16 +1,17 @@
+import json
+
 from django.test.testcases import TestCase
+from django.utils.six import BytesIO
+from django_crypto_fields.constants import LOCAL_MODE
+from django_crypto_fields.cryptor import Cryptor
+
+from rest_framework.parsers import JSONParser
+from rest_framework.renderers import JSONRenderer
 
 from edc_sync.models import OutgoingTransaction, IncomingTransaction
 from edc_sync.serializers import OutgoingTransactionSerializer
-from rest_framework.renderers import JSONRenderer
-from rest_framework.parsers import JSONParser
-from django.utils.six import BytesIO
 
-from example.models import (
-    TestModel, ComplexTestModel, Fk, M2m, TestEncryptedModel, BadTestModel, AnotherBadTestModel)
-from django_crypto_fields.cryptor import Cryptor
-from django_crypto_fields.constants import LOCAL_MODE
-import json
+from example.models import (TestModel, ComplexTestModel, Fk, M2m, TestEncryptedModel, BadTestModel, AnotherBadTestModel)
 
 
 class TestSerializers(TestCase):

@@ -1,7 +1,5 @@
 from django.contrib.auth.models import User
 
-from tastypie.models import ApiKey
-
 from ..models import OutgoingTransaction
 
 from .base_sync_device_tests import BaseSyncDeviceTests

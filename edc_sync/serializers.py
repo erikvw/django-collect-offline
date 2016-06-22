@@ -38,7 +38,7 @@ class BinaryField(Field):
 
 class BaseModelSerializer:
 
-    model_cls = None
+    model_class = None
 
     user_created = serializers.CharField(
         max_length=50,
@@ -60,10 +60,10 @@ class BaseModelSerializer:
         max_length=75)
 
     def create(self, validated_data):
-        return self.model_cls.objects.create(**validated_data)
+        return self.model_class.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
-        for fieldname in [fld.name for fld in self.model._meta.fields]:
+        for fieldname in [fld.name for fld in self.model_class._meta.fields]:
             setattr(instance, fieldname, validated_data.get(fieldname, getattr(instance, fieldname)))
         instance.save()
         return instance
@@ -113,7 +113,16 @@ class IncomingTransactionSerializer(BaseTransactionSerializer):
 
     model_class = IncomingTransaction
 
+    is_consumed = serializers.BooleanField(
+        default=False)
+
 
 class OutgoingTransactionSerializer(BaseTransactionSerializer):
 
     model_class = OutgoingTransaction
+
+    is_consumed_server = serializers.BooleanField(
+        default=False)
+
+    is_consumed_middleman = serializers.BooleanField(
+        default=False)

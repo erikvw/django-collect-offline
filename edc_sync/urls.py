@@ -17,5 +17,5 @@ urlpatterns = [
 ]
 
 urlpatterns += [
-    url(r'^api-token-auth/', obtain_auth_token)
+    url(r'^api-token-auth/', obtain_auth_token)  # will reply given username and password
 ]

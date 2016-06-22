@@ -3,8 +3,6 @@ from django.contrib.auth.models import User
 from django.core import management
 from django.test import TestCase
 
-from tastypie.models import ApiKey
-
 from edc_device import device
 
 from edc_sync.models import OutgoingTransaction, IncomingTransaction, MiddleManTransaction

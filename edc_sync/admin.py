@@ -32,7 +32,7 @@ edc_sync_admin = EdcSyncAdminSite(name='edc_sync_admin')
 class TokenAdmin(admin.ModelAdmin):
     raw_id_fields = ('user',)
     list_display = ('key', 'user', 'created')
-    fields = ('user',)
+    fields = ('user', 'key')
     ordering = ('-created',)
 admin.site.unregister(Token)
 admin.site.register(Token, TokenAdmin, site=edc_sync_admin)
