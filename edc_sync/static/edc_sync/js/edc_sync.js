@@ -1,61 +1,59 @@
-var outgoingListUrl = Urls[ 'outgoingtransaction-list' ]();        
+var outgoingListUrl = Urls[ 'outgoingtransaction-list' ]();
 var server = 'http://' + document.location.host
 
 function edcSyncReady(hosts, userName, apiToken) {
-	/* prepare page elements and hit the api */
+	/* Prepare page elements */
 	var hosts = JSON.parse( hosts );
 	var csrftoken = Cookies.get('csrftoken');
 
 	// configure AJAX header with csrf and authorization tokens
 	$.ajaxSetup({
-	    beforeSend: function(xhr, settings) {
-	        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-	            xhr.setRequestHeader("X-CSRFToken", csrftoken);
-	        };
+	beforeSend: function(xhr, settings) {
+		if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+			xhr.setRequestHeader("X-CSRFToken", csrftoken);
+		};
 			xhr.setRequestHeader("Authorization", "Token " + apiToken);
-	    }
+		}
 	});	
 
+	// make elements for each host, set the onClick event
 	$.each( hosts, function( host ) {
-        var divId = 'id-nav-pill-resources';
-        makePageElements( divId, host, userName )
+		var divId = 'id-nav-pill-resources';
+		makePageElements( divId, host, userName )
 		// this is the onClick event that starts the data transfer for this host.
 		$( '#id-link-fetch-' + host.replace( ':', '-' ) ).click( function (e) {
-		    e.preventDefault();
-			displayGetDataAlert( host );	    
+		e.preventDefault();
+			displayGetDataAlert( host );	
 			processOutgoingTransactions( host, userName );
 		});
-    });
+	});
 }
 
 function processOutgoingTransactions( host, userName ) {
-	/* chained requests: 
+	/* 
+	Process each OutgoingTransaction one at a time.
+	Requests are chained: 
 		1. GET outgoingtransaction from host;
 		2. POST as incomingtransaction to server (me)
 		3. PATCH outgoingtransaction on host;
-
-   Called recursively until outgoingtransaction_list returns nothing.
+   	Called recursively until outgoingtransaction_list returns nothing.
 	*/
 	var outgoingtransaction = null;
 	var outgoingtransaction_total_count = 0;
 	var url = 'http://' + host + outgoingListUrl + '?format=json'  // limit=1
 	var ajGetOutgoing = $.ajax({
-    	url: url,
-    	type: 'GET',
-    	dataType: 'json',
-    	processData: false,
-    });
+		url: url,
+		type: 'GET',
+		dataType: 'json',
+		processData: false,
+	});
 
-    ajPostIncoming = ajGetOutgoing.then( function( outgoingtransactions ) {
-
-    	var incomingListUrl = Urls[ 'incomingtransaction-list' ]();    
-
-    	outgoingtransaction_count = outgoingtransactions.count;
-    	outgoingtransaction = outgoingtransactions.results[0];
-
+	ajPostIncoming = ajGetOutgoing.then( function( outgoingtransactions ) {
+		var incomingListUrl = Urls[ 'incomingtransaction-list' ]();
+		outgoingtransaction_count = outgoingtransactions.count;
+		outgoingtransaction = outgoingtransactions.results[0];
 		$( '#id-resource-alert-text' ).text( hostAlertText( host, outgoingtransaction_count ) );
-
-    	return $.ajax({
+		return $.ajax({
 			url: server + incomingListUrl + '?format=json',
 			type: 'POST',
 			dataType: 'json',
@@ -65,10 +63,9 @@ function processOutgoingTransactions( host, userName ) {
 		});
 	});
 
-    ajPatchOutgoing = ajPostIncoming.then( function( incomingtransaction ) {
-
+	ajPatchOutgoing = ajPostIncoming.then( function( incomingtransaction ) {
 		var json_data = {};
-    	var outgoingDetailUrl = Urls[ 'outgoingtransaction-detail' ]( outgoingtransaction.pk );    
+		var outgoingDetailUrl = Urls[ 'outgoingtransaction-detail' ]( outgoingtransaction.pk );
 		var outgoingtransaction_fields = {
 			'user_modified': userName,
 			'modified': moment().utc().format("YYYY-MM-DDTHH:mm:ss.SSSZZ"),
@@ -90,10 +87,9 @@ function processOutgoingTransactions( host, userName ) {
 		if ( data != null ) {
 			processOutgoingTransactions( host, userName );  //recursive
 		}
-    });
+	});
 
-    // fails
-    ajGetOutgoing.fail( function( jqXHR, textStatus, errorThrown ) {
+	ajGetOutgoing.fail( function( jqXHR, textStatus, errorThrown ) {
 		console.log( textStatus + ': ' + errorThrown );
 		$( '#id-resource-alert' ).removeClass( 'alert-success' ).addClass( 'alert-danger' );
 		$( '#id-resource-alert-text' ).text( 'An error has occured while contacting ' +  host  + '. Got ' + errorThrown + ' accessing ' + nextPage || url);
@@ -166,11 +162,11 @@ function makePageElements ( divId, host, resourceName, listUrl, userName ) {
 	/* Make and update page elements.
 	   The "id-link-fetch- ... " onClick function pokes the API and starts the data
 	   transfer and updates.*/
-    $.each( ['show', 'fetch'], function( index, label ){
-	    var anchorId = 'id-link-' + label + '-' + host.replace( ':', '-' );
-	    var li = '<li><a id="' + anchorId + '">'+ label + ' resource on ' + host + '</a></li>';
-    	$( '#id-nav-pill-resources' ).append( li );
-    });
+	$.each( ['show', 'fetch'], function( index, label ){
+		var anchorId = 'id-link-' + label + '-' + host.replace( ':', '-' );
+		var li = '<li><a id="' + anchorId + '">'+ label + ' resource on ' + host + '</a></li>';
+		$( '#id-nav-pill-resources' ).append( li );
+	});
 	$( '#id-link-show-' + host.replace( ':', '-' ) ).attr( 'href', 'http://' + host + outgoingListUrl + '?format=json' );
-	$( '#id-link-fetch-' + host.replace( ':', '-' ) ).attr( 'href', '#' );    
+	$( '#id-link-fetch-' + host.replace( ':', '-' ) ).attr( 'href', '#' );
 }
