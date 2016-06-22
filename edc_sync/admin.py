@@ -1,9 +1,7 @@
 from django.apps import apps as django_apps
 from django.contrib import admin
 from django.contrib.admin.sites import AdminSite
-from django.contrib.auth.admin import UserAdmin
-from django.contrib.auth.models import User
-from tastypie.admin import ApiKeyInline
+
 from rest_framework.authtoken.admin import TokenAdmin
 from rest_framework.authtoken.models import Token
 
@@ -38,12 +36,6 @@ class TokenAdmin(admin.ModelAdmin):
     ordering = ('-created',)
 admin.site.unregister(Token)
 admin.site.register(Token, TokenAdmin, site=edc_sync_admin)
-
-# class UserModelAdmin(UserAdmin):
-#     inlines = UserAdmin.inlines + [ApiKeyInline]
-#
-# admin.site.unregister(User)
-# admin.site.register(User, UserModelAdmin)
 
 
 @admin.register(IncomingTransaction, site=edc_sync_admin)

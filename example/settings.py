@@ -45,7 +45,6 @@ DEPENDENCY_APPS = [
     'django_js_reverse',
     'corsheaders',
     'django_revision',
-    'tastypie',
     'crispy_forms',
     'simple_history',
     'edc_base',
