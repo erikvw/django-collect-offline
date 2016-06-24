@@ -6,18 +6,9 @@ from rest_framework.authtoken.models import Token
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
+    """Create token when a user is created (from rest_framework)."""
     if created:
         Token.objects.create(user=instance)
-
-
-@receiver(post_save, weak=False, dispatch_uid="deserialize_to_inspector_on_post_save")
-def to_inspector_on_post_save(sender, instance, raw, created, using, **kwargs):
-    if not raw:
-        try:
-            instance.to_inspector_on_post_save(instance, raw, created, using, **kwargs)
-        except AttributeError as e:
-            if 'to_inspector_on_post_save' not in str(e):
-                raise AttributeError(str(e))
 
 
 @receiver(m2m_changed, weak=False, dispatch_uid='serialize_m2m_on_save')
@@ -52,3 +43,14 @@ def serialize_on_post_delete(sender, instance, using, **kwargs):
     except AttributeError as e:
         if 'to_outgoing_transaction' not in str(e):
             raise AttributeError(str(e))
+
+
+@receiver(post_save, weak=False, dispatch_uid="deserialize_to_inspector_on_post_save")
+def to_inspector_on_post_save(sender, instance, raw, created, using, **kwargs):
+    """Middleman"""
+    if not raw:
+        try:
+            instance.to_inspector_on_post_save(instance, raw, created, using, **kwargs)
+        except AttributeError as e:
+            if 'to_inspector_on_post_save' not in str(e):
+                raise AttributeError(str(e))

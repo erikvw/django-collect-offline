@@ -13,17 +13,16 @@ from .base_transaction import BaseTransaction
 
 
 class IncomingTransaction(BaseTransaction):
-    """ Transactions received from a remote producer and to be consumed locally. """
+
+    """ Transactions received from a remote host. """
 
     check_hostname = None
 
     is_consumed = models.BooleanField(
-        default=False,
-        db_index=True)
+        default=False)
 
     is_self = models.BooleanField(
-        default=False,
-        db_index=True)
+        default=False)
 
     def deserialize_transaction(self, using, check_hostname=None, commit=True, check_device=True):
         device = Device()

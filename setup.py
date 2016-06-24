@@ -23,7 +23,9 @@ setup(
     zip_safe=False,
     keywords='django data synchronization offline',
     install_requires=[
-        'django-tastypie',
+        'django-rest-framework',
+        'django-js-reverse',
+        'corsheaders',
     ],
     classifiers=[
         'Environment :: Web Environment',

@@ -1,75 +1,12 @@
-from base64 import b64encode, b64decode
-
-from django.utils import six
-from django.utils.encoding import force_bytes
-from django.utils.translation import ugettext_lazy as _
-
 from rest_framework import serializers
-from rest_framework.fields import Field
-from rest_framework.fields import empty
 
+from edc_rest.binary_field import BinaryField
+from edc_rest.serializers import BaseModelSerializerMixin
 from edc_sync.choices import ACTIONS
 from edc_sync.models import IncomingTransaction, OutgoingTransaction
 
 
-class BinaryField(Field):
-    default_error_messages = {
-        'invalid': _('Value must be valid Binary.')
-    }
-
-    def to_internal_value(self, data):
-        if isinstance(data, six.text_type):
-            return six.memoryview(b64decode(force_bytes(data))).tobytes()
-        return data
-
-    def to_representation(self, value):
-        if isinstance(value, six.binary_type):
-            return b64encode(force_bytes(value)).decode('ascii')
-        return value
-
-    def run_validation(self, data=empty):
-        (is_empty_value, data) = self.validate_empty_values(data)
-        if is_empty_value:
-            return data
-        value = self.to_internal_value(data)
-        self.run_validators(value)
-        return value
-
-
-class BaseModelSerializer:
-
-    model_class = None
-
-    user_created = serializers.CharField(
-        max_length=50,
-        allow_blank=True)
-
-    user_modified = serializers.CharField(
-        max_length=50,
-        allow_blank=True)
-
-    hostname_created = serializers.CharField(
-        max_length=50,
-        allow_blank=True)
-
-    hostname_modified = serializers.CharField(
-        max_length=50,
-        allow_blank=True)
-
-    revision = serializers.CharField(
-        max_length=75)
-
-    def create(self, validated_data):
-        return self.model_class.objects.create(**validated_data)
-
-    def update(self, instance, validated_data):
-        for fieldname in [fld.name for fld in self.model_class._meta.fields]:
-            setattr(instance, fieldname, validated_data.get(fieldname, getattr(instance, fieldname)))
-        instance.save()
-        return instance
-
-
-class BaseTransactionSerializer(BaseModelSerializer, serializers.Serializer):
+class BaseTransactionSerializer(BaseModelSerializerMixin, serializers.Serializer):
 
     pk = serializers.UUIDField(read_only=True)
 

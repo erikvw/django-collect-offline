@@ -11,6 +11,8 @@ class HostManager(models.Manager):
 
 class Host(BaseUuidModel):
 
+    """Abstract class for hosts (either client or server)."""
+
     hostname = models.CharField(
         max_length=200,
         unique=True)
@@ -71,6 +73,8 @@ class Host(BaseUuidModel):
 
 class Client(Host):
 
+    """A model to capture the attributes of hosts (clients) to be contacted by the server."""
+
     class Meta:
         app_label = 'edc_sync'
         ordering = ['hostname', 'port']
@@ -78,6 +82,8 @@ class Client(Host):
 
 
 class Server(Host):
+
+    """A model to capture the attributes of the server."""
 
     class Meta:
         app_label = 'edc_sync'

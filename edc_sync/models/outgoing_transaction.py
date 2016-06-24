@@ -9,14 +9,13 @@ class OutgoingTransaction(BaseTransaction):
     """ Transactions produced locally to be consumed/sent to a queue or consumer. """
 
     is_consumed_middleman = models.BooleanField(
-        default=False,
-        db_index=True)
+        default=False)
 
+    # not required, remove
     is_consumed_server = models.BooleanField(
-        default=False,
-        db_index=True)
+        default=False)
 
-    using = models.CharField(max_length=25)
+    using = models.CharField(max_length=25, null=True)
 
     def save(self, *args, **kwargs):
         if not self.using:

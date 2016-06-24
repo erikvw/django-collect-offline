@@ -36,6 +36,9 @@ class SyncMixin:
     def to_outgoing_transaction(self, using, created=None, deleted=None):
         """ Serialize the model instance to an AES encrypted json object
         and saves the json object to the OutgoingTransaction model."""
+
+        # TODO: i think using should always be default
+
         created = True if created is None else created
         action = 'I' if created else 'U'
         if deleted:
@@ -57,19 +60,11 @@ class SyncMixin:
         """Return the value of the settings.ALLOW_MODEL_SERIALIZATION or True.
 
         If True, this instance will serialized and saved to OutgoingTransaction.
-
-        If this is an audit trail model instance, serialization be disabled if
-        ALLOW_AUDIT_TRAIL_MODEL_SERIALIZATION=False. (default=True)"""
+        """
         try:
             is_serialized = settings.ALLOW_MODEL_SERIALIZATION
         except AttributeError:
             is_serialized = True
-        if is_serialized:
-            # TODO: does this work?? dont think so
-            try:
-                is_serialized = settings.ALLOW_AUDIT_TRAIL_MODEL_SERIALIZATION
-            except AttributeError:
-                is_serialized = True
         return is_serialized
 
     def encrypted_json(self):
@@ -90,38 +85,6 @@ class SyncMixin:
         in your model which return True/False based on the criteria to be used for skipping.
         """
         False
-
-#     def deserialize_prep(self, **kwargs):
-#         """Users may override to manipulate the incoming object before calling save()"""
-#         pass
-#
-#     def _deserialize_post(self, incoming_transaction):
-#         """Default behavior for all subclasses of this class is to
-#         serialize to outgoing transaction.
-#
-#         Note: this is necessary because a deserialized object will not create
-#               an Outgoing Transaction by default since the "raw" parameter is True
-#               on deserialization."""
-#
-#         if not settings.ALLOW_MODEL_SERIALIZATION:
-#             raise SyncError(
-#                 'Unexpectedly attempted to serialize even though settings.ALLOW_MODEL_SERIALIZATION=False')
-#         try:
-#             OutgoingTransaction.objects.get(pk=incoming_transaction.id)
-#         except OutgoingTransaction.DoesNotExist:
-#             OutgoingTransaction.objects.create(
-#                 pk=incoming_transaction.id,
-#                 tx_name=incoming_transaction.tx_name,
-#                 tx_pk=incoming_transaction.tx_pk,
-#                 tx=incoming_transaction.tx,
-#                 timestamp=incoming_transaction.timestamp,
-#                 producer=incoming_transaction.producer,
-#                 action=incoming_transaction.action)
-#         self.deserialize_post()
-#
-#     def deserialize_post(self):
-#         """Users may override to do app specific tasks after deserialization."""
-#         pass
 
     def deserialize_on_duplicate(self):
         """Users may override this to determine how to handle a duplicate
