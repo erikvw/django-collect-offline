@@ -10,8 +10,7 @@ class BaseTransaction(BaseUuidModel):
     tx = models.BinaryField()
 
     tx_name = models.CharField(
-        max_length=64,
-        db_index=True)
+        max_length=64)
 
     tx_pk = models.UUIDField(
         db_index=True)
@@ -36,17 +35,14 @@ class BaseTransaction(BaseUuidModel):
     consumer = models.CharField(
         max_length=200,
         null=True,
-        blank=True,
-        db_index=True)
+        blank=True)
 
     is_ignored = models.BooleanField(
         default=False,
-        db_index=True,
     )
 
     is_error = models.BooleanField(
-        default=False,
-        db_index=True)
+        default=False)
 
     error = models.TextField(
         max_length=1000,

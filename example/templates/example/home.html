@@ -24,9 +24,9 @@
                 {% endif %}
                 <ul id="nav-pill-api" class="nav nav-pills nav-stacked">
                 <li><a href="{% url 'admin:index' %}">Administration</a></li>
-                <li><a href="">Show my top level API</a></li>
                 {% if user.is_authenticated %}
-                    <li><a href="{% url 'outgoingtransaction-list' %}?format=json">Show my outgoingtransaction (limit 20)</a></li>
+                    <li><a href="{% url 'outgoingtransaction-list' %}?format=json">Show my outgoingtransaction</a></li>
+                    <li><a href="{% url 'incomingtransaction-list' %}?format=json">Show my incomingtransaction</a></li>
                 {% endif %}
                 </ul>
             </div>

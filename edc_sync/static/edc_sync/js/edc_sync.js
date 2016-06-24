@@ -92,7 +92,7 @@ function processOutgoingTransactions( host, userName ) {
 	ajGetOutgoing.fail( function( jqXHR, textStatus, errorThrown ) {
 		console.log( textStatus + ': ' + errorThrown );
 		$( '#id-resource-alert' ).removeClass( 'alert-success' ).addClass( 'alert-danger' );
-		$( '#id-resource-alert-text' ).text( 'An error has occured while contacting ' +  host  + '. Got ' + errorThrown + ' accessing ' + nextPage || url);
+		$( '#id-resource-alert-text' ).text( 'An error has occured while contacting ' +  host  + '. Got ' + errorThrown );
 	});
 
 	ajPostIncoming.fail( function( jqXHR, textStatus, errorThrown ) {
