@@ -168,7 +168,7 @@ class TestSync(TestCase):
         TestModel.objects.using('client').create(f1='erik')
         self.assertListEqual(
             [obj.tx_name for obj in OutgoingTransaction.objects.using('client').all()],
-            [u'TestModel', u'HistoricalTestModel'])
+            [u'example.testmodel', u'example.historicaltestmodel'])
         self.assertListEqual([obj.tx_name for obj in OutgoingTransaction.objects.using('server').all()], [])
         self.assertRaises(OutgoingTransaction.DoesNotExist,
                           OutgoingTransaction.objects.using('server').get, tx_name='TestModel')
@@ -181,17 +181,17 @@ class TestSync(TestCase):
         test_model = TestModel.objects.using('client').create(f1='erik')
         self.assertListEqual(
             [obj.tx_name for obj in OutgoingTransaction.objects.using('client').filter(action='I')],
-            [u'TestModel', u'HistoricalTestModel'])
+            [u'example.testmodel', u'example.historicaltestmodel'])
         self.assertListEqual(
             [obj.tx_name for obj in OutgoingTransaction.objects.using('client').filter(action='U')],
             [])
         test_model.save(using='client')
         self.assertListEqual(
             [obj.tx_name for obj in OutgoingTransaction.objects.using('client').filter(action='U')],
-            [u'TestModel'])
+            [u'example.testmodel'])
         self.assertListEqual(
             [obj.tx_name for obj in OutgoingTransaction.objects.using('client').filter(action='I')],
-            [u'TestModel', u'HistoricalTestModel', u'HistoricalTestModel'])
+            [u'example.testmodel', u'example.historicaltestmodel', u'example.historicaltestmodel'])
 
     def test_complex_model_works_for_fk(self):
         with override_settings(DEVICE_ID='99'):
