@@ -25,7 +25,7 @@ setup(
     install_requires=[
         'djangorestframework',
         'django-js-reverse',
-        'corsheaders',
+        'django-cors-headers',
     ],
     classifiers=[
         'Environment :: Web Environment',
