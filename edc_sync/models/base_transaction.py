@@ -60,7 +60,7 @@ class BaseTransaction(BaseUuidModel):
         return '</{}.{}/{}/{}/{}/>'.format(
             self._meta.app_label, self._meta.model_name, self.id, self.tx_name, self.action)
 
-    def render(self):
+    def view(self):
         url = reverse('render_url',
                       kwargs={
                           'model_name': self._meta.object_name.lower(),
@@ -69,7 +69,7 @@ class BaseTransaction(BaseUuidModel):
                'onclick="return showAddAnotherPopup(this);"> <img src="/static/admin/img/icon_addlink.gif" '
                'width="10" height="10" alt="View"/></a>'.format(url=url))
         return ret
-    render.allow_tags = True
+    view.allow_tags = True
 
     class Meta:
         abstract = True

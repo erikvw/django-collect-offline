@@ -44,7 +44,7 @@ class IncomingTransactionAdmin (admin.ModelAdmin):
     ordering = ('-timestamp', )
 
     list_display = (
-        'tx_name', 'render', 'producer', 'is_consumed', 'is_error',
+        'tx_name', 'view', 'producer', 'is_consumed', 'is_error',
         'is_ignored', 'consumer', 'consumed_datetime', 'action',
         'tx_pk', 'timestamp', 'hostname_modified')
 
@@ -71,7 +71,7 @@ class OutgoingTransactionAdmin (admin.ModelAdmin):
     ordering = ('-timestamp', )
 
     list_display = (
-        'tx_name', 'render', 'producer', 'is_consumed_middleman',
+        'tx_name', 'view', 'producer', 'is_consumed_middleman',
         'is_consumed_server', 'is_error', 'consumer',
         'consumed_datetime', 'action', 'tx_pk', 'timestamp',
         'hostname_modified')

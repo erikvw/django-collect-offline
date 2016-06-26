@@ -4,6 +4,7 @@ from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.routers import DefaultRouter
 
 from edc_sync import views
+from edc_sync.admin import edc_sync_admin
 
 router = DefaultRouter()
 router.register(r'outgoingtransaction', views.OutgoingTransactionViewSet)
@@ -16,4 +17,5 @@ urlpatterns = [
     url(r'render/(?P<model_name>\w+)/(?P<pk>[\w]{8}-[\w]{4}-[\w]{4}-[\w]{4}-[\w]{12})/',
         views.RenderView.as_view(), name='render_url'),
     url(r'^jsreverse/$', urls_js, name='js_reverse'),
+    url(r'^admin/', edc_sync_admin.urls),
 ]
