@@ -26,6 +26,7 @@ setup(
         'djangorestframework',
         'django-js-reverse',
         'django-cors-headers',
+        'requests',
     ],
     classifiers=[
         'Environment :: Web Environment',
