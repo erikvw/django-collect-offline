@@ -35,21 +35,29 @@
         <div class="panel panel-default">
             {% if edc_sync_role == 'server' %}
                 <div class="panel-heading">Client Resources</div>
-                    <div id="id-div-resource-alert"></div>
-                    {% if user.is_authenticated %}
-                      <ul id="id-nav-pill-resources" class="nav nav-pills nav-stacked" style="text-transform: capitalize;">
-                      </ul>
-                    {% endif %}
+                <div id="id-div-resource-alert"></div>
+                {% if user.is_authenticated %}
+                  <ul id="id-nav-pill-resources" class="nav nav-pills nav-stacked" style="text-transform: capitalize;">
+                  </ul>
+                {% endif %}
                 <div class="panel-heading">Incoming Transactions</div>
-                    {% if user.is_authenticated %}
-                      <ul id="id-nav-pill-apply" class="nav nav-pills nav-stacked" style="text-transform: capitalize;">
-                      </ul>
-                    {% endif %}
+                {% if user.is_authenticated %}
+                  <ul id="id-nav-pill-apply" class="nav nav-pills nav-stacked" style="text-transform: capitalize;">
+                  </ul>
+                {% endif %}
             {% elif edc_sync_role == 'client' %}
             {% else %}
                 <div class="panel-heading">Resources</div>
                 <div class="alert alert-danger text-center">Edc-Sync role undefined. See AppConfig.</div>
             {% endif%}
+            <div class="panel-heading">CORS Origin Whitelist (from settings)</div>
+            {% if user.is_authenticated %}
+              <ul id="id-nav-pill-resources" class="nav nav-pills nav-stacked" style="text-transform: capitalize;">
+                {% for host in cors_origin_whitelist %}
+                    <li>{{ host }}</li>
+                {% endif %}
+              </ul>
+            {% endif %}
         </div>
         <div id="id-div-json"></div>    
         {% endif%}

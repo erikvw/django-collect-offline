@@ -111,8 +111,17 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
         context.update(
             edc_sync_admin=edc_sync_admin,
             project_name=self.app.verbose_name + ': ' + self.role.title(),
+            cors_origin_whitelist=self.cors_origin_whitelist,
         )
         return context
+
+    @property
+    def cors_origin_whitelist(self):
+        try:
+            cors_origin_whitelist = settings.CORS_ORIGIN_WHITELIST
+        except AttributeError:
+            cors_origin_whitelist = []
+        return cors_origin_whitelist
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
