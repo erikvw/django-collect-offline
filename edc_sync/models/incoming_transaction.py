@@ -3,14 +3,12 @@ import socket
 from django.core import serializers
 from django.db import models, transaction
 from django.utils import timezone
-from django_crypto_fields.cryptor import Cryptor
 
 from edc_device import Device
 
 from ..exceptions import SyncError
 
 from .base_transaction import BaseTransaction
-from django_crypto_fields.constants import LOCAL_MODE
 
 
 class IncomingTransaction(BaseTransaction):
@@ -24,16 +22,6 @@ class IncomingTransaction(BaseTransaction):
 
     is_self = models.BooleanField(
         default=False)
-
-    def aes_decrypt(self, cipher):
-        cryptor = Cryptor()
-        plaintext = cryptor.aes_decrypt(cipher, LOCAL_MODE)
-        return plaintext
-
-    def aes_encrypt(self, plaintext):
-        cryptor = Cryptor()
-        cipher = cryptor.aes_encrypt(plaintext, LOCAL_MODE)
-        return cipher
 
     def deserialize_transaction(self, check_hostname=None, commit=True, check_device=True):
         device = Device()

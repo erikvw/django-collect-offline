@@ -1,6 +1,9 @@
 from django.core.urlresolvers import reverse
 from django.db import models
 
+from django_crypto_fields.cryptor import Cryptor
+from django_crypto_fields.constants import LOCAL_MODE
+
 from edc_base.model.models import BaseUuidModel
 from edc_sync.choices import ACTIONS
 
@@ -59,6 +62,16 @@ class BaseTransaction(BaseUuidModel):
     def __str__(self):
         return '</{}.{}/{}/{}/{}/>'.format(
             self._meta.app_label, self._meta.model_name, self.id, self.tx_name, self.action)
+
+    def aes_decrypt(self, cipher):
+        cryptor = Cryptor()
+        plaintext = cryptor.aes_decrypt(cipher, LOCAL_MODE)
+        return plaintext
+
+    def aes_encrypt(self, plaintext):
+        cryptor = Cryptor()
+        cipher = cryptor.aes_encrypt(plaintext, LOCAL_MODE)
+        return cipher
 
     def view(self):
         url = reverse('render_url',
