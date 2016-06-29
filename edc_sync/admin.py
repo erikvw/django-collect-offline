@@ -28,14 +28,15 @@ class EdcSyncAdminSite(AdminSite):
 
 edc_sync_admin = EdcSyncAdminSite(name='edc_sync_admin')
 
+admin.site.unregister(Token)
 
-class TokenAdmin(admin.ModelAdmin):
+
+@admin.register(Token, site=edc_sync_admin)
+class MyTokenAdmin(TokenAdmin):
     raw_id_fields = ('user',)
     list_display = ('key', 'user', 'created')
-    fields = ('user', 'key')
+    fields = ('user', )
     ordering = ('-created',)
-admin.site.unregister(Token)
-admin.site.register(Token, TokenAdmin, site=edc_sync_admin)
 
 
 @admin.register(IncomingTransaction, site=edc_sync_admin)
@@ -53,7 +54,7 @@ class IncomingTransactionAdmin (admin.ModelAdmin):
         'consumed_datetime', 'producer', 'action', 'tx_name',
         'hostname_modified')
 
-    search_fields = ('tx_pk', 'tx', 'timestamp', 'error')
+    search_fields = ('tx_pk', 'tx', 'timestamp', 'error', 'id')
 
     actions = [
         reset_transaction_as_not_consumed,
@@ -81,7 +82,7 @@ class OutgoingTransactionAdmin (admin.ModelAdmin):
         'consumer', 'consumed_datetime', 'producer',
         'action', 'tx_name', 'hostname_modified')
 
-    search_fields = ('tx_pk', 'tx', 'timestamp', 'error')
+    search_fields = ('tx_pk', 'tx', 'timestamp', 'error', 'id')
 
     actions = [
         reset_outgoing_transaction_server_as_consumed,

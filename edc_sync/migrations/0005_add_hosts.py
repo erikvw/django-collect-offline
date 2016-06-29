@@ -12,14 +12,13 @@ import uuid
 
 class Migration(migrations.Migration):
 
-    initial = True
-
     dependencies = [
+        ('edc_sync', '0004_auto_20160624_1343'),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='IncomingTransaction',
+            name='Client',
             fields=[
                 ('created', django_extensions.db.fields.CreationDateTimeField(auto_now_add=True, verbose_name='created')),
                 ('modified', django_extensions.db.fields.ModificationDateTimeField(auto_now=True, verbose_name='modified')),
@@ -29,28 +28,22 @@ class Migration(migrations.Migration):
                 ('hostname_modified', edc_base.model.fields.hostname_modification_field.HostnameModificationField(editable=False, help_text='System field. (modified on every save)', max_length=50)),
                 ('revision', django_revision.revision_field.RevisionField(blank=True, editable=False, help_text='System field. Git repository tag:branch:commit.', max_length=75, null=True, verbose_name='Revision')),
                 ('id', models.UUIDField(blank=True, default=uuid.uuid4, editable=False, help_text='System auto field. UUID primary key.', primary_key=True, serialize=False)),
-                ('tx', models.BinaryField()),
-                ('tx_name', models.CharField(db_index=True, max_length=64)),
-                ('tx_pk', models.UUIDField(db_index=True)),
-                ('producer', models.CharField(db_index=True, help_text='Producer name', max_length=200)),
-                ('action', models.CharField(choices=[('I', 'Insert'), ('U', 'Update'), ('D', 'Delete')], max_length=1)),
-                ('timestamp', models.CharField(db_index=True, max_length=50)),
-                ('consumed_datetime', models.DateTimeField(blank=True, null=True)),
-                ('consumer', models.CharField(blank=True, db_index=True, max_length=200, null=True)),
-                ('is_ignored', models.BooleanField(db_index=True, default=False, help_text='Ignore if update')),
-                ('is_error', models.BooleanField(db_index=True, default=False)),
-                ('error', models.TextField(blank=True, max_length=1000, null=True)),
-                ('batch_seq', models.IntegerField(blank=True, null=True)),
-                ('batch_id', models.IntegerField(blank=True, null=True)),
-                ('is_consumed', models.BooleanField(db_index=True, default=False)),
-                ('is_self', models.BooleanField(db_index=True, default=False)),
+                ('hostname', models.CharField(max_length=200, unique=True)),
+                ('port', models.IntegerField(default='80')),
+                ('api_name', models.CharField(default='v1', max_length=15)),
+                ('format', models.CharField(default='json', max_length=15)),
+                ('authentication', models.CharField(default='api_key', max_length=15)),
+                ('is_active', models.BooleanField(default=True)),
+                ('last_sync_datetime', models.DateTimeField(blank=True, null=True)),
+                ('last_sync_status', models.CharField(blank=True, default='-', max_length=250, null=True)),
+                ('comment', models.TextField(blank=True, max_length=50, null=True)),
             ],
             options={
-                'ordering': ['timestamp', 'producer'],
+                'ordering': ['hostname', 'port'],
             },
         ),
         migrations.CreateModel(
-            name='OutgoingTransaction',
+            name='Server',
             fields=[
                 ('created', django_extensions.db.fields.CreationDateTimeField(auto_now_add=True, verbose_name='created')),
                 ('modified', django_extensions.db.fields.ModificationDateTimeField(auto_now=True, verbose_name='modified')),
@@ -60,25 +53,26 @@ class Migration(migrations.Migration):
                 ('hostname_modified', edc_base.model.fields.hostname_modification_field.HostnameModificationField(editable=False, help_text='System field. (modified on every save)', max_length=50)),
                 ('revision', django_revision.revision_field.RevisionField(blank=True, editable=False, help_text='System field. Git repository tag:branch:commit.', max_length=75, null=True, verbose_name='Revision')),
                 ('id', models.UUIDField(blank=True, default=uuid.uuid4, editable=False, help_text='System auto field. UUID primary key.', primary_key=True, serialize=False)),
-                ('tx', models.BinaryField()),
-                ('tx_name', models.CharField(db_index=True, max_length=64)),
-                ('tx_pk', models.UUIDField(db_index=True)),
-                ('producer', models.CharField(db_index=True, help_text='Producer name', max_length=200)),
-                ('action', models.CharField(choices=[('I', 'Insert'), ('U', 'Update'), ('D', 'Delete')], max_length=1)),
-                ('timestamp', models.CharField(db_index=True, max_length=50)),
-                ('consumed_datetime', models.DateTimeField(blank=True, null=True)),
-                ('consumer', models.CharField(blank=True, db_index=True, max_length=200, null=True)),
-                ('is_ignored', models.BooleanField(db_index=True, default=False, help_text='Ignore if update')),
-                ('is_error', models.BooleanField(db_index=True, default=False)),
-                ('error', models.TextField(blank=True, max_length=1000, null=True)),
-                ('batch_seq', models.IntegerField(blank=True, null=True)),
-                ('batch_id', models.IntegerField(blank=True, null=True)),
-                ('is_consumed_middleman', models.BooleanField(db_index=True, default=False)),
-                ('is_consumed_server', models.BooleanField(db_index=True, default=False)),
-                ('using', models.CharField(max_length=25)),
+                ('hostname', models.CharField(max_length=200, unique=True)),
+                ('port', models.IntegerField(default='80')),
+                ('api_name', models.CharField(default='v1', max_length=15)),
+                ('format', models.CharField(default='json', max_length=15)),
+                ('authentication', models.CharField(default='api_key', max_length=15)),
+                ('is_active', models.BooleanField(default=True)),
+                ('last_sync_datetime', models.DateTimeField(blank=True, null=True)),
+                ('last_sync_status', models.CharField(blank=True, default='-', max_length=250, null=True)),
+                ('comment', models.TextField(blank=True, max_length=50, null=True)),
             ],
             options={
-                'ordering': ['timestamp'],
+                'ordering': ['hostname', 'port'],
             },
+        ),
+        migrations.AlterUniqueTogether(
+            name='server',
+            unique_together=set([('hostname', 'port')]),
+        ),
+        migrations.AlterUniqueTogether(
+            name='client',
+            unique_together=set([('hostname', 'port')]),
         ),
     ]

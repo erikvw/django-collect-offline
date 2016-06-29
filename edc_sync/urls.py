@@ -1,5 +1,6 @@
 from django.conf.urls import url, include
 from django_js_reverse.views import urls_js
+
 from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.routers import DefaultRouter
 
@@ -18,4 +19,5 @@ urlpatterns = [
         views.RenderView.as_view(), name='render_url'),
     url(r'^jsreverse/$', urls_js, name='js_reverse'),
     url(r'^admin/', edc_sync_admin.urls),
+    url(r'^home/', views.HomeView.as_view(), name='edc_sync_home_url'),
 ]

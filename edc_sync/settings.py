@@ -182,3 +182,5 @@ REST_FRAMEWORK = {
 #         'rest_framework.permissions.IsAuthenticated',
 #     )
 }
+
+APP_LABEL = 'edc_sync'

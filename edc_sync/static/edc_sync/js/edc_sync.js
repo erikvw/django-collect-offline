@@ -164,9 +164,10 @@ function makePageElements ( divId, host, resourceName, listUrl, userName ) {
 	   transfer and updates.*/
 	$.each( ['show', 'fetch'], function( index, label ){
 		var anchorId = 'id-link-' + label + '-' + host.replace( ':', '-' );
-		var li = '<li><a id="' + anchorId + '">'+ label + ' resource on ' + host + '</a></li>';
+		var li = '<li><a id="' + anchorId + '">'+ label + ' \'OutgoingTransaction\' Resource on Host \'' + host + '\'</a></li>';
 		$( '#id-nav-pill-resources' ).append( li );
 	});
 	$( '#id-link-show-' + host.replace( ':', '-' ) ).attr( 'href', 'http://' + host + outgoingListUrl + '?format=json' );
 	$( '#id-link-fetch-' + host.replace( ':', '-' ) ).attr( 'href', '#' );
+	$( '#id-nav-pill-apply' ).append( '<li><a id="id-link-apply" href="#">Apply Incoming Transactions</a></li>' );
 }

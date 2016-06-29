@@ -1,0 +1,70 @@
+{% extends 'edc_base/base.html' %}
+
+{% load staticfiles %}
+
+{% block extra-scripts %}
+{{ block.super }}
+<script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/edc_sync.js" %}"></script>
+{% endblock extra-scripts %}
+
+{% block main %}
+        
+    <div id="div-home-middle" class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">Administration</div>
+            <ul id="nav-pill-admin" class="nav nav-pills nav-stacked">
+                <li><a href="{% url 'edc_sync_admin:index'%} ">{{ edc_sync_admin.index_title }}</a></li>
+            </ul>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">API</div>
+                {% if user.is_authenticated and api_token == None %}
+                    <div class="alert alert-danger text-center">Current user '{{ user.username }}' missing API token.</div>
+                {% endif %}
+                <ul id="nav-pill-api" class="nav nav-pills nav-stacked">
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'outgoingtransaction-list' %}?format=json">Show My Outgoingtransaction</a></li>
+                    <li><a href="{% url 'incomingtransaction-list' %}?format=json">Show My Incomingtransaction</a></li>
+                {% endif %}
+                </ul>
+            </div>
+    </div><!-- div-home-middle -->
+
+    <div id="div-home-right" class="col-md-8">
+        {% if edc_sync_role == 'server' %}
+        <div class="panel panel-default">
+            {% if edc_sync_role == 'server' %}
+                <div class="panel-heading">Client Resources</div>
+                    <div id="id-div-resource-alert"></div>
+                    {% if user.is_authenticated %}
+                      <ul id="id-nav-pill-resources" class="nav nav-pills nav-stacked" style="text-transform: capitalize;">
+                      </ul>
+                    {% endif %}
+                <div class="panel-heading">Incoming Transactions</div>
+                    {% if user.is_authenticated %}
+                      <ul id="id-nav-pill-apply" class="nav nav-pills nav-stacked" style="text-transform: capitalize;">
+                      </ul>
+                    {% endif %}
+            {% elif edc_sync_role == 'client' %}
+            {% else %}
+                <div class="panel-heading">Resources</div>
+                <div class="alert alert-danger text-center">Edc-Sync role undefined. See AppConfig.</div>
+            {% endif%}
+        </div>
+        <div id="id-div-json"></div>    
+        {% endif%}
+    </div>
+
+{% endblock main %}
+
+{% block extra-scripts-bottom %}
+{{ block.super }}
+
+<script type="text/javascript" charset="utf8" class="init">
+    $(document).ready( function() { 
+        edcSyncReady('{{ hosts|escapejs }}', '{{ user.username }}', '{{ api_token }}');
+    });
+
+</script>
+
+{% endblock extra-scripts-bottom %}

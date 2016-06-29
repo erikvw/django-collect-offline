@@ -7,6 +7,7 @@ from requests.exceptions import RequestException
 from edc_sync.constants import SERVER, CLIENT
 from edc_sync.models.host import Client, Server
 from rest_framework.authtoken.models import Token
+from django.core.exceptions import ImproperlyConfigured
 
 
 class EdcSyncViewMixin:
@@ -22,6 +23,9 @@ class EdcSyncViewMixin:
             host_model = Client
         if self.role == CLIENT:
             host_model = Server
+        if not self.role:
+            raise ImproperlyConfigured(
+                'Project uses \'edc_sync\' but has not defined a role for this app instance. See AppConfig.')
         return host_model
 
     @property
@@ -56,6 +60,7 @@ class EdcSyncViewMixin:
         context.update(
             api_token=self.get_api_token(self.request.user),
             hosts=json.dumps(self.hosts),
+            edc_sync_role=self.role,
             resource=self.resource,
         )
         return context

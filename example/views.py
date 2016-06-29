@@ -14,7 +14,7 @@ from example.admin import example_admin
 
 class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
-    template_name = 'example/home.html'
+    template_name = 'edc_sync/home.html'
     app_label = settings.APP_LABEL
 
     def __init__(self, *args, **kwargs):
