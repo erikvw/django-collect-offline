@@ -14,6 +14,16 @@ from django_crypto_fields.field_cryptor import FieldCryptor
 
 class Command(BaseCommand):
 
+    def add_arguments(self, parser):
+
+        parser.add_argument(
+            '--dry-run',
+            action='store_true',
+            dest='dry-run',
+            default=False,
+            help='dry run',
+        )
+
     def __init__(self, *args, **kwargs):
         self.aes_decrypt = Cryptor(aes_encryption_mode=AES_CIPHER.MODE_CFB).aes_decrypt
         self.aes_encrypt = Cryptor(aes_encryption_mode=AES_CIPHER.MODE_CBC).aes_encrypt
@@ -21,7 +31,7 @@ class Command(BaseCommand):
         super(Command, self).__init__(*args, **kwargs)
 
     def handle(self, *args, **options):
-        self.dry_run = True
+        self.dry_run = options['dry-run']
         if self.dry_run:
             sys.stdout.write(self.style.NOTICE('\nDry run. No changes will be made.\n'))
         error_msg = (
