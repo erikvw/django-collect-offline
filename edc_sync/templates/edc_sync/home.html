@@ -54,7 +54,7 @@
             {% if user.is_authenticated %}
               <ul id="id-nav-pill-resources" class="nav nav-pills nav-stacked" style="text-transform: capitalize;">
                 {% for host in cors_origin_whitelist %}
-                    <li>{{ host }}</li>
+                    <li><a>{{ host }}</a></li>
                 {% endfor %}
               </ul>
             {% endif %}
