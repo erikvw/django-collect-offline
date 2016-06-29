@@ -21,7 +21,7 @@ function edcSyncReady(hosts, userName, apiToken) {
 		var divId = 'id-nav-pill-resources';
 		makePageElements( divId, host, userName )
 		// this is the onClick event that starts the data transfer for this host.
-		$( '#id-link-fetch-' + host.replace( ':', '-' ).replace( '.', '-' ) ).click( function (e) {
+		$( '#id-link-fetch-' + host.replace( ':', '-' ).split( '.' ).join( '-' ) ).click( function (e) {
 		e.preventDefault();
 			displayGetDataAlert( host );	
 			processOutgoingTransactions( host, userName );
@@ -163,11 +163,12 @@ function makePageElements ( divId, host, resourceName, listUrl, userName ) {
 	   The "id-link-fetch- ... " onClick function pokes the API and starts the data
 	   transfer and updates.*/
 	$.each( ['show', 'fetch'], function( index, label ){
-		var anchorId = 'id-link-' + label + '-' + host.replace( ':', '-' ).replace( '.', '-' );
+		var anchorId = 'id-link-' + label + '-' + host.replace( ':', '-' ).split( '.' ).join( '-' );
 		var li = '<li><a id="' + anchorId + '">'+ label + ' \'OutgoingTransaction\' Resource on Host \'' + host + '\'</a></li>';
 		$( '#id-nav-pill-resources' ).append( li );
 	});
-	$( '#id-link-show-' + host.replace( ':', '-' ).replace( '.', '-' ) ).attr( 'href', 'http://' + host + outgoingListUrl + '?format=json' );
-	$( '#id-link-fetch-' + host.replace( ':', '-' ).replace( '.', '-' ) ).attr( 'href', '#' );
+	alert(host.replace( ':', '-' ).split( '.' ).join( '-' ));
+	$( '#id-link-show-' + host.replace( ':', '-' ).split( '.' ).join( '-' ) ).attr( 'href', 'http://' + host + outgoingListUrl + '?format=json' );
+	$( '#id-link-fetch-' + host.replace( ':', '-' ).split( '.' ).join( '-' ) ).attr( 'href', '#' );
 	$( '#id-nav-pill-apply' ).append( '<li><a id="id-link-apply" href="#">Apply Incoming Transactions</a></li>' );
 }
