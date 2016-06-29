@@ -167,7 +167,6 @@ function makePageElements ( divId, host, resourceName, listUrl, userName ) {
 		var li = '<li><a id="' + anchorId + '">'+ label + ' \'OutgoingTransaction\' Resource on Host \'' + host + '\'</a></li>';
 		$( '#id-nav-pill-resources' ).append( li );
 	});
-	alert(host.replace( ':', '-' ).split( '.' ).join( '-' ));
 	$( '#id-link-show-' + host.replace( ':', '-' ).split( '.' ).join( '-' ) ).attr( 'href', 'http://' + host + outgoingListUrl + '?format=json' );
 	$( '#id-link-fetch-' + host.replace( ':', '-' ).split( '.' ).join( '-' ) ).attr( 'href', '#' );
 	$( '#id-nav-pill-apply' ).append( '<li><a id="id-link-apply" href="#">Apply Incoming Transactions</a></li>' );
