@@ -50,6 +50,10 @@
                 <div class="panel-heading">Resources</div>
                 <div class="alert alert-danger text-center">Edc-Sync role undefined. See AppConfig.</div>
             {% endif%}
+        </div>
+        <div id="id-div-json"></div>    
+        {% endif%}
+        <div class="panel panel-default">
             <div class="panel-heading">CORS Origin Whitelist (from settings)</div>
             {% if user.is_authenticated %}
               <ul id="id-nav-pill-resources" class="nav nav-pills nav-stacked" style="text-transform: capitalize;">
@@ -59,8 +63,6 @@
               </ul>
             {% endif %}
         </div>
-        <div id="id-div-json"></div>    
-        {% endif%}
     </div>
 
 {% endblock main %}
