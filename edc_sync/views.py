@@ -1,4 +1,5 @@
 import json
+import socket
 
 from django.apps import apps as django_apps
 from django.conf import settings
@@ -25,6 +26,7 @@ from edc_sync.serializers import OutgoingTransactionSerializer, IncomingTransact
 from rest_framework.renderers import JSONRenderer
 from rest_framework.views import APIView
 from django.db.models.aggregates import Count
+
 
 
 @api_view(['GET'])
@@ -112,8 +114,19 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
             edc_sync_admin=edc_sync_admin,
             project_name=self.app.verbose_name + ': ' + self.role.title(),
             cors_origin_whitelist=self.cors_origin_whitelist,
+            hostname=socket.gethostname(),
+            ip_address=self.ip_address,
         )
         return context
+
+    @property
+    def ip_address(self):
+        return [l for l in (
+            [ip for ip in socket.gethostbyname_ex(socket.gethostname())[2]
+                if not ip.startswith("127.")][:1], [[
+                    (s.connect(('8.8.8.8', 53)), s.getsockname()[0], s.close())
+                    for s in [socket.socket(socket.AF_INET, socket.SOCK_DGRAM)]][0][1]]
+        ) if l][0][0]
 
     @property
     def cors_origin_whitelist(self):

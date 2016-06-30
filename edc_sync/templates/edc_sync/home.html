@@ -11,6 +11,11 @@
         
     <div id="div-home-middle" class="col-md-4">
         <div class="panel panel-default">
+            <ul id="nav-pill-host" class="nav nav-pills nav-stacked">
+                <li><a href="#">{{ edc_sync_role|title }}: {{ hostname }} <span class="pull-right">{{ ip_address }}</span></a></li>
+            </ul>
+        </div>
+        <div class="panel panel-default">
             <div class="panel-heading">Administration</div>
             <ul id="nav-pill-admin" class="nav nav-pills nav-stacked">
                 <li><a href="{% url 'edc_sync_admin:index'%} ">{{ edc_sync_admin.index_title }}</a></li>
