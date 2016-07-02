@@ -174,7 +174,7 @@ function makePageElements ( divId, host, resourceName, listUrl, userName ) {
 
 function updateStatictics( host ) {
 	var host_string = host.replace( ':', '-' ).split( '.' ).join( '-' );
-	var url = host + Urls['transaction-count'];
+	var url = 'http://' + host + Urls['transaction-count']();
 	ajTransactionCount = $.ajax({
 		url: url,
 		type: 'GET',
