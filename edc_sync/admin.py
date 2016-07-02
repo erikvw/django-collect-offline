@@ -24,7 +24,7 @@ class EdcSyncAdminSite(AdminSite):
     site_header = edc_sync_app.verbose_name
     site_title = edc_sync_app.verbose_name
     index_title = edc_sync_app.verbose_name + ' ' + 'Admin'
-    site_url = '/edc_sync/'
+    site_url = '/'
 
 edc_sync_admin = EdcSyncAdminSite(name='edc_sync_admin')
 
