@@ -184,7 +184,7 @@ function updateStatictics( host ) {
 	ajTransactionCount.done( function ( data ) {
 		if ( data != null ) {
 			$( '#bdg-outgoingtransaction-count-' + host_string + '').text(data.outgoingtransaction_count)			
-			$( '#id-hostname-' + host_string +'').text(data.hostname)			
+			$( '#id-hostname-' + host_string +'').text('[' + data.hostname.toLowerCase() + ']')			
 		}
 	});
 }
