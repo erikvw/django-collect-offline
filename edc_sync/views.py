@@ -28,14 +28,13 @@ from rest_framework.views import APIView
 from django.db.models.aggregates import Count
 
 
-
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication, ))
 @permission_classes((IsAuthenticated,))
 def api_root(request, format=None):
     return Response({
         'outgoingtransaction': reverse('outgoingtransaction-list', request=request, format=format),
-        'incomingtransaction': reverse('outgoingtransaction-list', request=request, format=format)
+        'incomingtransaction': reverse('outgoingtransaction-list', request=request, format=format),
     })
 
 
@@ -54,18 +53,23 @@ class IncomingTransactionViewSet(viewsets.ModelViewSet):
     serializer_class = IncomingTransactionSerializer
 
 
-# class OutgoingTransactionCountView(viewsets.ModelViewSet):
-#
-#     queryset = OutgoingTransaction.objects.all()
-#     serializer_class = OutgoingTransactionSerializer
-#
-#     def filter_queryset(self, queryset):
-#         return self.queryset.filter(is_consumed_server=False)
-#
-#     def get_queryset(self):
-#         return self.filter_queryset.annotate(
-#             is_consumed_server=Count('is_consumed_server'),
-#         )
+class TransactionCountView(APIView):
+    """
+    A view that returns the count  of transactions.
+    """
+    renderer_classes = (JSONRenderer, )
+
+    def get(self, request, format=None):
+        outgoingtransaction_count = OutgoingTransaction.objects.filter(is_consumed_server=False).count()
+        outgoingtransaction_middleman_count = OutgoingTransaction.objects.filter(
+            is_consumed_server=False,
+            is_consumed_middleman=False).count()
+        incomingtransaction_count = IncomingTransaction.objects.filter(is_consumed=False).count()
+        content = {'outgoingtransaction_count': outgoingtransaction_count,
+                   'outgoingtransaction_middleman_count': outgoingtransaction_middleman_count,
+                   'incomingtransaction_count': incomingtransaction_count,
+                   'hostname': socket.gethostname()}
+        return Response(content)
 
 
 class RenderView(EdcBaseViewMixin, TemplateView):

@@ -15,7 +15,7 @@ from .actions import (
 
 from .constants import SERVER, CLIENT
 from .models import IncomingTransaction, OutgoingTransaction, Client, Server
-
+from django.core.urlresolvers import reverse
 
 edc_sync_app = django_apps.get_app_config('edc_sync')
 
@@ -24,7 +24,7 @@ class EdcSyncAdminSite(AdminSite):
     site_header = edc_sync_app.verbose_name
     site_title = edc_sync_app.verbose_name
     index_title = edc_sync_app.verbose_name + ' ' + 'Admin'
-    site_url = '/'
+    site_url = '/edc-sync/'
 
 edc_sync_admin = EdcSyncAdminSite(name='edc_sync_admin')
 
@@ -96,11 +96,6 @@ class HostAdmin(admin.ModelAdmin):
             'last_sync_datetime', 'last_sync_status', 'comment')
 
         list_filter = ('is_active', 'last_sync_datetime', 'last_sync_status',)
-
-#         actions = [
-#             reset_producer_status,
-#             update_producer_from_settings_file,
-#             toggle_producer_is_active]
 
 
 if edc_sync_app.role == SERVER:

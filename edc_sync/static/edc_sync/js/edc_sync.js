@@ -26,7 +26,10 @@ function edcSyncReady(hosts, userName, apiToken) {
 			displayGetDataAlert( host );	
 			processOutgoingTransactions( host, userName );
 		});
+		updateStatictics( host );
 	});
+	$( '#id-nav-pill-apply' ).append( '<li><a id="id-link-apply" href="#">Apply Incoming Transactions<span id="bdg-incomingtransaction-count" class="badge pull-right">0</span></a></li>' );
+
 }
 
 function processOutgoingTransactions( host, userName ) {
@@ -162,12 +165,26 @@ function makePageElements ( divId, host, resourceName, listUrl, userName ) {
 	/* Make and update page elements.
 	   The "id-link-fetch- ... " onClick function pokes the API and starts the data
 	   transfer and updates.*/
-	$.each( ['show', 'fetch'], function( index, label ){
-		var anchorId = 'id-link-' + label + '-' + host.replace( ':', '-' ).split( '.' ).join( '-' );
-		var li = '<li><a id="' + anchorId + '">'+ label + ' \'OutgoingTransaction\' Resource on Host \'' + host + '\'</a></li>';
-		$( '#id-nav-pill-resources' ).append( li );
+	var host_string = host.replace( ':', '-' ).split( '.' ).join( '-' );
+	var anchorId = 'id-link-fetch-' + host_string;
+	var li = '<li><a id="' + anchorId + '">Fetch \'OutgoingTransaction\' from ' + host + '&nbsp;<span id="id-hostname-' + host_string +'"></span>&nbsp;<span id="bdg-outgoingtransaction-count-' + host_string + '" class="badge pull-right">?</span></a></li>';
+	$( '#id-nav-pill-resources' ).append( li );
+	$( '#id-link-fetch-' + host_string ).attr( 'href', '#' );
+}
+
+function updateStatictics( host ) {
+	var host_string = host.replace( ':', '-' ).split( '.' ).join( '-' );
+	var url = host + Urls['transaction-count'];
+	ajTransactionCount = $.ajax({
+		url: url,
+		type: 'GET',
+		dataType: 'json',
+		processData: false,
 	});
-	$( '#id-link-show-' + host.replace( ':', '-' ).split( '.' ).join( '-' ) ).attr( 'href', 'http://' + host + outgoingListUrl + '?format=json' );
-	$( '#id-link-fetch-' + host.replace( ':', '-' ).split( '.' ).join( '-' ) ).attr( 'href', '#' );
-	$( '#id-nav-pill-apply' ).append( '<li><a id="id-link-apply" href="#">Apply Incoming Transactions</a></li>' );
+	ajTransactionCount.done( function ( data ) {
+		if ( data != null ) {
+			$( '#bdg-outgoingtransaction-count-' + host_string + '').text(data.outgoingtransaction_count)			
+			$( '#id-hostname-' + host_string +'').text(data.hostname)			
+		}
+	});
 }

@@ -19,6 +19,8 @@
             <div class="panel-heading">Administration</div>
             <ul id="nav-pill-admin" class="nav nav-pills nav-stacked">
                 <li><a href="{% url 'edc_sync_admin:index'%} ">{{ edc_sync_admin.index_title }}</a></li>
+                <li><a href="{% url 'edc_sync_admin:edc_sync_client_changelist'%} ">Clients</a></li>
+                <li><a href="{% url 'edc_sync_admin:authtoken_token_changelist'%} ">User Tokens</a></li>
             </ul>
         </div>
         <div class="panel panel-default">
@@ -33,19 +35,35 @@
                 {% endif %}
                 </ul>
             </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">CORS Origin Whitelist (from settings)</div>
+            {% if user.is_authenticated %}
+              <ul id="id-nav-pill-cors" class="nav nav-pills nav-stacked" style="text-transform: capitalize;">
+                {% for host in cors_origin_whitelist %}
+                    <li><a>{{ host }}</a></li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+        </div>
+            
     </div><!-- div-home-middle -->
 
     <div id="div-home-right" class="col-md-8">
         {% if edc_sync_role == 'server' %}
         <div class="panel panel-default">
             {% if edc_sync_role == 'server' %}
-                <div class="panel-heading">Client Resources</div>
+                <div class="panel-heading">Client Resources
+                <a id="link-refresh-clients" href=""><i id="bdg-refresh-clients" class="fa fa-refresh fa-1x fa-fw pull-right"></i></a>
+                </div>
                 <div id="id-div-resource-alert"></div>
                 {% if user.is_authenticated %}
                   <ul id="id-nav-pill-resources" class="nav nav-pills nav-stacked" style="text-transform: capitalize;">
                   </ul>
                 {% endif %}
-                <div class="panel-heading">Incoming Transactions</div>
+                <div class="panel-heading">Incoming Transactions
+                <a id="link-refresh-self" href=""><i id="bdg-refresh-self" class="fa fa-refresh fa-1x fa-fw pull-right"></i></a>
+                </div>
                 {% if user.is_authenticated %}
                   <ul id="id-nav-pill-apply" class="nav nav-pills nav-stacked" style="text-transform: capitalize;">
                   </ul>
@@ -56,18 +74,7 @@
                 <div class="alert alert-danger text-center">Edc-Sync role undefined. See AppConfig.</div>
             {% endif%}
         </div>
-        <div id="id-div-json"></div>    
         {% endif%}
-        <div class="panel panel-default">
-            <div class="panel-heading">CORS Origin Whitelist (from settings)</div>
-            {% if user.is_authenticated %}
-              <ul id="id-nav-pill-resources" class="nav nav-pills nav-stacked" style="text-transform: capitalize;">
-                {% for host in cors_origin_whitelist %}
-                    <li><a>{{ host }}</a></li>
-                {% endfor %}
-              </ul>
-            {% endif %}
-        </div>
     </div>
 </div>
 {% endblock main %}
