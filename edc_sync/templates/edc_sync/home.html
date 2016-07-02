@@ -48,7 +48,11 @@
             <div class="panel-heading">Administration</div>
             <ul id="nav-pill-admin" class="nav nav-pills nav-stacked">
                 <li><a href="{% url 'edc_sync_admin:index'%} ">{{ edc_sync_admin.index_title }}</a></li>
-                <li><a href="{% url 'edc_sync_admin:edc_sync_client_changelist'%} ">Clients</a></li>
+                {% if edc_sync_role == 'server' %}
+                    <li><a href="{% url 'edc_sync_admin:edc_sync_client_changelist'%} ">Clients</a></li>
+                {% elif edc_sync_role == 'client' %}
+                    <li><a href="{% url 'edc_sync_admin:edc_sync_server_changelist'%} ">Servers</a></li>
+                {% endif %}
                 <li><a href="{% url 'edc_sync_admin:authtoken_token_changelist'%} ">User Tokens</a></li>
             </ul>
         </div>
