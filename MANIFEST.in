@@ -1,2 +1,2 @@
 recursive-include edc_sync/templates *
-recursive-include edc_sync/static/edc_sync *
+recursive-include edc_sync/static/ *
