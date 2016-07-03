@@ -7,7 +7,6 @@ test-*
 .settings
 db.sqlite3*
 example/db.sqlite3.server
-sync_old/
 example/static/
 # C extensions
 *.so
