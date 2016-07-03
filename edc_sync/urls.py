@@ -20,5 +20,5 @@ urlpatterns = [
         views.RenderView.as_view(), name='render_url'),
     url(r'^jsreverse/$', urls_js, name='js_reverse'),
     url(r'^admin/', edc_sync_admin.urls),
-    url(r'^', views.HomeView.as_view(), name='edc_sync_home_url'),
+    url(r'^', views.HomeView.as_view(), name='edc-sync-home-url'),
 ]

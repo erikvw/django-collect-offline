@@ -15,7 +15,6 @@ from .actions import (
 
 from .constants import SERVER, CLIENT
 from .models import IncomingTransaction, OutgoingTransaction, Client, Server
-from django.core.urlresolvers import reverse
 
 edc_sync_app = django_apps.get_app_config('edc_sync')
 
