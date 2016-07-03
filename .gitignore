@@ -8,7 +8,6 @@ test-*
 db.sqlite3*
 example/db.sqlite3.server
 sync_old/
-edc_sync/static/admin/*
 example/static/
 # C extensions
 *.so
