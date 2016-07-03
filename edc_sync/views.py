@@ -125,9 +125,7 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
     @property
     def ip_address(self):
-        ip_address = [[ip for ip in socket.gethostbyname_ex(socket.gethostname())[2]
-                       if not ip.startswith("127.")][:1]][0][0]
-        return ip_address
+        return None
 
     @property
     def cors_origin_whitelist(self):
