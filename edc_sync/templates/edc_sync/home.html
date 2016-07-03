@@ -20,7 +20,7 @@
         <div class="panel panel-default">
             {% if edc_sync_role == 'server' %}
                 <div class="panel-heading">Client Resources
-                <a id="link-refresh-clients" href=""><i id="bdg-refresh-clients" class="fa fa-refresh fa-1x fa-fw pull-right"></i></a>
+                <a id="link-refresh-clients" title="click to refresh" href=""><i id="bdg-refresh-clients" class="fa fa-refresh fa-1x fa-fw pull-right"></i></a>
                 </div>
                 <div id="id-div-resource-alert"></div>
                 {% if user.is_authenticated %}
@@ -72,7 +72,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">CORS Origin Whitelist (from settings)</div>
             {% if user.is_authenticated %}
-              <ul id="id-nav-pill-cors" class="nav nav-pills nav-stacked" style="text-transform: capitalize;">
+              <ul id="id-nav-pill-cors" class="nav nav-pills nav-stacked">
                 {% for host in cors_origin_whitelist %}
                     <li><a>{{ host }}</a></li>
                 {% endfor %}

@@ -26,9 +26,13 @@ function edcSyncReady(hosts, userName, apiToken) {
 			displayGetDataAlert( host );	
 			processOutgoingTransactions( host, userName );
 		});
-		updateStatictics( host );
 	});
+	updateFromHosts( hosts );
 	$( '#id-nav-pill-apply' ).append( '<li><a id="id-link-apply" href="#">Apply Incoming Transactions<span id="bdg-incomingtransaction-count" class="badge pull-right">0</span></a></li>' );
+    $('#bdg-refresh-clients').click( function(e) {
+        e.preventDefault();
+        updateFromHosts( hosts );
+    });
 
 }
 
@@ -172,7 +176,15 @@ function makePageElements ( divId, host, resourceName, listUrl, userName ) {
 	$( '#id-link-fetch-' + host_string ).attr( 'href', '#' );
 }
 
-function updateStatictics( host ) {
+function updateFromHosts( hosts ) {
+    $("#bdg-refresh-clients").addClass('fa-spin');
+	$.each( hosts, function( host ) {
+		updateFromHost( host );
+	});	
+	$("#bdg-refresh-clients").removeClass('fa-spin');		
+}
+
+function updateFromHost( host ) {
 	var host_string = host.replace( ':', '-' ).split( '.' ).join( '-' );
 	var url = 'http://' + host + Urls['transaction-count']();
 	ajTransactionCount = $.ajax({
@@ -184,7 +196,7 @@ function updateStatictics( host ) {
 	ajTransactionCount.done( function ( data ) {
 		if ( data != null ) {
 			$( '#bdg-outgoingtransaction-count-' + host_string + '').text(data.outgoingtransaction_count)			
-			$( '#id-hostname-' + host_string +'').text('[' + data.hostname.toLowerCase() + ']')			
+			$( '#id-hostname-' + host_string +'').text(' -- ' + data.hostname.toLowerCase() + '')			
 		}
 	});
 }
