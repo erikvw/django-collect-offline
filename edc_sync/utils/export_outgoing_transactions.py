@@ -23,7 +23,8 @@ def export_outgoing_transactions(path):
             outgoing_transactions = OutgoingTransaction.objects.filter(
                 is_consumed_server=False, is_consumed_middleman=False)
             json_txt = serializers.serialize(
-                "json", outgoing_transactions, ensure_ascii=True, use_natural_keys=True)
+                "json", outgoing_transactions, ensure_ascii=True,  use_natural_foreign_keys=True,
+                use_natural_primary_keys=False)
             f.write(json_txt)
             exported = outgoing_transactions.count()
             with transaction.atomic():

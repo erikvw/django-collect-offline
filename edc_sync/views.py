@@ -1,6 +1,7 @@
 import json
 import socket
 
+from django.shortcuts import redirect
 from django.apps import apps as django_apps
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -10,6 +11,9 @@ from django.utils.decorators import method_decorator
 from django.views.generic.base import TemplateView
 from django_crypto_fields.constants import LOCAL_MODE
 from django_crypto_fields.cryptor import Cryptor
+from django.shortcuts import render
+from django.contrib import messages
+from datetime import datetime
 
 from rest_framework import viewsets
 from rest_framework.authentication import TokenAuthentication
@@ -26,6 +30,7 @@ from edc_sync.serializers import OutgoingTransactionSerializer, IncomingTransact
 from rest_framework.renderers import JSONRenderer
 from rest_framework.views import APIView
 from django.db.models.aggregates import Count
+from edc_sync.utils.export_outgoing_transactions import export_outgoing_transactions
 
 
 @api_view(['GET'])
@@ -145,3 +150,43 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         return super(HomeView, self).dispatch(*args, **kwargs)
+
+
+class SendTransactionFilesView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
+
+    template_name = 'edc_sync/home.html'
+    app_label = settings.APP_LABEL
+    COMMUNITY = None
+
+    def __init__(self, *args, **kwargs):
+        super(SendTransactionFilesView, self).__init__(*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(
+            edc_sync_admin=edc_sync_admin,
+            project_name=self.app.verbose_name + ': ' + self.role.title(),
+            cors_origin_whitelist=self.cors_origin_whitelist,
+            hostname=socket.gethostname(),
+            ip_address=self.ip_address,
+        )
+        return context
+
+    def get(self, request, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        TODAY = datetime.today().strftime("%Y%m%d%H%M")
+        file_name = "bcpp_interview_{}_{}.json".format(request.GET.get('community') or 'bhp', TODAY)
+        root_path = "/Users/django/django/transaction_json_files/dump/"
+        path = '{}{}'.format(root_path, file_name)
+        self.dump_transactions(path)
+        self.transfer_transactions()
+        messages.add_message(request, messages.INFO, 'Transactions transfered to the server successfully.')
+        #return render(request, self.template_name, context)
+        return redirect(reverse('edc-sync-home-url'))
+
+    def dump_transactions(self, path):
+        return export_outgoing_transactions(path)
+
+    def transfer_transactions(self):
+        from subprocess import call
+        call(["sh", "/Users/django/source/scripts/community/tx_scp_transaction_file_to_community_server.sh"])
