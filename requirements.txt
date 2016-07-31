@@ -2,6 +2,7 @@ Django
 factory-boy
 django-simple-history
 django-rest-framework
+django-rest-swagger
 django-js-reverse
 corsheaders
 # djangorestframework-httpsignature
