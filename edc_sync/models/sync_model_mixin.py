@@ -7,11 +7,10 @@ from django.db import models
 from django.db.models.fields import UUIDField, AutoField
 from django.utils import timezone
 from django.utils.timezone import now
-from simple_history.models import HistoricalRecords
 
 from django_crypto_fields.constants import LOCAL_MODE
 from django_crypto_fields.cryptor import Cryptor
-
+from edc_base.model.models.historical_records import HistoricalRecords
 from ..exceptions import SyncModelError
 
 from .outgoing_transaction import OutgoingTransaction
@@ -109,50 +108,15 @@ class SyncHistoricalRecords(HistoricalRecords):
 
     """Sync HistoricalRecords that uses a UUID primary key and has a natural key method."""
 
-    def get_history_id_field(self, model):
-        """Return a field instance without initially assuming
-        it should be AutoField.
-
-        For example, primary key is UUIDField(primary_key=True, default=uuid.uuid4)"""
-        try:
-            field = [field for field in model._meta.fields if field.primary_key][0]
-            field = field.__class__(primary_key=True, default=field.default)
-        except (IndexError, TypeError):
-            field = AutoField(primary_key=True)
-        return field
-
     def get_extra_fields(self, model, fields):
         """Override to set history_id (to UUIDField) and add the
         SyncModelMixin methods."""
         extra_fields = super(SyncHistoricalRecords, self).get_extra_fields(model, fields)
-        extra_fields.update({'history_id': self.get_history_id_field(model)})
         extra_fields.update(
             {attr: getattr(SyncMixin, attr)
              for attr in [attr for attr in dir(SyncMixin)if not attr.startswith('_')]
              })
         return extra_fields
-
-    def post_save(self, instance, created, **kwargs):
-        """Override to include \'using\'."""
-        if not created and hasattr(instance, 'skip_history_when_saving'):
-            return
-        if not kwargs.get('raw', False):
-            self.create_historical_record(instance, created and '+' or '~', using=kwargs.get('using'))
-
-    def post_delete(self, instance, **kwargs):
-        """Override to include \'using\'."""
-        self.create_historical_record(instance, '-', using=kwargs.get('using'))
-
-    def create_historical_record(self, instance, history_type, **kwargs):
-        """Override to include \'using\'."""
-        history_date = getattr(instance, '_history_date', now())
-        history_user = self.get_history_user(instance)
-        manager = getattr(instance, self.manager_name)
-        attrs = {}
-        for field in instance._meta.fields:
-            attrs[field.attname] = getattr(instance, field.attname)
-        manager.using(kwargs.get('using')).create(history_date=history_date, history_type=history_type,
-                                                  history_user=history_user, **attrs)
 
 
 class SyncModelMixin(SyncMixin, models.Model):
