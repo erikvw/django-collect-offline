@@ -29,7 +29,22 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# Transfer Files
 
+COMMUNITY = 'Gaborone'
+
+TX_DUMP_PATH = "path_to_dump_files"  # e.g ~/transaction_json_files/dump
+TX_ARCHIVE_DIR = "path_to_achive_tx_files"
+
+REMOTE_SERVER_IP = 'IP'  # e.g edc4 IP
+MEDIA_REMOTE_DIR = 'remote_path_where_media_files_will_transfer_to'
+MEDIA_DIR = "path_to_where_you_kept_media_files"
+
+REMOTE_DIR = "remote_path_to_transfer_files_to"  # e.g ~/transaction_json_files/to_upload
+REMOTE_USERNAME = "enter_remote_username"
+REMOTE_PASSWORD = "enter_remote_password"
+
+CLIENT_PASSWORD = "localhost_password"
 # Application definition
 
 INSTALLED_APPS = [
