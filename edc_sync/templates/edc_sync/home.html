@@ -5,9 +5,95 @@
 {% block extra-scripts %}
 {{ block.super }}
 <script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/edc_sync.js" %}"></script>
+
+<script>
+$(document).ready(function(){
+	function blinker() {
+	    $('#progress_title').fadeOut(500);
+	    $('#progress_title').fadeIn(500);
+	}
+
+	function track_file_transfer(total_media_files, total_tx_files){
+		var transfer_progress = $.ajax({url: "{% url 'transfer_files_url' %}", data: {action: 'files'}, dataType: 'json'}).promise();
+		transfer_progress.then(function(results){
+			var sent_tx_files = 0;
+			if (total_tx_files > 1 && total_tx_files != results.tx_files){
+				sent_tx_files = (total_tx_files + 1) - results.tx_files;
+			}else{
+				sent_tx_files = 1;
+			}
+			var sent_media_files = 0 ;
+			if (total_media_files > 1){
+				sent_media_files = total_media_files - results.media_files;
+			}
+			$("#pending_tx").text(sent_tx_files+" sent");
+			$("#pending_media").text(results.archived_media_no+" sent");
+			if (results.media_files != 0 || results.tx_files != 0){
+				track_file_transfer(total_media_files, total_tx_files); //recurse
+			}else{
+				$("#tx_spinner").removeClass("fa-spin");
+				$("#progress_title").attr("style", "color:green");
+				blinker();
+				$("#progress_title").text("Pending transactions have been transfered to the server successfully.");
+			}
+		});
+		transfer_progress.fail(function(){
+			//errors
+			$("#tx_spinner").removeClass("fa-spin");
+			$("#progress_title").addClass("alert-danger");
+			$("#progress_title").text("Failed to transfer files,(An error has occured), check machine is connected to wifi.");
+		});
+	}
+	
+	function transfer_files(){
+		var dump_info = $.ajax({url: "{% url 'transfer_files_url' %}", data: {action: 'dump_transactions'}, dataType: 'json'}).promise();
+
+		dump_info.then(function(results){
+			return $.ajax({url: "{% url 'transfer_files_url' %}", data: {action: 'transfer'}, dataType: 'json'});
+		});
+		
+		dump_info.then(function(results){
+			var get_stats = $.ajax({url: "{% url 'transfer_files_url' %}", data: {action: 'file_statistics'}, dataType: 'json'}).promise();
+			get_stats.then(function(results){
+				var total_media_files = results.media_files
+				var total_tx_files =  results.tx_files
+				$("#total_media").text(total_media_files);
+				$("#tx_files").text(total_tx_files);
+			});
+			get_stats.fail(function(){
+				$("#progress_title").text("Failed to transfer files,(An error has occured).");
+			});
+		});
+
+		dump_info.then(function(results){
+			var total_media_files = results.media_files
+			var total_tx_files =  results.tx_files
+			track_file_transfer(total_media_files, total_tx_files);
+		});
+		dump_info.fail(function(){
+			$("#tx_spinner").removeClass("fa-spin");
+			$("#tx_spinner").addClass("alert-danger");
+			$("#progress_title").text("Failed to transfer files,(An error has occured), check machine is connected to wifi.");
+		});
+	}
+	
+    $("#transfer_btn").click(function(){
+    	$("#transfer_status").toggle();
+    	$("#progress_title").toggle();
+    	$("#progress_title").addClass("alert-info");
+    	$("#tx_spinner").addClass("fa-spin");
+    	transfer_files();
+    	blinker();
+    });
+    $("#progress_title").toggle();
+    $("#transfer_status").toggle();
+});
+</script>
+
 {% endblock extra-scripts %}
 
 {% block main %}
+
 <div class="container">
 
     <div id="div-home-right" class="col-md-8">
@@ -42,7 +128,20 @@
         </div>
         {% endif%}
           
-           <a href="{% url 'transfer_files_url' %}" class="btn btn-default pull-right" style="">Send Transactions To The Server</a>
+           <!-- <a href="{% url 'transfer_files_url' %}" class="btn btn-default pull-right" style="">Send Transactions To The Server</a> -->
+      <!-- begin transfer data-->
+		<div class="panel panel-default">
+		<div class="panel-heading">
+			<button id="transfer_btn" class="btn btn-default">Send Data To Server</button><i id="tx_spinner" class="fa fa-refresh pull-right"></i>
+        </div>
+		
+		<div id="transfer_status" class="panel-body">
+			<p> Found <strong><span id="tx_files" style="margin-left:3px;"></span></strong> transaction files..<strong><span id="pending_tx" class="alert-info"></span></strong></p>
+			<p> Found <strong><span id="total_media" style="margin-left:3px;"></span></strong> media files..<span id="pending_media" class="alert-info"></span></p>
+		</div>
+		<div class="panel-footer" id="progress_title" class="alert alert-success"> Wait until transferring is done.</div>
+		</div>
+      <!-- end  transfer data-->
     </div>
 
     <div id="div-home-middle" class="col-md-4">
@@ -94,7 +193,6 @@
     $(document).ready( function() { 
         edcSyncReady('{{ hosts|escapejs }}', '{{ user.username }}', '{{ api_token }}');
     });
-
 </script>
 
 {% endblock extra-scripts-bottom %}
