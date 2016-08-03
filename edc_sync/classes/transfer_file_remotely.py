@@ -8,7 +8,25 @@ from django.conf import settings
 
 
 class TransferFileRemotely(object):
+    """
+    ADD TO SETTINGS FILES
 
+    COMMUNITY = 'Gaborone'
+
+    TX_DUMP_PATH = "path_to_dump_files"  # e.g ~/transaction_json_files/dump
+    TX_ARCHIVE_DIR = "path_to_achive_tx_files"
+
+    REMOTE_SERVER_IP = 'IP'  # e.g edc4 IP
+    MEDIA_REMOTE_DIR = 'remote_path_where_media_files_will_transfer_to'
+    MEDIA_DIR = "path_to_where_you_kept_media_files"
+
+    REMOTE_DIR = "remote_path_to_transfer_files_to"  # e.g ~/transaction_json_files/to_upload
+    REMOTE_USERNAME = "enter_remote_username"
+    REMOTE_PASSWORD = "enter_remote_password"
+
+    CLIENT_PASSWORD = "localhost_password"
+
+    """
     def __init__(self, remote_server_ip=None, remote_dir=None, remote_username=None, remote_password=None,
                  tx_dump_dir=None, media_dir=None, media_remote_dir=None, archive_dir=None,
                  client_password=None, archived_media_dir=None):
@@ -29,7 +47,7 @@ class TransferFileRemotely(object):
 
     def connect_localhost(self):
         try:
-            self.client.connect('localhost', username=getpass.getuser(), password='~!sets')
+            self.client.connect('localhost', username=getpass.getuser(), password=self.client_password)
         except paramiko.SSHException as e:
             raise ("Please contact administrator, Connection Error occurred.({})".format(e))
         return self.client
@@ -160,15 +178,3 @@ class TransferFileRemotely(object):
         file_names = sftp.listdir(self.archived_media_dir)
         client.close()
         return file_names
-
-    @property
-    def transactions_info(self):
-        SOURCE_ROOT = Path(os.path.dirname(os.path.realpath(__file__))).ancestor(1)
-        print(SOURCE_ROOT)
-        filename = "/Users/tsetsiba/source/edc-sync/edc_sync/etc/default.cnf"
-        data = {}
-        with open(filename) as file:
-            for line in file:
-                field, field_data = line.split('=')
-                data.update({field.strip(): field_data.replace('\n', ' ').strip()})
-        return data
