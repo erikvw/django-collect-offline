@@ -5,6 +5,7 @@ django-rest-framework
 django-rest-swagger
 django-js-reverse
 corsheaders
+paramiko
 # djangorestframework-httpsignature
 # httpie
 git+https://github.com/erikvw/django-crypto-fields@develop#egg=django-crypto-fields
