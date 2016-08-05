@@ -9,6 +9,8 @@ from django.conf import settings
 
 class TransferFileRemotely(object):
     """
+    A class to transfer files from client machine to the server. Specify following
+
     ADD TO SETTINGS FILES
 
     COMMUNITY = 'Gaborone'
@@ -28,7 +30,7 @@ class TransferFileRemotely(object):
 
     """
     def __init__(self, remote_server_ip=None, remote_dir=None, remote_username=None, remote_password=None,
-                 tx_dump_dir=None, media_dir=None, media_remote_dir=None, archive_dir=None,
+                 tx_dump_dir=None, media_dir=None, media_remote_dir=None, tx_archive_dir=None,
                  client_password=None, archived_media_dir=None):
         self.remote_server_ip = remote_server_ip or settings.REMOTE_SERVER_IP
         self.remote_dir = remote_dir or settings.REMOTE_DIR
@@ -37,13 +39,14 @@ class TransferFileRemotely(object):
         self.tx_dump_dir = tx_dump_dir or settings.TX_DUMP_PATH
         self.media_dir = media_dir or settings.MEDIA_DIR
         self.media_remote_dir = media_remote_dir or settings.MEDIA_REMOTE_DIR
-        self.archive_dir = archive_dir or settings.ARCHIVE_DIR
+        self.archive_dir = tx_archive_dir or settings.TX_ARCHIVE_DIR
         self.client_password = client_password or settings.CLIENT_PASSWORD
         self.client_remote = None
         self.community = settings.COMMUNITY
         self.client = paramiko.SSHClient()
         self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         self.archived_files_no = 0
+        self.media_count = 0
 
     def connect_localhost(self):
         try:
@@ -71,10 +74,14 @@ class TransferFileRemotely(object):
         return file_names
 
     @property
-    def local_media_files(self):
+    def media_files_to_transfer(self):
         client = self.connect_localhost()
         sftp = client.open_sftp()
         filenames = sftp.listdir(self.media_dir)
+        try:
+            filenames.remove('.DS_Store')
+        except AttributeError:
+            pass
         media_to_transfer = []
         for filename in filenames:
             try:
@@ -109,14 +116,15 @@ class TransferFileRemotely(object):
             for file_name in self.local_tx_files:
                 local_file_name = self.tx_dump_dir + '/{}'.format(file_name)
                 remote_file_name = self.remote_dir + '/{}'.format(file_name)
-                sftp_server.put(local_file_name, remote_file_name)
-                if self.check_remote_file_status(sftp_server, remote_file_name):
-                    send_transactions_to_server_status.append(True)
+                sftp_server.put(local_file_name, remote_file_name)  # Transfer transaction to the server
+                if self.check_remote_file_status(sftp_server, remote_file_name):  # Confirm it has transferred
                     client = self.connect_localhost()
                     self.archive_file(client, self.tx_dump_dir, local_file_name, self.archive_dir)
                     self.create_history(file_name)
+                    send_transactions_to_server_status.append(True)
                 else:
                     send_transactions_to_server_status.append(False)
+                    raise ("Transaction: {}, failed to transfer. {}.".format(file_name, datetime.today()))
             return send_transactions_to_server_status
         except IOError as e:
             print(e)
@@ -133,7 +141,6 @@ class TransferFileRemotely(object):
             acknowledged=True,
             ack_datetime=datetime.today(),
         )
-        print(history.__dict__)
         return history
 
     @property
@@ -144,18 +151,19 @@ class TransferFileRemotely(object):
             server = self.connect_to_remote_server()
             sftp_server = server.open_sftp()
             local_media_transfer_status = []
-            for file_name in self.local_media_files:
+            self.media_count = len(self.media_files_to_transfer)
+            for file_name in self.media_files_to_transfer:
                 local_file_name = self.media_dir + '/{}'.format(file_name)
                 remote_file_name = self.media_remote_dir + '/{}'.format(file_name)
-                if self.check_remote_file_status(sftp_server, file_name):
-                    local_media_transfer_status.append(False)
-                else:
-                    sftp_server.put(local_file_name, remote_file_name)
-                    if self.check_remote_file_status(sftp_server, file_name):
-                        self.create_history(file_name)
+                sftp_server.put(local_file_name, remote_file_name)  # Transfer media file to the server
+                if self.check_remote_file_status(sftp_server, remote_file_name):
+                    self.create_history(file_name)
                     local_media_transfer_status.append(True)
+                else:
+                    raise("Media file: {} failed to transfer. {}".format(file_name, datetime.today()))
             return local_media_transfer_status
         except IOError:
+            raise("failed to send file {}".format(file_name))
             return False
         return False
 
@@ -163,7 +171,8 @@ class TransferFileRemotely(object):
         try:
             sftp.stat(remote_file_name)
             return True
-        except IOError:
+        except IOError as e:
+            print("{}".format(e))
             return False
 
     def archive_file(self, client, transfered_file_dir, filename, archive_dir):
@@ -178,3 +187,9 @@ class TransferFileRemotely(object):
         file_names = sftp.listdir(self.archived_media_dir)
         client.close()
         return file_names
+
+    def count_media_sent(self, filenames):
+        return History.objects.filter(filename__in=filenames).count()
+
+    def count_tx_sent(self, filenames):
+        return History.objects.filter(filename__in=filenames).count()

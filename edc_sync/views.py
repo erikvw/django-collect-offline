@@ -158,6 +158,7 @@ class SendTransactionFilesView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView)
     template_name = 'edc_sync/home.html'
     app_label = settings.APP_LABEL
     COMMUNITY = None
+    transfer = None
 
     def __init__(self, *args, **kwargs):
         super(SendTransactionFilesView, self).__init__(*args, **kwargs)
@@ -175,28 +176,33 @@ class SendTransactionFilesView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView)
 
     def get(self, request, *args, **kwargs):
         tx_count, media_count, transfer = self.files_count()
-        result = dict({'media_files': media_count or 0, 'tx_files': tx_count or 0, "archived_media_no": archived})
+        result = dict({'media_to_send': media_count,
+                       'media_files': transfer.media_files_to_transfer,
+                       'tx_to_send': tx_count,
+                       'tx_files': transfer.local_tx_files,
+                       })
         if request.is_ajax():
             if request.GET.get('action') == 'dump_transactions':
                 if not transfer.validate_dump:
                     self.dump_transactions(self.file_name(request))
             elif request.GET.get('action') == 'transfer':
-                self.transfer_transactions()
+                self.transfer = self.transfer_transactions()
             else:
-                tx_count, media_count, archived = self.files_count()
-                result = dict({'media_files': media_count or 0, 'tx_files': tx_count or 0, "archived_media_no": archived})
-        print("media count", media_count)
+                tx_count, media_count, transfer = self.files_count()
+                result = dict({'media_to_send': media_count,
+                               'tx_to_send': tx_count,
+                               })
         return HttpResponse(json.dumps(result), content_type='application/json')
 
     def file_name(self, request):
         TODAY = datetime.today().strftime("%Y%m%d%H%M")
         file_name = "bcpp_interview_{}_{}.json".format(request.GET.get('community') or settings.COMMUNITY, TODAY)
-        path = '{}{}'.format(settings.TX_DUMP_PATH, file_name)
+        path = '{}/{}'.format(settings.TX_DUMP_PATH, file_name)
         return path
 
     def files_count(self):
         transfer = TransferFileRemotely()
-        media_count_dir = len(transfer.local_media_files)
+        media_count_dir = len(transfer.media_files_to_transfer)
         return (len(transfer.local_tx_files), media_count_dir, transfer)
 
     def dump_transactions(self, path):
@@ -206,3 +212,4 @@ class SendTransactionFilesView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView)
         transfer = TransferFileRemotely()
         transfer.send_transactions_to_server
         transfer.send_media_files_to_server
+        return transfer
