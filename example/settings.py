@@ -33,7 +33,7 @@ ALLOWED_HOSTS = ['localhost']
 
 # Application definition
 
-DEPENDENCY_APPS = [
+INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -47,16 +47,11 @@ DEPENDENCY_APPS = [
     'django_revision',
     'crispy_forms',
     'simple_history',
-    'edc_base',
+    'example.apps.EdcBaseAppConfig',
+    'example.apps.EdcSyncAppConfig',
+    'example.apps.DjangoCryptoFieldsAppConfig',
+    'example.apps.AppConfig',
 ]
-
-EXAMPLE_APPS = [
-    'example.apps.SyncAppConfig',
-    'example.apps.DjangoCryptoFieldsApp',
-    'example.apps.ExampleAppConfig',
-]
-
-INSTALLED_APPS = DEPENDENCY_APPS + EXAMPLE_APPS
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
