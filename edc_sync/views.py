@@ -113,7 +113,6 @@ class RenderView(EdcBaseViewMixin, TemplateView):
 class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
     template_name = 'edc_sync/home.html'
-    app_label = settings.APP_LABEL
 
     def __init__(self, *args, **kwargs):
         super(HomeView, self).__init__(*args, **kwargs)
@@ -156,7 +155,6 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 class SendTransactionFilesView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
     template_name = 'edc_sync/home.html'
-    app_label = settings.APP_LABEL
     COMMUNITY = None
     transfer = None
 

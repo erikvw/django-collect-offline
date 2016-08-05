@@ -13,4 +13,5 @@ class AppConfig(DjangoAppConfig):
         if not self.role:
             style = color_style()
             sys.stdout.write(style.NOTICE(
-                'Warning: Project uses \'edc_sync\' but has not defined a role for this app instance. See AppConfig.\n'))
+                'Warning: Project uses \'edc_sync\' but has not defined a role '
+                'for this app instance. See AppConfig.\n'))
