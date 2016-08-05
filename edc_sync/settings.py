@@ -57,11 +57,12 @@ INSTALLED_APPS = [
     'django_revision',
     'rest_framework',
     'rest_framework.authtoken',
+    # 'rest_framework_swagger',
     'django_js_reverse',
     'simple_history',
-    'example.apps.ExampleAppConfig',
-    'edc_sync.apps.DjangoCryptoFieldsApp',
-    'edc_sync.apps.EdcSyncAppConfig',
+    'example.apps.AppConfig',
+    'example.apps.DjangoCryptoFieldsAppConfig',
+    'edc_sync.apps.AppConfig',
 ]
 
 MIDDLEWARE_CLASSES = [

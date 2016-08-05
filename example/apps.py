@@ -1,22 +1,26 @@
-from django.apps import AppConfig
-from django_crypto_fields.apps import DjangoCryptoFieldsAppConfig
+from django.apps import AppConfig as DjangoAppConfig
+from django_crypto_fields.apps import AppConfig as DjangoCryptoFieldsAppConfigParent
 from edc_sync.constants import CLIENT
-from edc_sync.apps import EdcSyncAppConfig
+from edc_sync.apps import AppConfig as EdcSyncAppConfigParent
+from edc_base.apps import AppConfig as EdcBaseAppConfigParent
 
 
-class SyncAppConfig(EdcSyncAppConfig):
-    name = 'edc_sync'
-    verbose_name = EdcSyncAppConfig.verbose_name + ' ' + CLIENT.title()
-    role = CLIENT
-
-
-class ExampleAppConfig(AppConfig):
+class AppConfig(DjangoAppConfig):
     name = 'example'
     verbose_name = 'Example Project'
     institution = 'Botswana-Harvard AIDS Institute Partnership'
 
 
-class DjangoCryptoFieldsApp(DjangoCryptoFieldsAppConfig):
-    name = 'django_crypto_fields'
+class EdcBaseAppConfig(EdcBaseAppConfigParent):
+    institution = 'Botswana-Harvard AIDS Institute Partnership'
+    verbose_name = 'Example Project'
+
+
+class EdcSyncAppConfig(EdcSyncAppConfigParent):
+    verbose_name = EdcSyncAppConfigParent.verbose_name + ' ' + CLIENT.title()
+    role = CLIENT
+
+
+class DjangoCryptoFieldsAppConfig(DjangoCryptoFieldsAppConfigParent):
     model = ('example', 'crypt')
     crypt_model_using = 'default'
