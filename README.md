@@ -42,7 +42,7 @@ Our research also involves collecting blood specimens that need to get to our co
 
 __edc-sync__ uses either the REST API or FILE transfer:
 - field client ---REST---> community server
-- field client ---REST---> middleman (and model inspector) ---REST---> community server
+- field client ---REST---> middleman (and modelre inspector) ---REST---> community server
 - site server ---FILE---> central server
 
 It is also possible to use Django's DB router if connections are good and reliable (this option may be removed in future).
@@ -178,6 +178,33 @@ to disable the `SyncModelMixin` add this to your settings.py
 
 ALLOW_MODEL_SERIALIZATION = False  # (default: True)
 
+### EDC Sync File Transfer
+
+With a stable connectivity between client and server then we use the REST API to sync transactions with the server. 
+Alternatively our remote data systems can generate transaction files in the field with a client machine, 
+then the files need to be transfered to the community server. Non technical users(RA's) must transfer the generated files
+to the community server using edc sync file transfer. Edc sync file transfer use paramiko to connect to the community server and transfer newly generated files.
+
+
+### Data Flow
+
+- field client ---Paramiko---> community server
+
+### Required Attributes in Settings.py
+
+Add the following to settings.py
+
+* LOCAL_TRANSACTION_DIR= /path/to/local transactions/
+
+* LOCAL_ARCHIVE_DIR = /path/to/archive/files/
+
+* LOCAL_MEDIA_DIR = /path/to/media files/
+
+* REMOTE_SERVER_IP = IP Address
+
+* REMOTE_MEDIA_DIR = /path/to/transfer/media files/to/
+
+* REMOTE_TRANSACTION_DIR = /path/to/transfer files/to/
 
 ## TODO
 
