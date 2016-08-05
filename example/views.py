@@ -25,7 +25,7 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
         context.update(
             example_admin=example_admin,
             edc_sync_admin=edc_sync_admin,
-            project_name=self.app.verbose_name + ': ' + self.role.title(),
+            project_name=context.get('project_name') + ': ' + self.role.title(),
         )
         return context
 
