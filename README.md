@@ -178,6 +178,29 @@ to disable the `SyncModelMixin` add this to your settings.py
 
 ALLOW_MODEL_SERIALIZATION = False  # (default: True)
 
+### EDC Sync File Transfer
+
+Our remote data systems generate transactions files or media files in the field using client machine, then the files are transferred to the community server.
+Non technical users(RA's) need to transfer the generated files to the community server using our data system. To transfer files, we use paramiko to connect to the remote
+machine (community server) and transfer newly generated files securely.
+
+### Data Flow
+
+- field client ---Paramiko---> community server
+
+### Required Attributes in Settings.py
+
+Add the following to settings.py
+
+LOCAL_TRANSACTION_DIR= "/path/to/local transactions/"
+LOCAL_ARCHIVE_DIR = "/path/to/archive/files/"
+
+LOCAL_MEDIA_DIR = "/path/to/media files/"
+
+REMOTE_SERVER_IP = 'IP'  # e.g IP
+REMOTE_MEDIA_DIR = '/path/to/transfer/media files/to/'
+
+REMOTE_TRANSACTION_DIR = "/path/to/transfer files/to/"  # e.g /home/user/transaction_json_files/to_upload
 
 ## TODO
 
