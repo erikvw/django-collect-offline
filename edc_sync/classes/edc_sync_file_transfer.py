@@ -1,7 +1,4 @@
-import os
 import logging
-logger = logging.getLogger(__name__)
-import sys
 import paramiko
 import getpass
 from unipath import Path
@@ -10,6 +7,7 @@ from datetime import datetime
 from django.conf import settings
 from django.core.management.color import color_style
 from django.apps import apps as django_apps
+logger = logging.getLogger(__name__)
 
 
 class EdcSyncFileTransfer(object):
@@ -142,13 +140,13 @@ class EdcSyncFileTransfer(object):
                 local_file_name = self.user_media_files + '/{}'.format(file_name)
                 remote_file_name = self.remote_user_media_files + '/{}'.format(file_name)
                 sftp_server.put(local_file_name, remote_file_name, confirm=True)  # Transfer media file to the server
-                self.create_history(file_name)
-#                 if self.check_remote_file_status(sftp_server, remote_file_name):
-#                     self.create_history(file_name)
-#                     local_media_transfer_status.append(True)
-#                 else:
-#                     print("Not working")
-#                     raise ("Media file: {} failed to transfer. {}".format(file_name, datetime.today()))
+#                 self.create_history(file_name)
+                if self.check_remote_file_status(sftp_server, remote_file_name):
+                    self.create_history(file_name)
+                    local_media_transfer_status.append(True)
+                else:
+                    print("Not working")
+                    raise ("Media file: {} failed to transfer. {}".format(file_name, datetime.today()))
             sftp_server.close()
             return local_media_transfer_status
         except IOError:
@@ -194,10 +192,10 @@ class EdcSyncFileTransfer(object):
     def count_tx_sent(self, filenames):
         return History.objects.filter(filename__in=filenames).count()
 
-    def log_message(self, message, type):
-        if type == "error":
+    def log_message(self, message, message_type):
+        if message_type == "error":
             logger.error(message)
-        elif type == "info":
+        elif message_type == "info":
             logger.info(message)
         else:
             logger.debug(message)

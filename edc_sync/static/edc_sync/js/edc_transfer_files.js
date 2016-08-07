@@ -42,13 +42,7 @@ function track_file_transfer(total_media_to_send, total_tx_to_send, url, media_f
 		}else if(total_tx_to_send == 1){
 			sent_tx_files = 1;
 		}
-		
-//		var sent_media_files = 0 ;
-//		if (total_media_to_send > 1){
-//			sent_media_files = total_media_to_send - results.media_to_send;
-//			console.log(sent_media_files);
-//		}
-//		
+
 		$("#pending-tx").text(sent_tx_files+" sent");
 		$("#pending-media").text( results.media_to_send+" sent");
 
@@ -81,20 +75,6 @@ function transfer_files(url){
 			$("#alert-progress-status").text("Failed to transfer files, (An error has occured).");
 		});
 	});
-	
-	/*dump_info.then(function(results){
-		console.log("track_file_transfer here, get_stats;");
-		var get_stats = $.ajax({url: url, data: {action: 'file_statistics'}, dataType: 'json'}).promise();
-		get_stats.then(function(results){
-			var total_media_to_send = results.media_to_send
-			var total_tx_to_send =  results.tx_to_send
-			$("#total_media").text(total_media_to_send);
-			$("#tx_files").text(total_tx_to_send);
-		});
-		get_stats.fail(function(){
-			$("#alert-progress-status").text("Failed to transfer files,(An error has occured).");
-		});
-	}); */
 
 	dump_info.then(function(results){
 		var total_media_to_send = results.media_to_send;
