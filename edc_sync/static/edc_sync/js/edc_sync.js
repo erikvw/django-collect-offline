@@ -27,7 +27,7 @@ function edcSyncReady(hosts, userName, apiToken) {
 			processOutgoingTransactions( host, userName );
 		});
 	});
-	updateFromHosts( hosts );
+	// updateFromHosts( hosts );
 	$( '#id-nav-pill-apply' ).append( '<li><a id="id-link-apply" href="#">Apply Incoming Transactions<span id="bdg-incomingtransaction-count" class="badge pull-right">0</span></a></li>' );
     $('#bdg-refresh-clients').click( function(e) {
         e.preventDefault();
