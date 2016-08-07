@@ -4,106 +4,9 @@
 
 {% block extra-scripts %}
 {{ block.super }}
-<script type="text/javascript" charset="utf8" src="{% static "edc_sync1/js/edc_sync.js" %}"></script>
+<script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/edc_sync.js" %}"></script>
 
-<script type="text/javascript">
-$(document).ready(function(){
-	function blinker() {
-	    $('#progress_title').fadeOut(500);
-	    $('#progress_title').fadeIn(500);
-	}
-
-	function track_file_transfer(total_media_to_send, total_tx_to_send){
-		var transfer_progress = $.ajax({url: "{% url 'transfer_files_url' %}", data: {action: 'track_stats'}, dataType: 'json'}).promise();
-		transfer_progress.then(function(results){
-			var sent_tx_files = 0;
-			if (total_tx_to_send > 1){
-				sent_tx_files = total_tx_to_send - results.tx_to_send;
-			}else if(total_tx_to_send == 1){
-				sent_tx_files = 1;
-			}
-			
-			var sent_media_files = 0 ;
-			if (total_media_to_send > 1){
-				sent_media_files = total_media_to_send - results.media_to_send;
-				console.log(sent_media_files);
-			}
-			$("#pending_tx").text(sent_tx_files+" sent");
-			$("#pending_media").text(sent_media_files+" sent");
-			console.log(results.media_files);
-			console.log(results.tx_files);
-			console.log("media files to send" + results.media_to_send);
-			console.log("tx files to send" +results.tx_to_send);
-			if (results.media_to_send != 0 || results.tx_to_send != 0){
-				track_file_transfer(total_media_to_send, total_tx_to_send); //recurse
-			}else{
-				$("#tx_spinner").removeClass("fa-spin");
-				$("#progress_title").attr("style", "color:green");
-				blinker();
-				$("#progress_title").text("Pending transactions have been transfered to the server successfully.");
-			}
-		});
-		transfer_progress.fail(function(){
-			//errors
-			$("#tx_spinner").removeClass("fa-spin");
-			$("#progress_title").addClass("alert-danger");
-			$("#progress_title").text("Failed to transfer files,(An error has occured), check machine is connected to wifi.");
-		});
-	}
-	
-	function transfer_files(){
-		var dump_info = $.ajax({url: "{% url 'transfer_files_url' %}", data: {action: 'dump_transactions'}, dataType: 'json'}).promise();
-
-		dump_info.then(function(results){
-			console.log("track_file_transfer here, transfer;");
-			$("#total_media").text(results.media_to_send);
-			$("#tx_files").text(results.tx_to_send);
-			
-			var transfer = $.ajax({url: "{% url 'transfer_files_url' %}", data: {action: 'transfer'}, dataType: 'json'}).promise();
-			transfer.fail(function(){
-				$("#progress_title").text("Failed to transfer files, (An error has occured).");
-			});
-		});
-		
-		dump_info.then(function(results){
-			console.log("track_file_transfer here, get_stats;");
-			var get_stats = $.ajax({url: "{% url 'transfer_files_url' %}", data: {action: 'file_statistics'}, dataType: 'json'}).promise();
-			get_stats.then(function(results){
-				var total_media_to_send = results.media_to_send
-				var total_tx_to_send =  results.tx_to_send
-				$("#total_media").text(total_media_to_send);
-				$("#tx_files").text(total_tx_to_send);
-			});
-			get_stats.fail(function(){
-				$("#progress_title").text("Failed to transfer files,(An error has occured).");
-			});
-		});
-
-		dump_info.then(function(results){
-			var total_media_to_send = results.media_to_send;
-			var total_tx_to_send =  results.tx_to_send;
-			console.log("track_file_transfer here, track_file_transfer(total_media_to_send, total_tx_to_send);");
-			track_file_transfer(total_media_to_send, total_tx_to_send);
-		});
-		dump_info.fail(function(){
-			$("#tx_spinner").removeClass("fa-spin");
-			$("#tx_spinner").addClass("alert-danger");
-			$("#progress_title").text("Failed to transfer files,(An error has occured), check machine is connected to wifi.");
-		});
-	}
-	
-    $("#transfer_btn").click(function(){
-    	$("#transfer_status").toggle();
-    	$("#progress_title").toggle();
-    	$("#progress_title").addClass("alert-info");
-    	$("#tx_spinner").addClass("fa-spin");
-    	transfer_files();
-    	blinker();
-    });
-    $("#progress_title").toggle();
-    $("#transfer_status").toggle();
-});
-</script>
+<script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/edc_transfer_files.js" %}"></script>
 
 {% endblock extra-scripts %}
 
@@ -147,14 +50,14 @@ $(document).ready(function(){
       <!-- begin transfer data-->
 		<div class="panel panel-default">
 		<div class="panel-heading">
-			<button id="transfer_btn" class="btn btn-default">Send Data To Server</button><i id="tx_spinner" class="fa fa-refresh pull-right"></i>
+			<button id="btn_transfer" class="btn btn-default">Send Data To Server</button><i id="tx_spinner" class="fa fa-refresh pull-right"></i>
         </div>
 		
 		<div id="transfer_status" class="panel-body">
-			<p> Found <strong><span id="tx_files" style="margin-left:3px;">(loading..)</span></strong> transaction files..<strong><span id="pending_tx" class="alert-info"></span></strong></p>
-			<p> Found <strong><span id="total_media" style="margin-left:3px;">(loading..)</span></strong> media files..<span id="pending_media" class="alert-info"></span></p>
+			<p> Found <strong><span id="tx_files" style="margin-left:3px;">(loading..)</span></strong> transaction files..<strong><span id="pending-tx" class="alert-info"></span></strong></p>
+			<p> Found <strong><span id="total_media" style="margin-left:3px;">(loading..)</span></strong> media files..<span id="pending-media" class="alert-info"></span></p>
 		</div>
-		<div class="panel-footer" id="progress_title" class="alert alert-success"> Wait until transferring is done.</div>
+		<div class="panel-footer" id="alert-progress-status" class="alert alert-info"> Wait until transferring is done.</div>
 		</div>
       <!-- end  transfer data-->
     </div>
@@ -206,7 +109,9 @@ $(document).ready(function(){
 
 <script type="text/javascript" charset="utf8" class="init">
     $(document).ready( function() { 
-        edcSyncReady('{{ hosts|escapejs }}', '{{ user.username }}', '{{ api_token }}');
+        //edcSyncReady('{{ hosts|escapejs }}', '{{ user.username }}', '{{ api_token }}');
+        url = "{% url 'transfer_files_url' %}";
+        edcFileTransferReady('{{ hosts|escapejs }}', '{{ user.username }}', '{{ api_token }}', url);
     });
 </script>
 

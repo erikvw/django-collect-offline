@@ -6,12 +6,9 @@ from edc_sync.choices import STATUS
 
 class History(models.Model):
 
-    community = models.CharField(
+    location = models.CharField(
         max_length=100,
-        default='Gaborone')
-
-    remote_hostname = models.CharField(
-        max_length=100)
+        default='gaborone')
 
     remote_path = models.CharField(
         max_length=200)

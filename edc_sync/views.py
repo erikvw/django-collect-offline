@@ -31,7 +31,8 @@ from rest_framework.renderers import JSONRenderer
 from rest_framework.views import APIView
 from django.db.models.aggregates import Count
 from edc_sync.utils.export_outgoing_transactions import export_outgoing_transactions
-from edc_sync.classes.transfer_file_remotely import TransferFileRemotely
+from edc_sync.classes import EdcSyncFileTransfer
+from edc_sync.models.history import History
 
 
 @api_view(['GET'])
@@ -177,39 +178,47 @@ class SendTransactionFilesView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView)
     def get(self, request, *args, **kwargs):
         tx_count, media_count, transfer = self.files_count()
         result = dict({'media_to_send': media_count,
-                       'media_files': transfer.media_files_to_transfer,
+                       'media_files': transfer.user_media_files_to_transfer,
                        'tx_to_send': tx_count,
-                       'tx_files': transfer.local_tx_files,
+                       'tx_files': [],
                        })
         if request.is_ajax():
             if request.GET.get('action') == 'dump_transactions':
                 if not transfer.validate_dump:
-                    self.dump_transactions(self.file_name(request))
+                    self.dump_transactions(self.file_name(request, transfer))
             elif request.GET.get('action') == 'transfer':
                 self.transfer = self.transfer_transactions()
             else:
                 tx_count, media_count, transfer = self.files_count()
-                result = dict({'media_to_send': media_count,
+                media_files = []
+                try:
+                    media_files = request.GET.get('media_files').split(',')
+                except AttributeError:
+                    pass
+                result = dict({'media_to_send': self.count_sent_media(media_files),
                                'tx_to_send': tx_count,
                                })
         return HttpResponse(json.dumps(result), content_type='application/json')
 
-    def file_name(self, request):
+    def file_name(self, request, file_transfer):
         TODAY = datetime.today().strftime("%Y%m%d%H%M")
         file_name = "bcpp_interview_{}_{}.json".format(request.GET.get('community') or settings.COMMUNITY, TODAY)
-        path = '{}/{}'.format(settings.TX_DUMP_PATH, file_name)
+        path = '{}/{}'.format(file_transfer.user_dump_tx_files, file_name)
         return path
 
     def files_count(self):
-        transfer = TransferFileRemotely()
-        media_count_dir = len(transfer.media_files_to_transfer)
-        return (len(transfer.local_tx_files), media_count_dir, transfer)
+        transfer = EdcSyncFileTransfer()
+        media_count_dir = len(transfer.user_media_files_to_transfer)
+        return (len(transfer.user_tx_files), media_count_dir, transfer)
+
+    def count_sent_media(self, media_files):
+        return History.objects.filter(filename__in=media_files).count()
 
     def dump_transactions(self, path):
         return export_outgoing_transactions(path)
 
     def transfer_transactions(self):
-        transfer = TransferFileRemotely()
+        transfer = EdcSyncFileTransfer()
         transfer.send_transactions_to_server
         transfer.send_media_files_to_server
         return transfer
