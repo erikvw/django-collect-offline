@@ -19,7 +19,7 @@ function edcFileTransferReady(hosts, userName, apiToken, url) {
 		$("#transfer_status").toggle();
 		$("#alert-progress-status").toggle();
 		$("#alert-progress-status").addClass("alert-info");
-		$("#tx_spinner").addClass("fa-spin");
+		$("#id-tx-spinner").addClass("fa-spin");
 		transfer_files(url);
 		blinker();
 	});
@@ -43,13 +43,13 @@ function track_file_transfer(total_media_to_send, total_tx_to_send, url, media_f
 			sent_tx_files = 1;
 		}
 
-		$("#pending-tx").text(sent_tx_files+" sent");
-		$("#pending-media").text( results.media_to_send+" sent");
+		$("#id-pending-tx").text(sent_tx_files+" sent");
+		$("#id-pending-media").text( results.media_to_send+" sent");
 
 		if (results.media_to_send != total_media_to_send || results.tx_to_send != 0){
 			track_file_transfer(total_media_to_send, total_tx_to_send, url, media_files); //recurse
 		}else{
-			$("#tx_spinner").removeClass("fa-spin");
+			$("#id-tx-spinner").removeClass("fa-spin");
 			$("#alert-progress-status").attr("style", "color:green");
 			blinker();
 			$("#alert-progress-status").text("Pending transactions have been transfered to the server successfully.");
@@ -57,7 +57,7 @@ function track_file_transfer(total_media_to_send, total_tx_to_send, url, media_f
 	});
 	transfer_progress.fail(function(){
 		//errors
-		$("#tx_spinner").removeClass("fa-spin");
+		$("#id-tx-spinner").removeClass("fa-spin");
 		$("#alert-progress-status").addClass("alert-danger");
 		$("#alert-progress-status").text("Failed to transfer files,(An error has occured).");
 	});
@@ -68,8 +68,8 @@ function transfer_files(url){
 
 	dump_info.then(function(results){
 		console.log("track_file_transfer here, transfer;");
-		$("#total_media").text(results.media_to_send);
-		$("#tx_files").text(results.tx_to_send);
+		$("#id-total-media").text(results.media_to_send);
+		$("#id-tx-files").text(results.tx_to_send);
 		var transfer = $.ajax({url: url, data: {action: 'transfer'}, dataType: 'json'}).promise();
 		transfer.fail(function(){
 			$("#alert-progress-status").text("Failed to transfer files, (An error has occured).");
@@ -87,10 +87,8 @@ function transfer_files(url){
 		track_file_transfer(total_media_to_send, total_tx_to_send, url, media_files.toString());
 	});
 	dump_info.fail(function(){
-		$("#tx_spinner").removeClass("fa-spin");
-		$("#tx_spinner").addClass("alert-danger");
+		$("#id-tx-spinner").removeClass("fa-spin");
+		$("#id-tx-spinner").addClass("alert-danger");
 		$("#alert-progress-status").text("Failed to transfer files,(An error has occured), check machine is connected to wifi.");
 	});
 }
-
-

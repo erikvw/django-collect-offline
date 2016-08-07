@@ -1,7 +1,6 @@
 import json
 import socket
 
-from django.shortcuts import redirect
 from django.apps import apps as django_apps
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -11,28 +10,25 @@ from django.utils.decorators import method_decorator
 from django.views.generic.base import TemplateView
 from django_crypto_fields.constants import LOCAL_MODE
 from django_crypto_fields.cryptor import Cryptor
-from django.shortcuts import render
-from django.contrib import messages
 from datetime import datetime
 
 from rest_framework import viewsets
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
+from rest_framework.views import APIView
 
 from edc_base.views.edc_base_view_mixin import EdcBaseViewMixin
 from edc_sync.admin import edc_sync_admin
+from edc_sync.classes import EdcSyncFileTransfer
 from edc_sync.edc_sync_view_mixin import EdcSyncViewMixin
 from edc_sync.models import OutgoingTransaction, IncomingTransaction
-from edc_sync.serializers import OutgoingTransactionSerializer, IncomingTransactionSerializer
-from rest_framework.renderers import JSONRenderer
-from rest_framework.views import APIView
-from django.db.models.aggregates import Count
-from edc_sync.utils.export_outgoing_transactions import export_outgoing_transactions
-from edc_sync.classes import EdcSyncFileTransfer
 from edc_sync.models.history import History
+from edc_sync.serializers import OutgoingTransactionSerializer, IncomingTransactionSerializer
+from edc_sync.utils.export_outgoing_transactions import export_outgoing_transactions
 
 
 @api_view(['GET'])
@@ -114,7 +110,6 @@ class RenderView(EdcBaseViewMixin, TemplateView):
 class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
     template_name = 'edc_sync/home.html'
-    app_label = settings.APP_LABEL
 
     def __init__(self, *args, **kwargs):
         super(HomeView, self).__init__(*args, **kwargs)
@@ -123,7 +118,7 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context.update(
             edc_sync_admin=edc_sync_admin,
-            project_name=self.app.verbose_name + ': ' + self.role.title(),
+            project_name=context.get('project_name') + ': ' + self.role.title(),
             cors_origin_whitelist=self.cors_origin_whitelist,
             hostname=socket.gethostname(),
             ip_address=self.ip_address,
@@ -157,7 +152,6 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 class SendTransactionFilesView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
     template_name = 'edc_sync/home.html'
-    app_label = settings.APP_LABEL
     COMMUNITY = None
     transfer = None
 

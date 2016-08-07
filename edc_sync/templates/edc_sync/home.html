@@ -6,7 +6,7 @@
 {{ block.super }}
 <script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/edc_sync.js" %}"></script>
 
-<script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/edc_transfer_files.js" %}"></script>
+<script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/edc_sync_files.js" %}"></script>
 
 {% endblock extra-scripts %}
 
@@ -46,20 +46,9 @@
         </div>
         {% endif%}
           
-           <!-- <a href="{% url 'transfer_files_url' %}" class="btn btn-default pull-right" style="">Send Transactions To The Server</a> -->
-      <!-- begin transfer data-->
-		<div class="panel panel-default">
-		<div class="panel-heading">
-			<button id="btn_transfer" class="btn btn-default">Send Data To Server</button><i id="tx_spinner" class="fa fa-refresh pull-right"></i>
-        </div>
-		
-		<div id="transfer_status" class="panel-body">
-			<p> Found <strong><span id="tx_files" style="margin-left:3px;">(loading..)</span></strong> transaction files..<strong><span id="pending-tx" class="alert-info"></span></strong></p>
-			<p> Found <strong><span id="total_media" style="margin-left:3px;">(loading..)</span></strong> media files..<span id="pending-media" class="alert-info"></span></p>
-		</div>
-		<div class="panel-footer" id="alert-progress-status" class="alert alert-info"> Wait until transferring is done.</div>
-		</div>
-      <!-- end  transfer data-->
+        {% if edc_sync_role == 'server' %}
+            {% include "edc_sync/edc_sync_files.html" %}
+        {% endif%}  
     </div>
 
     <div id="div-home-middle" class="col-md-4">
@@ -109,9 +98,11 @@
 
 <script type="text/javascript" charset="utf8" class="init">
     $(document).ready( function() { 
-        //edcSyncReady('{{ hosts|escapejs }}', '{{ user.username }}', '{{ api_token }}');
         url = "{% url 'transfer_files_url' %}";
         edcFileTransferReady('{{ hosts|escapejs }}', '{{ user.username }}', '{{ api_token }}', url);
+      
+        edcSyncReady('{{ hosts|escapejs }}', '{{ user.username }}', '{{ api_token }}');
+ 
     });
 </script>
 
