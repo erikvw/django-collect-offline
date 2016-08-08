@@ -23,7 +23,7 @@ from rest_framework.views import APIView
 
 from edc_base.views.edc_base_view_mixin import EdcBaseViewMixin
 from edc_sync.admin import edc_sync_admin
-from edc_sync.classes import EdcSyncFileTransfer
+from edc_sync.classes import TransferTransactionFile, TransferMedia
 from edc_sync.edc_sync_view_mixin import EdcSyncViewMixin
 from edc_sync.models import OutgoingTransaction, IncomingTransaction
 from edc_sync.models.history import History
@@ -170,49 +170,41 @@ class SendTransactionFilesView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView)
         return context
 
     def get(self, request, *args, **kwargs):
-        tx_count, media_count, transfer = self.files_count()
-        result = dict({'media_to_send': media_count,
-                       'media_files': transfer.user_media_files_to_transfer,
-                       'tx_to_send': tx_count,
-                       'tx_files': [],
-                       })
+        transfer_media = TransferMedia()
+        media_files = transfer_media.user_media_files_to_transfer
+        tranfer_transactions = TransferTransactionFile()
+        result = dict({
+            'media_to_send_count': transfer_media.count_sent_media(media_files),
+            'media_files': media_files,
+            'transaction_file_to_send_count': len(tranfer_transactions.user_transaction_filenames()),
+        })
         if request.is_ajax():
-            if request.GET.get('action') == 'dump_transactions':
-                if not transfer.validate_dump:
-                    self.dump_transactions(self.file_name(request, transfer))
-            elif request.GET.get('action') == 'transfer':
-                self.transfer = self.transfer_transactions()
+            if request.GET.get('action') == 'dump_transactions_to_file':
+                if not tranfer_transactions.validate_dump:
+                    self.dump_transactions(self.file_name(request, tranfer_transactions))
+            elif request.GET.get('action') == 'transfer_data_to_remote_device':
+                transfer_media.transfer_media()
+                tranfer_transactions.transfer_transactions()
             else:
-                tx_count, media_count, transfer = self.files_count()
                 media_files = []
                 try:
                     media_files = request.GET.get('media_files').split(',')
                 except AttributeError:
                     pass
-                result = dict({'media_to_send': self.count_sent_media(media_files),
-                               'tx_to_send': tx_count,
-                               })
+                result = dict({
+                    'media_to_send_count': transfer_media.count_sent_media(media_files),
+                    'transaction_file_to_send_count': len(tranfer_transactions.user_transaction_filenames()),
+                })
         return HttpResponse(json.dumps(result), content_type='application/json')
 
-    def file_name(self, request, file_transfer):
+    def filename(self, request, file_transfer):
         TODAY = datetime.today().strftime("%Y%m%d%H%M")
-        file_name = "bcpp_interview_{}_{}.json".format(request.GET.get('community') or settings.COMMUNITY, TODAY)
-        path = '{}/{}'.format(file_transfer.user_dump_tx_files, file_name)
+        filename = "bcpp_interview_{}_{}.json".format(request.GET.get('community') or settings.COMMUNITY, TODAY)
+        path = '{}/{}'.format(file_transfer.user_dump_tx_files, filename)
         return path
-
-    def files_count(self):
-        transfer = EdcSyncFileTransfer()
-        media_count_dir = len(transfer.user_media_files_to_transfer)
-        return (len(transfer.user_tx_files), media_count_dir, transfer)
-
-    def count_sent_media(self, media_files):
-        return History.objects.filter(filename__in=media_files).count()
 
     def dump_transactions(self, path):
         return export_outgoing_transactions(path)
 
-    def transfer_transactions(self):
-        transfer = EdcSyncFileTransfer()
-        transfer.send_transactions_to_server
-        transfer.send_media_files_to_server
-        return transfer
+    def transfer_media(self):
+        return TransferMedia()

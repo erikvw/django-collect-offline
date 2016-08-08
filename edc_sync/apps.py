@@ -1,3 +1,4 @@
+import os
 import getpass
 import sys
 from django.conf import settings
@@ -10,25 +11,21 @@ class EdcSyncAppConfig(DjangoAppConfig):
     name = 'edc_sync'
     verbose_name = 'Data Synchronization'
     role = 'server'
+    # make relative
 
-    remote_server_ip = None
-    remote_username = 'django'
-    remote_dump_tx_files = '/Users/{}/transaction_json_files/dump'.format(remote_username)
-    remote_user_media_files = '/Users/{}/transaction_json_files/media/to_upload'.format(remote_username)
+    transaction_files = None
+    transaction_files_archive = None
 
-    user_dump_tx_files = '/Users/{}/source/bcpp-interview/bcpp_interview/media/edc_sync/user_tx_files/dump'.format(getpass.getuser())
-    user_archived_tx_files = '/Users/{}/source/bcpp-interview/bcpp_interview/media/edc_sync/user_tx_files/archived'.format(getpass.getuser())
+    media_folders = []
 
-    user_media_files = '/Users/{}/source/bcpp-interview/bcpp_interview/media/upload'.format(getpass.getuser())
-    location = None
+    file_server = None
+    file_server_folder = None
+    remote_username = None
 
     def ready(self):
         if not self.role:
             style = color_style()
             sys.stdout.write(style.NOTICE(
                 'Warning: Project uses \'edc_sync\' but has not defined a role for this app instance. See AppConfig.\n'))
-        if settings.EDC_SYNC_REMOTE_FILE_SERVER:
-            if not self.remote_server_ip or not self.remote_user_media_files:
-                style = color_style()
-                sys.stdout.write(style.NOTICE(
-                    'Warning: Project uses \'edc_sync file transfer\' but has not defined a required attributes for this app instance. See AppConfig.\n'))
+        self.transaction_files = os.path.join(settings.BASE_DIR, 'transactions')
+        self.transaction_files_archive = os.path.join(settings.BASE_DIR, 'transactions', 'archive')

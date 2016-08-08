@@ -3,14 +3,14 @@
 
 <div class="panel panel-default">
 <div class="panel-heading">
-	<button id="btn_transfer" class="btn btn-default">Send Data To Server</button><i id="id-tx-spinner" class="fa fa-refresh pull-right"></i>
-      </div>
+	<button id="btn_transfer" class="btn btn-default">Send Data To Server</button><span id="id-tx-spinner" class="fa fa-refresh pull-right"></span>
+ </div>
 
-<div id="transfer_status" class="panel-body">
-	<p> Found <strong><span id="id-tx-files" style="margin-left:3px;">(loading..)</span></strong> transaction files..<strong><span id="id-pending-tx" class="alert-info"></span></strong></p>
+<div id="panel-transfer-files" class="panel-body" style="display:none;">
+	<p> Found <strong><span id="id-tx-files" class="fa fa-spinner fa-spin"></span></strong> transaction files..<strong><span id="id-pending-tx" class="alert-info"></span></strong></p>
 	<p> Found <strong><span id="id-total-media" style="margin-left:3px;">(loading..)</span></strong> media files..<span id="id-pending-media" class="alert-info"></span></p>
 </div>
-<div class="panel-footer" id="alert-progress-status" class="alert alert-info"> Wait until transferring is done.</div>
+<div class="panel-footer" id="alert-progress-status" class="alert alert-info" style="display:none;"></div>
 </div>
 
 <!-- end edc_sync_files-->
