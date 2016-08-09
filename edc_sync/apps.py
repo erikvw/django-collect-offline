@@ -27,5 +27,5 @@ class EdcSyncAppConfig(DjangoAppConfig):
             style = color_style()
             sys.stdout.write(style.NOTICE(
                 'Warning: Project uses \'edc_sync\' but has not defined a role for this app instance. See AppConfig.\n'))
-        self.transaction_files = os.path.join(settings.BASE_DIR, 'transactions')
+        self.transaction_files = os.path.join(settings.BASE_DIR, 'transactions', "dump")
         self.transaction_files_archive = os.path.join(settings.BASE_DIR, 'transactions', 'archive')
