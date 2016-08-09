@@ -27,9 +27,8 @@ class AppConfig(ConfigParserMixin, DjangoAppConfig):
         sys.stdout.write('Loading {} ...\n'.format(self.verbose_name))
         if not self.role:
             sys.stdout.write(style.NOTICE(
-                'Warning: Project uses \'edc_sync\' but has not defined a role for this app instance. '
-                'See AppConfig.\n'))
-        self.transaction_files = os.path.join(settings.BASE_DIR, 'transactions')
+                'Warning: Project uses \'edc_sync\' but has not defined a role for this app instance. See AppConfig.\n'))
+        self.transaction_files = os.path.join(settings.BASE_DIR, 'transactions', 'dump')
         self.transaction_files_archive = os.path.join(settings.BASE_DIR, 'transactions', 'archive')
         self.set_config_attrs()
         sys.stdout.write(' Done loading {}.\n'.format(self.verbose_name))

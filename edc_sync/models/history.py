@@ -1,34 +1,22 @@
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
-from edc_sync.choices import STATUS
+from edc_sync.models.sync_model_mixin import SyncModelMixin
+from edc_base.model.models import BaseUuidModel
 
 
-class History(models.Model):
+class HistoryManager(models.Manager):
+    def get_by_natural_key(self, filename, sent_datetime):
+        return self.get(filename=filename, sent_datetime=sent_datetime)
 
-    location = models.CharField(
-        max_length=100,
-        default='gaborone')
 
-    remote_path = models.CharField(
-        max_length=200)
+class History(BaseUuidModel, SyncModelMixin):
 
-    archive_path = models.CharField(
-        max_length=100,
-        null=True)
+    objects = HistoryManager()
 
     filename = models.CharField(
         max_length=100,
         unique=True)
-
-    filesize = models.FloatField(default=0.0)
-
-    filetimestamp = models.DateTimeField(default=timezone.now)
-
-    status = models.CharField(
-        max_length=15,
-        choices=STATUS,
-        default=STATUS[0][0])
 
     sent_datetime = models.DateTimeField(default=timezone.now)
 
@@ -47,8 +35,12 @@ class History(models.Model):
         null=True,
         blank=True)
 
+    def natural_key(self):
+        return (self.filename, self.sent_datetime)
+
     class Meta:
         app_label = 'edc_sync'
         ordering = ('-sent_datetime', )
         verbose_name = 'Sent History'
         verbose_name_plural = 'Sent History'
+        unique_together = (('filename', 'sent_datetime'),)
