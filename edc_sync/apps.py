@@ -14,18 +14,14 @@ class AppConfig(ConfigParserMixin, DjangoAppConfig):
     verbose_name = 'Data Synchronization'
     role = 'server'
     config_filename = 'edc_sync.ini'
-#     default_config = {
-#         'user': 'django',
-#         'file_server': 'localhost',
-#         'file_server_folder': '~/edc_sync_files'}
+    config_items = {
+        'remote_user': 'django',
+        'file_server': 'localhost',
+        'file_server_folder': '~/edc_sync_files'}
     transaction_files = None
     transaction_files_archive = None
 
     media_folders = []
-
-    file_server = None
-    file_server_folder = None
-    remote_username = None
 
     def ready(self):
         sys.stdout.write('Loading {} ...\n'.format(self.verbose_name))
