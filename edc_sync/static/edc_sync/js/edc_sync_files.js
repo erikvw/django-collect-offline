@@ -1,6 +1,6 @@
 //var transfer_files_url = Urls[ 'transfer_files_url' ]();
 
-function edcFileTransferReady(url) {
+function edcFileTransferReady() {
 
 	$("#btn_transfer").click(function(){
 		$("#panel-transfer-files").toggle(); 
@@ -8,7 +8,7 @@ function edcFileTransferReady(url) {
 		$("#alert-progress-status").addClass("alert-info");
 		$("#alert-progress-status").text("Transfering files.");
 		$("#id-tx-spinner").addClass("fa-spin");
-		transfer_files(url);
+		transfer_files(Urls['transfer_files_url']);
 	});
 }
 
