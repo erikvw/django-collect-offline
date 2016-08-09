@@ -4,10 +4,16 @@
 
 {% block extra-scripts %}
 {{ block.super }}
-<script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/edc_sync.js" %}"></script>
-
-<script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/edc_sync_files.js" %}"></script>
-
+  <!-- begin edc-sync extra-scripts -->
+  <script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/edc_sync.js" %}"></script>
+  <script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/edc_sync_files.js" %}"></script>
+  <script type="text/javascript" charset="utf8" class="init">
+      $(document).ready( function() { 
+          edcSyncReady('{{ hosts|escapejs }}', '{{ user.username }}', '{{ api_token }}');
+          edcFileTransferReady( "{% url 'transfer_files_url' %}" );
+      });
+  </script>
+  <!-- end edc-sync extra-scripts -->
 {% endblock extra-scripts %}
 
 {% block main %}
@@ -92,18 +98,3 @@
 
 </div>
 {% endblock main %}
-
-{% block extra-scripts-bottom %}
-{{ block.super }}
-
-<script type="text/javascript" charset="utf8" class="init">
-    $(document).ready( function() { 
-        url = "{% url 'transfer_files_url' %}";
-        edcFileTransferReady('{{ hosts|escapejs }}', '{{ user.username }}', '{{ api_token }}', url);
-      
-        edcSyncReady('{{ hosts|escapejs }}', '{{ user.username }}', '{{ api_token }}');
- 
-    });
-</script>
-
-{% endblock extra-scripts-bottom %}
