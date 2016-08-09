@@ -94,11 +94,11 @@ class FileTransfer(object):
             raise False
         return client
 
-    def filenames(self, dir):
+    def filenames(self, source_dir):
         """ Returns a list transaction files to transfer to the remote device """
         localhost = self.connect_to_device(LOCALHOST)
         localhost_sftp = localhost.open_sftp()
-        filenames = localhost_sftp.listdir(dir)
+        filenames = localhost_sftp.listdir(source_dir)
         localhost_sftp.close()
         return filenames
 

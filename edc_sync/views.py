@@ -1,3 +1,4 @@
+import os
 import json
 import socket
 
@@ -23,12 +24,11 @@ from rest_framework.views import APIView
 
 from edc_base.views.edc_base_view_mixin import EdcBaseViewMixin
 from edc_sync.admin import edc_sync_admin
-from edc_sync.classes import TransferTransactionFile, TransferMedia
 from edc_sync.edc_sync_view_mixin import EdcSyncViewMixin
 from edc_sync.models import OutgoingTransaction, IncomingTransaction
-from edc_sync.models.history import History
 from edc_sync.serializers import OutgoingTransactionSerializer, IncomingTransactionSerializer
 from edc_sync.utils.export_outgoing_transactions import export_outgoing_transactions
+from edc_sync.classes.file_transfer import FileTransfer
 
 
 @api_view(['GET'])
@@ -170,21 +170,20 @@ class SendTransactionFilesView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView)
         return context
 
     def get(self, request, *args, **kwargs):
-        transfer_media = TransferMedia()
-        media_files = transfer_media.user_media_files_to_transfer
-        tranfer_transactions = TransferTransactionFile()
+        file_transfer = FileTransfer()
+        media_files = file_transfer.user_media_files_to_transfer
         result = dict({
-            'media_to_send_count': transfer_media.count_sent_media(media_files),
+            'media_to_send_count': file_transfer.count_sent_media(media_files),
             'media_files': media_files,
-            'transaction_file_to_send_count': len(tranfer_transactions.user_transaction_filenames()),
+            'transaction_file_to_send_count': len(file_transfer.filenames(file_transfer.transaction_files)),
         })
         if request.is_ajax():
             if request.GET.get('action') == 'dump_transactions_to_file':
-                if not tranfer_transactions.validate_dump:
-                    self.dump_transactions(self.file_name(request, tranfer_transactions))
+                if not file_transfer.validate_dump:
+                    self.dump_transactions(self.file_name(request, file_transfer))
             elif request.GET.get('action') == 'transfer_data_to_remote_device':
-                transfer_media.transfer_media()
-                tranfer_transactions.transfer_transactions()
+                file_transfer.transfer_media_files()
+                file_transfer.transfer_transactions()
             else:
                 media_files = []
                 try:
@@ -192,19 +191,16 @@ class SendTransactionFilesView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView)
                 except AttributeError:
                     pass
                 result = dict({
-                    'media_to_send_count': transfer_media.count_sent_media(media_files),
-                    'transaction_file_to_send_count': len(tranfer_transactions.user_transaction_filenames()),
+                    'media_to_send_count': file_transfer.count_sent_media(media_files),
+                    'transaction_file_to_send_count': len(file_transfer.user_transaction_filenames()),
                 })
         return HttpResponse(json.dumps(result), content_type='application/json')
 
     def filename(self, request, file_transfer):
         TODAY = datetime.today().strftime("%Y%m%d%H%M")
-        filename = "bcpp_interview_{}_{}.json".format(request.GET.get('community') or settings.COMMUNITY, TODAY)
-        path = '{}/{}'.format(file_transfer.user_dump_tx_files, filename)
+        filename = "bcpp_interview_{}_{}.json".format(socket.gethostname(), TODAY)
+        path = os.path.join(file_transfer.user_dump_tx_files, filename)
         return path
 
     def dump_transactions(self, path):
         return export_outgoing_transactions(path)
-
-    def transfer_media(self):
-        return TransferMedia()
