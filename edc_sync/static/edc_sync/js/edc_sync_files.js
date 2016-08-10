@@ -23,7 +23,7 @@ function track_file_transfer(total_media_to_send, total_tx_to_send, url, media_f
 	transfer_progress.then(function(results){
 		var sent_tx_files = 0;
 		if (total_tx_to_send > 1) {
-			sent_tx_files = total_tx_to_send - results.;
+			sent_tx_files = total_tx_to_send - results;
 		} else if(total_tx_to_send == 1) {
 			sent_tx_files = 1;
 		}

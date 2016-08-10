@@ -1,4 +1,4 @@
-var outgoingListUrl = Urls[ 'outgoingtransaction-list' ]();
+var outgoingListUrl = Urls[ 'edc-sync:outgoingtransaction-list' ]();
 var server = 'http://' + document.location.host
 
 function edcSyncReady(hosts, userName, apiToken) {
@@ -56,7 +56,7 @@ function processOutgoingTransactions( host, userName ) {
 	});
 
 	ajPostIncoming = ajGetOutgoing.then( function( outgoingtransactions ) {
-		var incomingListUrl = Urls[ 'incomingtransaction-list' ]();
+		var incomingListUrl = Urls[ 'edc-sync:incomingtransaction-list' ]();
 		outgoingtransaction_count = outgoingtransactions.count;
 		outgoingtransaction = outgoingtransactions.results[0];
 		$( '#id-resource-alert-text' ).text( hostAlertText( host, outgoingtransaction_count ) );
@@ -72,7 +72,7 @@ function processOutgoingTransactions( host, userName ) {
 
 	ajPatchOutgoing = ajPostIncoming.then( function( incomingtransaction ) {
 		var json_data = {};
-		var outgoingDetailUrl = Urls[ 'outgoingtransaction-detail' ]( outgoingtransaction.pk );
+		var outgoingDetailUrl = Urls[ 'edc-sync:outgoingtransaction-detail' ]( outgoingtransaction.pk );
 		var outgoingtransaction_fields = {
 			'user_modified': userName,
 			'modified': moment().utc().format("YYYY-MM-DDTHH:mm:ss.SSSZZ"),
@@ -186,7 +186,7 @@ function updateFromHosts( hosts ) {
 
 function updateFromHost( host ) {
 	var host_string = host.replace( ':', '-' ).split( '.' ).join( '-' );
-	var url = 'http://' + host + Urls['transaction-count']();
+	var url = 'http://' + host + Urls['edc-sync:transaction-count']();
 	ajTransactionCount = $.ajax({
 		url: url,
 		type: 'GET',
