@@ -151,7 +151,7 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
 class SendTransactionFilesView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
-    template_name = 'edc_sync/home.html'
+    template_name = 'edc_sync/home1.html'
     COMMUNITY = None
     transfer = None
 
@@ -172,18 +172,15 @@ class SendTransactionFilesView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView)
     def get(self, request, *args, **kwargs):
         file_transfer = FileTransfer()
         media_files = file_transfer.user_media_files_to_transfer
-        result = dict({
-            'media_to_send_count': file_transfer.count_sent_media(media_files),
-            'media_files': media_files,
-            'transaction_file_to_send_count': len(file_transfer.filenames(file_transfer.transaction_files)),
-        })
+        result = {}
         if request.is_ajax():
-            if request.GET.get('action') == 'dump_transactions_to_file':
-                if not file_transfer.validate_dump:
-                    self.dump_transactions(self.file_name(request, file_transfer))
+            if request.GET.get('action') == 'get_pending_media_count':
+                result = dict({
+                    'pending_media_count': file_transfer.count_sent_media(media_files),
+                    'media_files': media_files
+                })
             elif request.GET.get('action') == 'transfer_data_to_remote_device':
                 file_transfer.transfer_media_files()
-                file_transfer.transfer_transactions()
             else:
                 media_files = []
                 try:
@@ -191,16 +188,6 @@ class SendTransactionFilesView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView)
                 except AttributeError:
                     pass
                 result = dict({
-                    'media_to_send_count': file_transfer.count_sent_media(media_files),
-                    'transaction_file_to_send_count': len(file_transfer.user_transaction_filenames()),
+                    'pending_media_count': file_transfer.count_sent_media(media_files),
                 })
         return HttpResponse(json.dumps(result), content_type='application/json')
-
-    def filename(self, request, file_transfer):
-        TODAY = datetime.today().strftime("%Y%m%d%H%M")
-        filename = "bcpp_interview_{}_{}.json".format(socket.gethostname(), TODAY)
-        path = os.path.join(file_transfer.user_dump_tx_files, filename)
-        return path
-
-    def dump_transactions(self, path):
-        return export_outgoing_transactions(path)

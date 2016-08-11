@@ -77,7 +77,7 @@ class FileTransfer(object):
         self.transaction_files_archive = self.edc_sync_app_config.transaction_files_archive
         self.file_server = self.edc_sync_app_config.file_server
         self.file_server_folder = self.edc_sync_app_config.file_server_folder
-        self.remote_username = self.edc_sync_app_config.remote_username
+        self.remote_user = self.edc_sync_app_config.remote_user
         self.media_dir = self.edc_sync_app_config.media_folders[0]
 
     @property
@@ -85,7 +85,7 @@ class FileTransfer(object):
         return django_apps.get_app_config('edc_sync')
 
     def connect_to_device(self, device):
-        device, username = (self.file_server, self.remote_username) if device == REMOTE else (LOCALHOST, getpass.getuser())
+        device, username = (self.file_server, self.remote_user) if device == REMOTE else (LOCALHOST, getpass.getuser())
         try:
             client = paramiko.SSHClient()
             client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -116,21 +116,20 @@ class FileTransfer(object):
             connector.move()
             connector.create_history()
 
-    @property
-    def user_media_files_to_transfer(self):
+    def user_media_files_to_transfer(self, media_dir):
         """Returns a list of media file to send to the server. """
-        user_media_files_to_transfer = self.filenames(self.media_dir)
+        user_media_files_to_transfer = self.filenames(media_dir)
         try:
             user_media_files_to_transfer.remove('.DS_Store')
         except ValueError:
             pass
-        _media_to_transfer = []
+        media_to_transfer = []
         for filename in user_media_files_to_transfer:
             try:
                 History.objects.get(filename=filename)
             except History.DoesNotExist:
-                _media_to_transfer.append(filename)
-        return _media_to_transfer
+                media_to_transfer.append(filename)
+        return media_to_transfer
 
     @property
     def transfer_media_files(self):
@@ -138,14 +137,15 @@ class FileTransfer(object):
         remote_device = self.connect_to_device(REMOTE)
         remote_device_sftp = remote_device.open_sftp()
         localhost = self.connect_to_device(LOCALHOST)
-        for file_name in self.user_media_files_to_transfer:
-            connector = FileConnector(
-                remote_device_sftp=remote_device_sftp, localhost=localhost,
-                is_archived=False, source_folder=self.media_dir, destination_folder=self.file_server_folder,
-                filename=file_name, device=REMOTE
-            )
-            connector.copy()
-            connector.create_history()
+        for media_dir in self.media_dir:
+            for file_name in self.user_media_files_to_transfer(media_dir):
+                connector = FileConnector(
+                    remote_device_sftp=remote_device_sftp, localhost=localhost,
+                    is_archived=False, source_folder=self.media_dir, destination_folder=self.file_server_folder,
+                    filename=file_name, device=REMOTE
+                )
+                connector.copy()
+                connector.create_history()
 
     def count_sent_media(self, initial_media_files):
         """ Count number of registered media files based on the initial files to send."""

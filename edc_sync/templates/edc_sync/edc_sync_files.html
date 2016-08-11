@@ -1,16 +1,17 @@
-
 <!-- begin edc_sync_files-->
-
 <div class="panel panel-default">
 <div class="panel-heading">
-	<button id="btn_transfer" class="btn btn-default">Send Data To Server</button><span id="id-tx-spinner" class="fa fa-refresh pull-right"></span>
- </div>
-
-<div id="panel-transfer-files" class="panel-body" style="display:none;">
-	<p> Found <strong><span id="id-tx-files" class="fa fa-spinner fa-spin"></span></strong> transaction files..<strong><span id="id-pending-tx" class="alert-info"></span></strong></p>
-	<p> Found <strong><span id="id-total-media" style="margin-left:3px;">(loading..)</span></strong> media files..<span id="id-pending-media" class="alert-info"></span></p>
-</div>
-<div class="panel-footer" id="alert-progress-status" class="alert alert-info" style="display:none;"></div>
+	<ul id="nav-pill-host" class="nav nav-pills nav-stacked">
+		<li>
+		<span id="id-pending-media" class="pull-left">6 Pending Media</span>
+		<span id="id-tx-spinner" class="fa fa-refresh pull-right"></span>
+		</li>
+	 </ul>
 </div>
 
-<!-- end edc_sync_files-->
+<div id="panel-transfer-files" class="panel-body"> 
+	<p><button id="btn-transfer" class="btn btn-default">Push Media To Device: 10.113.200.200</button></p>
+	<div class="alert alert-info" id="alert-progress-status"></div>
+</div>
+</div>
+<!-- end edc_sync_files 9779267 twb895 -->

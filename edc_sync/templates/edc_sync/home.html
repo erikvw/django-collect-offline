@@ -3,7 +3,9 @@
 {% load staticfiles %}
 
 {% block extra-scripts %}
+
 {{ block.super }}
+
 <script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/edc_sync.js" %}"></script>
 
 <script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/edc_sync_files.js" %}"></script>
@@ -11,7 +13,6 @@
 {% endblock extra-scripts %}
 
 {% block main %}
-
 <div class="container">
 
     <div id="div-home-right" class="col-md-8">
@@ -70,7 +71,7 @@
                     <div class="alert alert-danger text-center">Current user '{{ user.username }}' missing API token.</div>
                 {% endif %}
                 <ul id="nav-pill-api" class="nav nav-pills nav-stacked">
-                {% if user.is_authenticated %}
+                {% if not user.is_authenticated %}
                     <li><a href="{% url 'outgoingtransaction-list' %}?format=json">Show My Outgoingtransaction</a></li>
                     <li><a href="{% url 'incomingtransaction-list' %}?format=json">Show My Incomingtransaction</a></li>
                 {% endif %}
@@ -95,14 +96,14 @@
 
 {% block extra-scripts-bottom %}
 {{ block.super }}
-
 <script type="text/javascript" charset="utf8" class="init">
-    $(document).ready( function() { 
-        url = "{% url 'transfer_files_url' %}";
-        edcFileTransferReady('{{ hosts|escapejs }}', '{{ user.username }}', '{{ api_token }}', url);
-      
+    $(document).ready( function() {
+    	alert("okay");
+    	var transfer_files_url = Urls[ 'transfer_files_url' ]();
+    	alert("okay 1");
+    	alert(transfer_files_url);
+    	edcSyncFilesReady();
         edcSyncReady('{{ hosts|escapejs }}', '{{ user.username }}', '{{ api_token }}');
- 
     });
 </script>
 
