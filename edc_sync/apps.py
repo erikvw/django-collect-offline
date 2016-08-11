@@ -21,7 +21,12 @@ class AppConfig(ConfigParserMixin, DjangoAppConfig):
     media_folders = []
     config_filename = 'edc_sync.ini'
     # these attrs will be overwritten with values in edc_sync.ini, see ready()
-    config_attrs = ['user', 'password', 'file_server', 'file_server_folder', 'role']
+    config_attrs = {
+        'edc_sync': ['user', 'password', 'file_server', 'file_server_folder', 'role'],
+        'corsheaders': [('cors_origin_whitelist', tuple), ('cors_origin_allow_all', bool)]
+    }
+    cors_origin_whitelist = None  # a tuple of host:port, host:port, ...
+    cors_origin_allow_all = True
 
     def ready(self):
         sys.stdout.write('Loading {} ...\n'.format(self.verbose_name))
@@ -31,6 +36,6 @@ class AppConfig(ConfigParserMixin, DjangoAppConfig):
                 'app instance. See AppConfig.\n'))
         self.transaction_folder = os.path.join(settings.BASE_DIR, 'transactions')
         self.transaction_archive = os.path.join(self.transaction_folder, 'archive')
-        self.overwrite_config_attrs_on_class(self.name)
+        self.overwrite_config_attrs_on_class()
         sys.stdout.write(' * role is {}.\n'.format(self.role.upper()))
         sys.stdout.write(' Done loading {}.\n'.format(self.verbose_name))
