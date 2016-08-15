@@ -22,5 +22,5 @@ urlpatterns = [
     url(r'^jsreverse/$', urls_js, name='js_reverse'),
     url(r'^admin/', edc_sync_admin.urls),
     url(r'^transfer_files/$', views.SendTransactionFilesView.as_view(), name='transfer_files_url'),
-    url(r'^', views.HomeView.as_view(), name='edc-sync-home-url'),
+    url(r'^', views.HomeView.as_view(), name='home-url'),
 ]
