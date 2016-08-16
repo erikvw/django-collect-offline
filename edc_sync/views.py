@@ -1,4 +1,3 @@
-import os
 import json
 import socket
 
@@ -11,9 +10,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic.base import TemplateView
 from django_crypto_fields.constants import LOCAL_MODE
 from django_crypto_fields.cryptor import Cryptor
-from datetime import datetime
 
-from rest_framework.generics import CreateAPIView
 from rest_framework import viewsets
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
@@ -26,9 +23,8 @@ from rest_framework.views import APIView
 from edc_base.views.edc_base_view_mixin import EdcBaseViewMixin
 from edc_sync.admin import edc_sync_admin
 from edc_sync.edc_sync_view_mixin import EdcSyncViewMixin
-from edc_sync.models import OutgoingTransaction, IncomingTransaction, History
-from edc_sync.serializers import OutgoingTransactionSerializer, IncomingTransactionSerializer, HistorySerializer
-from edc_sync.classes.file_transfer import FileTransfer
+from edc_sync.models import OutgoingTransaction, IncomingTransaction
+from edc_sync.serializers import OutgoingTransactionSerializer, IncomingTransactionSerializer
 
 
 @api_view(['GET'])
@@ -107,25 +103,6 @@ class RenderView(EdcBaseViewMixin, TemplateView):
         return context
 
 
-class HistoryCreateView(CreateAPIView):
-
-    queryset = History.objects.all()
-    serializer_class = HistorySerializer
-
-    def perform_create(self, serializer):
-        serializer.save(user_created=self.request.user)
-
-
-class MediaFilesAPIView(APIView):
-    """
-    A view that returns the count  of transactions.
-    """
-    renderer_classes = (JSONRenderer, )
-
-    def get(self, request, format=None):
-        return Response(json.dumps(FileTransfer().pending_media_files()))
-
-
 class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
     template_name = 'edc_sync/home.html'
@@ -166,50 +143,3 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         return super(HomeView, self).dispatch(*args, **kwargs)
-
-
-class PullMediaFileView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
-
-    template_name = 'edc_sync/home.html'
-    COMMUNITY = None
-    transfer = None
-
-    def __init__(self, *args, **kwargs):
-        super(PullMediaFileView, self).__init__(*args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context.update(
-            edc_sync_admin=edc_sync_admin,
-            project_name=self.app.verbose_name + ': ' + self.role.title(),
-            cors_origin_whitelist=self.cors_origin_whitelist,
-            hostname=socket.gethostname(),
-            ip_address=self.ip_address,
-        )
-        return context
-
-    def copy_media_file(self, host, filename):
-        transfer = FileTransfer(
-            file_server=host, filename=filename
-        )
-        return transfer.pull_media_files()
-
-    def get(self, request, *args, **kwargs):
-        result = {}
-        if request.is_ajax():
-            host = request.GET.get('host')
-            ip_address = host[:-5] if '8000' in host else host
-            print(ip_address)
-            action = request.GET.get('action')
-            if action == 'pull':
-                filename = request.GET.get('filename')
-                if self.copy_media_file(ip_address, filename):
-                    result = {'filename': filename, 'host': ip_address, 'status': True}
-                else:
-                    result = {'filename': filename, 'host': ip_address, 'status': False}
-            elif action == 'media-count':
-                transfer = FileTransfer(
-                    file_server=host,
-                )
-                result = {'mediafiles': transfer.media_files_to_copy(), 'host': host}
-        return HttpResponse(json.dumps(result), content_type='application/json')
