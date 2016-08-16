@@ -13,6 +13,9 @@ router.register(r'incomingtransaction', views.IncomingTransactionViewSet)
 
 urlpatterns = [
     url(r'^api/transaction-count/$', views.TransactionCountView.as_view(), name='transaction-count'),
+    url(r'^api/create-history/$', views.HistoryCreateView.as_view(), name='create-history'),
+    url(r'^api/media-count/$', views.MediaFilesAPIView.as_view(), name='media-count'),
+    url(r'^pull-media-file/$', views.PullMediaFileView.as_view(), name='pull-media-file'),
     url(r'^api/', include(router.urls)),
     # url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^api-token-auth/', obtain_auth_token),  # will reply given username and password
@@ -21,6 +24,5 @@ urlpatterns = [
         views.RenderView.as_view(), name='render_url'),
     url(r'^jsreverse/$', urls_js, name='js_reverse'),
     url(r'^admin/', edc_sync_admin.urls),
-    url(r'^transfer_files/$', views.SendTransactionFilesView.as_view(), name='transfer_files_url'),
     url(r'^', views.HomeView.as_view(), name='home-url'),
 ]

@@ -5,13 +5,14 @@
 {% block extra-scripts %}
 
 {{ block.super }}
+
   <!-- begin edc-sync extra-scripts -->
   <script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/edc_sync.js" %}"></script>
   <script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/edc_sync_files.js" %}"></script>
   <script type="text/javascript" charset="utf8" class="init">
-      $(document).ready( function() { 
-          edcSyncReady('{{ hosts|escapejs }}', '{{ user.username }}', '{{ api_token }}');
-          edcFileTransferReady();
+      $(document).ready( function() {
+    	  edcSyncMediaFilesReady('{{ hosts|escapejs }}', "{%  url 'edc-sync:pull-media-file' %}");
+    	  edcSyncReady('{{ hosts|escapejs }}', '{{ user.username }}', '{{ api_token }}');
       });
   </script>
   <!-- end edc-sync extra-scripts -->
@@ -44,17 +45,17 @@
                   <ul id="id-nav-pill-apply" class="nav nav-pills nav-stacked" style="text-transform: capitalize;">
                   </ul>
                 {% endif %}
+                
             {% elif edc_sync_role == 'client' %}
             {% else %}
                 <div class="panel-heading">Resources</div>
                 <div class="alert alert-danger text-center">Edc-Sync role undefined. See AppConfig.</div>
             {% endif%}
         </div>
+  
+        {% include "edc_sync/edc_sync_files.html" %}
+ 
         {% endif%}
-          
-        {% if edc_sync_role == 'client' %}
-            {% include "edc_sync/edc_sync_files.html" %}
-        {% endif%}  
     </div>
 
     <div id="div-home-middle" class="col-md-4">
@@ -98,15 +99,4 @@
 
 </div>
 
-{% block extra-scripts-bottom %}
-{{ block.super }}
-<script type="text/javascript" charset="utf8" class="init">
-    $(document).ready( function() {
-        edcSyncReady('{{ hosts|escapejs }}', '{{ user.username }}', '{{ api_token }}');
-    });
-</script>
-
-{% endblock extra-scripts-bottom %}
-
 {% endblock main %}
-

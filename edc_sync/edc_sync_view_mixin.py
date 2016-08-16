@@ -19,6 +19,7 @@ class EdcSyncViewMixin:
 
     @property
     def host_model(self):
+        host_model = None
         if self.role == SERVER:
             host_model = Client
         if self.role == CLIENT:
@@ -26,7 +27,7 @@ class EdcSyncViewMixin:
         if not self.role:
             raise ImproperlyConfigured(
                 'Project uses \'edc_sync\' but has not defined a role for this app instance. See AppConfig.')
-        return host_model
+        return Client
 
     @property
     def resource(self):
@@ -34,7 +35,7 @@ class EdcSyncViewMixin:
             resource = 'outgoingtransaction'
         if self.role == CLIENT:
             resource = 'incomingtransaction'
-        return resource
+        return 'incomingtransaction'
 
     @property
     def hosts(self):

@@ -1,8 +1,0 @@
-remote_server_ip = your_remote_server_ip
-remote_dir = your_remote_dir
-remote_username = your_remote_username
-remote_password = your_remote_password
-transactions_dir = path_to_transaction_files
-media_dir = path_to_media_files
-media_remote_dir = path_to_media_dir_in_remote_machine
-archive_dir = path_to_archive_dir

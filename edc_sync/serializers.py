@@ -3,7 +3,7 @@ from rest_framework import serializers
 from edc_rest.binary_field import BinaryField
 from edc_rest.serializers import BaseModelSerializerMixin
 from edc_sync.choices import ACTIONS
-from edc_sync.models import IncomingTransaction, OutgoingTransaction
+from edc_sync.models import IncomingTransaction, OutgoingTransaction, History
 
 
 class BaseTransactionSerializer(BaseModelSerializerMixin, serializers.Serializer):
@@ -63,3 +63,9 @@ class OutgoingTransactionSerializer(BaseTransactionSerializer):
 
     is_consumed_middleman = serializers.BooleanField(
         default=False)
+
+
+class HistorySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = History

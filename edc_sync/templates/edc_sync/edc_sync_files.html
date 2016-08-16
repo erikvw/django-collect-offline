@@ -1,17 +1,14 @@
 <!-- begin edc_sync_files-->
 <div class="panel panel-default">
 <div class="panel-heading">
-	<ul id="nav-pill-host" class="nav nav-pills nav-stacked">
-		<li>
-		<span id="id-pending-media" class="pull-left">6 Pending Media</span>
-		<span id="id-tx-spinner" class="fa fa-refresh pull-right"></span>
-		</li>
-	 </ul>
+ 	<ul class="nav nav-pills nav-stacked">
+ 		<li>Media Files <span id="id-tx-spinner" class="fa fa-refresh pull-right"></span></li>
+ 	</ul>
 </div>
-
-<div id="panel-transfer-files" class="panel-body"> 
-	<p><button id="btn-transfer" class="btn btn-default">Push Media To Device: 10.113.200.200</button></p>
-	<div class="alert alert-info" id="alert-progress-status"></div>
+<div id="panel-media" class="panel-body">
+	<div class="alert alert-info" id="alert-progress-status" style="display:none">Transfering Media Files.<span id="id-media-count"></span></div>
+	 <ul class="nav nav-pills nav-stacked" id="id-nav-pull-resources">
+     </ul>
 </div>
 </div>
 <!-- end edc_sync_files 9779267 twb895 -->

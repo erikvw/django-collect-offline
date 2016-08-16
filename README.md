@@ -180,32 +180,34 @@ ALLOW_MODEL_SERIALIZATION = False  # (default: True)
 
 ### EDC Sync File Transfer
 
-With a stable connectivity between client and server then we use the REST API to sync transactions with the server. 
-Alternatively our remote data systems can generate transaction files in the field with a client machine, 
-then the files need to be transfered to the community server. Non technical users(RA's) must transfer the generated files
-to the community server using edc sync file transfer. Edc sync file transfer use paramiko to connect to the community server and transfer newly generated files.
+Transferring of media files(e.g audio) from remote machine to the connected node(device) or central server.
 
 
 ### Data Flow
 
-- field client ---Paramiko---> community server
+- field machine ---Paramiko---> connected machine
 
-### Required Attributes in Settings.py
+### Setup SSH Keys
 
-Add the following to settings.py
+1. Generate public key for the server or client.
+	* ssh-keygen -t rsa
+2. Copy public key to machine you want to connect to with ssh-copy-id.
+	* ssh-copy-id  user@remote_machine_ip
 
-* LOCAL_TRANSACTION_DIR= /path/to/local transactions/
+### Override edc_sync.ini and specify attributes
 
-* LOCAL_ARCHIVE_DIR = /path/to/archive/files/
+- user your/remote_username
+- file_server_folder where/to/copy/files/from
+- file_server remote_ip
+- media_dir_upload where/to/copy/files/to
 
-* LOCAL_MEDIA_DIR = /path/to/media files/
+#### Add above attributes for AppConfig in your Application in the child class of Edc Sync AppConfig
 
-* REMOTE_SERVER_IP = IP Address
-
-* REMOTE_MEDIA_DIR = /path/to/transfer/media files/to/
-
-* REMOTE_TRANSACTION_DIR = /path/to/transfer files/to/
-
+```
+    config_attrs = {
+        'edc_sync': ['file_server', 'file_server_folder', 'role', 'media_dir_upload' ],
+    }
+```
 ## TODO
 
 * handle proxy models
