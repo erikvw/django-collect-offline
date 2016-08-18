@@ -10,3 +10,5 @@ git+https://github.com/botswana-harvard/edc-base@develop#egg=edc-base
 git+https://github.com/erikvw/django-revision@develop#egg=django-revision
 git+https://github.com/botswana-harvard/edc-device@develop#egg=edc-device
 git+https://github.com/botswana-harvard/edc-rest@develop#egg=edc-rest
+git+https://github.com/botswana-harvard/edc-rest@develop#egg=edc-syn
+git+https://github.com/botswana-harvard/edc-sync-files@develop#edc-sync-files
