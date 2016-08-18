@@ -24,7 +24,7 @@ setup(
     keywords='django data synchronization offline',
     install_requires=[
         'djangorestframework',
-        'rest_framework_swagger',
+        #'rest_framework_swagger',
         'django-js-reverse',
         'django-cors-headers',
         'requests',
