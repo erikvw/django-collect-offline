@@ -3,12 +3,17 @@ from django_crypto_fields.apps import AppConfig as DjangoCryptoFieldsAppConfigPa
 from edc_sync.constants import CLIENT
 from edc_sync.apps import AppConfig as EdcSyncAppConfigParent
 from edc_base.apps import AppConfig as EdcBaseAppConfigParent
+from edc_device.apps import AppConfig as EdcDeviceAppConfigParent
 
 
 class AppConfig(DjangoAppConfig):
     name = 'example'
     verbose_name = 'Example Project'
     institution = 'Botswana-Harvard AIDS Institute Partnership'
+
+
+class EdcDeviceAppConfig(EdcDeviceAppConfigParent):
+    device_id = '15'
 
 
 class EdcBaseAppConfig(EdcBaseAppConfigParent):

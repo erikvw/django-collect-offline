@@ -29,9 +29,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-# Transfer Files
-
-EDC_SYNC_REMOTE_FILE_SERVER = True
 
 # Application definition
 
@@ -186,5 +183,6 @@ REST_FRAMEWORK = {
 #         'rest_framework.permissions.IsAuthenticated',
 #     )
 }
+
 
 APP_LABEL = 'edc_sync'

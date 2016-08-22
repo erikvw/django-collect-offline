@@ -1,22 +1,27 @@
-from django.apps import AppConfig
-from django_crypto_fields.apps import DjangoCryptoFieldsAppConfig
+from django.apps import AppConfig as DjangoAppConfig
+from django_crypto_fields.apps import AppConfig as DjangoCryptoFieldsAppConfigParent
 from edc_sync.constants import SERVER
-from edc_sync.apps import EdcSyncAppConfig
+from edc_sync.apps import AppConfig as EdcSyncAppConfigParent
+from edc_device.apps import AppConfig as EdcDeviceAppConfigParent
 
 
-class SyncAppConfig(EdcSyncAppConfig):
-    name = 'edc_sync'
-    verbose_name = EdcSyncAppConfig.verbose_name + ' ' + SERVER.title()
-    role = SERVER
-
-
-class ExampleAppConfig(AppConfig):
+class AppConfig(DjangoAppConfig):
     name = 'example_server'
     verbose_name = 'Example Project'
     institution = 'Botswana-Harvard AIDS Institute Partnership'
 
 
-class DjangoCryptoFieldsApp(DjangoCryptoFieldsAppConfig):
+class EdcSyncAppConfig(EdcSyncAppConfigParent):
+    name = 'edc_sync'
+    verbose_name = EdcSyncAppConfigParent.verbose_name + ' ' + SERVER.title()
+    role = SERVER
+
+
+class DjangoCryptoFieldsAppConfig(DjangoCryptoFieldsAppConfigParent):
     name = 'django_crypto_fields'
     model = ('example', 'crypt')
     crypt_model_using = 'default'
+
+
+class EdcDeviceAppConfig(EdcDeviceAppConfigParent):
+    device_id = '99'

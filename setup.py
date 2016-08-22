@@ -28,7 +28,6 @@ setup(
         'django-js-reverse',
         'django-cors-headers',
         'requests',
-        'paramiko',
     ],
     classifiers=[
         'Environment :: Web Environment',

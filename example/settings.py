@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'django_revision',
     'crispy_forms',
     'simple_history',
+    'example.apps.EdcDeviceAppConfig',
     'example.apps.EdcBaseAppConfig',
     'example.apps.EdcSyncAppConfig',
     'example.apps.DjangoCryptoFieldsAppConfig',
@@ -171,9 +172,6 @@ LANGUAGES = (
     ('tn', 'Setswana'),
     ('en', 'English'),
 )
-DEVICE_ID = '15'
-SERVER_DEVICE_ID_LIST = ['99']
-# MIDDLEMAN_DEVICE_ID_LIST = []
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 # django-cors-headers

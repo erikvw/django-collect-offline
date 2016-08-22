@@ -2,9 +2,10 @@ from example.settings import *
 
 APP_LABEL = 'example'
 EXAMPLE_APPS = [
-    'example_server.apps.SyncAppConfig',
-    'example.apps.DjangoCryptoFieldsApp',
-    'example.apps.ExampleAppConfig',
+    'example_server.apps.EdcDeviceAppConfig',
+    'example_server.apps.EdcSyncAppConfig',
+    'example_server.apps.DjangoCryptoFieldsAppConfig',
+    'example_server.apps.AppConfig',
 ]
 INSTALLED_APPS = DEPENDENCY_APPS + EXAMPLE_APPS
 
