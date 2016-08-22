@@ -1,14 +1,15 @@
 import socket
 
+from django.apps import apps as django_apps
 from django.core import serializers
 from django.db import models, transaction
 from django.utils import timezone
 
-from edc_device import Device
-
 from ..exceptions import SyncError
 
 from .base_transaction import BaseTransaction
+
+edc_device_app_config = django_apps.get_app_config('edc_device')
 
 
 class IncomingTransaction(BaseTransaction):
@@ -24,11 +25,10 @@ class IncomingTransaction(BaseTransaction):
         default=False)
 
     def deserialize_transaction(self, check_hostname=None, commit=True, check_device=True):
-        device = Device()
         if check_device:
-            if not device.is_server:
+            if not edc_device_app_config.is_server:
                 raise SyncError('Objects may only be deserialized on a server. Got device={} {}.'.format(
-                    device.device_role(device.device_id), device))
+                    edc_device_app_config.device_id, edc_device_app_config.role))
         inserted, updated, deleted = 0, 0, 0
         check_hostname = True if check_hostname is None else check_hostname
         for deserialized_object in serializers.deserialize(
