@@ -6,6 +6,7 @@ django-js-reverse
 paramiko
 # httpie
 git+https://github.com/erikvw/django-crypto-fields@develop#egg=django-crypto-fields
+git+https://github.com/erikvw/django-appconfig-ini@develop#egg=django-appconfig-ini
 git+https://github.com/botswana-harvard/edc-base@develop#egg=edc-base
 git+https://github.com/erikvw/django-revision@develop#egg=django-revision
 git+https://github.com/botswana-harvard/edc-device@develop#egg=edc-device
