@@ -1,2 +1,6 @@
+include AUTHORS CHANGES README.md LICENCE
 recursive-include edc_sync/templates *
 recursive-include edc_sync/static *
+recursive-include docs *
+recursive-exclude edc_example/*
+recursive-exclude etc/*
