@@ -13,6 +13,7 @@ class AppConfig(ConfigIniMixin, DjangoAppConfig):
     verbose_name = 'Data Synchronization'
     role = 'server'
     config_ini_attrs = {'edc_sync': ['role']}
+    edc_sync_files_using = False
 
     def ready(self):
         sys.stdout.write('Loading {} ...\n'.format(self.verbose_name))
