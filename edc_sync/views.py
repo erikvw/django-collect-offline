@@ -20,7 +20,7 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.views import APIView
 
-from edc_base.views.edc_base_view_mixin import EdcBaseViewMixin
+from edc_base.view_mixins import EdcBaseViewMixin
 from edc_sync.admin import edc_sync_admin
 from edc_sync.edc_sync_view_mixin import EdcSyncViewMixin
 from edc_sync.models import OutgoingTransaction, IncomingTransaction
