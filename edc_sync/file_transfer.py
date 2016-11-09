@@ -1,10 +1,14 @@
 import paramiko
 import getpass
 import os.path
-from edc_sync.models import History
+
 from datetime import datetime
 from django.apps import apps as django_apps
-from edc_sync.constants import REMOTE, LOCALHOST
+
+from .models import History
+
+REMOTE = 'remote'
+LOCALHOST = 'localhost'
 
 
 class FileConnector(object):

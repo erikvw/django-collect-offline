@@ -1,5 +1,5 @@
-from ..exceptions import TransactionConsumerError
-from ..models import OutgoingTransaction, IncomingTransaction
+from .exceptions import TransactionConsumerError
+from .models import OutgoingTransaction, IncomingTransaction
 
 
 class Consumer(object):

@@ -11,12 +11,13 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
 import os
+import sys
+
 from unipath import Path
 from django.utils import timezone
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(os.path.dirname(os.path.realpath(__file__)))
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
@@ -43,12 +44,41 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     # 'rest_framework_swagger',
+    'django_crypto_fields.apps.AppConfig',
     'django_js_reverse',
     'simple_history',
-    'example.apps.AppConfig',
-    'example.apps.DjangoCryptoFieldsAppConfig',
+    'edc_base.apps.AppConfig',
+    'edc_protocol.apps.AppConfig',
+    'edc_lab.apps.AppConfig',
+    'edc_device.apps.AppConfig',
+    'edc_visit_tracking.apps.AppConfig',
+    'edc_example.apps.AppConfig',
     'edc_sync.apps.AppConfig',
 ]
+
+if 'test' in sys.argv:
+    # Ignore running migrations on unit tests -- speeds up tests.
+    MIGRATION_MODULES = {
+        "call_manager": None,
+        "edc_appointment": None,
+        "edc_code_lists": None,
+        "edc_configuration": None,
+        "edc_consent": None,
+        "edc_content_type_map": None,
+        "edc_data_manager": None,
+        "edc_death_report": None,
+        "edc_death_report": None,
+        "edc_identifier": None,
+        "edc_metadata": None,
+        "edc_registration": None,
+        "edc_rule_groups": None,
+        "edc_sync": None,
+        "edc_visit_schedule": None,
+        "edc_visit_tracking": None,
+        "edc_lab": None,
+        "ba_namotswe": None,
+        'django_crypto_fields': None,
+    }
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',

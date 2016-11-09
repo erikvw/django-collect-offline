@@ -4,16 +4,15 @@ from django.conf import settings
 from django.core import serializers
 from django.core.exceptions import ImproperlyConfigured
 from django.db import models
-from django.db.models.fields import UUIDField, AutoField
+from django.db.models.fields import UUIDField
 from django.utils import timezone
-from django.utils.timezone import now
-
 from django_crypto_fields.constants import LOCAL_MODE
 from django_crypto_fields.cryptor import Cryptor
-from edc_base.model.models.historical_records import HistoricalRecords
-from ..exceptions import SyncModelError
 
-from .outgoing_transaction import OutgoingTransaction
+from edc_base.model.models.historical_records import HistoricalRecords
+
+from .exceptions import SyncModelError
+from .models import OutgoingTransaction
 
 
 class SyncMixin:
@@ -37,7 +36,6 @@ class SyncMixin:
         and saves the json object to the OutgoingTransaction model."""
 
         # TODO: i think using should always be default
-
         created = True if created is None else created
         action = 'I' if created else 'U'
         if deleted:

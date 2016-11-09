@@ -11,7 +11,8 @@ from rest_framework.renderers import JSONRenderer
 from edc_sync.models import OutgoingTransaction, IncomingTransaction
 from edc_sync.serializers import OutgoingTransactionSerializer
 
-from example.models import (TestModel, ComplexTestModel, Fk, M2m, TestEncryptedModel, BadTestModel, AnotherBadTestModel)
+from edc_example.models import (
+    TestModel, ComplexTestModel, Fk, M2m, TestEncryptedModel, BadTestModel, AnotherBadTestModel)
 
 
 class TestSerializers(TestCase):

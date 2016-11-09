@@ -4,6 +4,9 @@
 
 # edc-sync
 
+##(needs updating!)
+
+
 Deploy a Django app as a client on laptop that is offline and sync the data with your server when you get back online.
 
     pip install git+https://github.com/botswana-harvard/edc-sync@develop#egg=edc_sync
@@ -96,11 +99,11 @@ Using `edc_sync` suggests a multi-database environment. In the rare case that th
 
 For example, in your `example.apps.py`: 
 
-    from django_crypto_fields.apps import DjangoCryptoFieldsAppConfig
+    from django_crypto_fields.apps import AppConfig as DjangoCryptoFieldsAppConfigParent
 
-    class DjangoCryptoFieldsApp(DjangoCryptoFieldsAppConfig):
+    class DjangoCryptoFieldsAppConfig(DjangoCryptoFieldsAppConfigParent):
         name = 'django_crypto_fields'
-        model = ('example', 'crypt')
+        model = ('edc_example', 'crypt')
         crypt_model_using = 'client'
 
 ### Audit trail manager on models
@@ -111,32 +114,19 @@ Edc apps use `django_simple_history` to keep a full audit trail of data modifica
 To include a model add the `SyncModelMixin`. For example the base class for all CRFs in a module might look like this:
 
     from edc_base.model.models import BaseUuidModel
-    from edc_consent.models RequiresConsentMixin
-    from edc_offstudy.models import OffStudyMixin
     from edc_sync.models import SyncModelMixin, SyncHistoricalRecords
-    from edc_visit_tracking.models import CrfModelMixin
     
-    from .maternal_consent import MaternalConsent
+    from .visit import Visit
 
-    class MaternalCrfModel(CrfModelMixin, SyncModelMixin, OffStudyMixin,
-                           RequiresConsentMixin, BaseUuidModel):
+    class CrfModel(SyncModelMixin, BaseUuidModel):
     
-        consent_model = MaternalConsent
-    
-        off_study_model = ('mb_maternal', 'MaternalOffStudy')
-    
-        maternal_visit = models.OneToOneField(MaternalVisit)
+        visit = models.OneToOneField(Visit)
     
         history = SyncHistoricalRecords()
-    
-        entry_meta_data_manager = CrfMetaDataManager(MaternalVisit)
-    
+        
         def natural_key(self):
-            return (self.maternal_visit.natural_key(), )
-        natural_key.dependencies = ['mb_maternal.maternal_visit']
-    
-        def __str__(self):
-            return str(self.get_visit())
+            return (self.visit.natural_key(), )
+        natural_key.dependencies = ['myapp.visit']
     
         class Meta:
             abstract = True
@@ -145,32 +135,6 @@ To include a model add the `SyncModelMixin`. For example the base class for all 
 `SyncModelMixin` needs model method `natural_key` and the model manager method `get_by_natural_key`. If either or both do not exist, a `SyncError` Exception is raises. In the example above, the `CrfModelMixin` declares the `objects` model manager that includes the required manager method.
 
 For any insert, update or delete of concrete models based on `MaternalCrfModel`, the `SyncModelMixin` creates `OutgoingTransaction` instances on the same DB as the concrete model.
-
-### Copy transactions from one DB to another
-
-Data entered on 'client' eventually needs to be synchronized to 'server'. Your `settings.DATABASES` might be like this:
-    
-    DATABASES = {
-        'default': {},
-        'server': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        },
-        'client': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        }
-    }
-      
-As data is entered on `client`, the data is serialized into model `OutgoingTransaction` on `client`. The outgoing transactions on `client` are can be copied to `server` like this:
-
-    OutgoingTransaction.objects.using('client').filter(
-            is_consumed_server=False).copy_to_incoming_transaction('server') 
-
-Once the transactions are on `server` they are deserialized like this:
-
-    messages = IncomingTransaction.objects.using('server').filter(
-        is_consumed=False).deserialize(custom_device=device, check_hostname=False)
 
 ### Settings
 

@@ -1,13 +1,15 @@
 import json
 
-from django.apps import apps as django_apps
 from json.decoder import JSONDecodeError
 from requests.exceptions import RequestException
-
-from edc_sync.constants import SERVER, CLIENT
-from edc_sync.models.host import Client, Server
 from rest_framework.authtoken.models import Token
+
+from django.apps import apps as django_apps
 from django.core.exceptions import ImproperlyConfigured
+
+
+from .constants import SERVER, CLIENT
+from .models import Client, Server
 
 
 class EdcSyncViewMixin:
@@ -27,7 +29,7 @@ class EdcSyncViewMixin:
         if not self.role:
             raise ImproperlyConfigured(
                 'Project uses \'edc_sync\' but has not defined a role for this app instance. See AppConfig.')
-        return Client
+        return host_model
 
     @property
     def resource(self):
@@ -35,7 +37,7 @@ class EdcSyncViewMixin:
             resource = 'outgoingtransaction'
         if self.role == CLIENT:
             resource = 'incomingtransaction'
-        return 'incomingtransaction'
+        return resource
 
     @property
     def hosts(self):

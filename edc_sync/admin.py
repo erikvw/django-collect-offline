@@ -16,13 +16,13 @@ from .actions import (
 from .constants import SERVER, CLIENT
 from .models import IncomingTransaction, OutgoingTransaction, Client, Server
 
-edc_sync_app = django_apps.get_app_config('edc_sync')
+edc_sync_app_config = django_apps.get_app_config('edc_sync')
 
 
 class EdcSyncAdminSite(AdminSite):
-    site_header = edc_sync_app.verbose_name
-    site_title = edc_sync_app.verbose_name
-    index_title = edc_sync_app.verbose_name + ' ' + 'Admin'
+    site_header = edc_sync_app_config.verbose_name
+    site_title = edc_sync_app_config.verbose_name
+    index_title = edc_sync_app_config.verbose_name + ' ' + 'Admin'
     site_url = '/edc-sync/'
 
 edc_sync_admin = EdcSyncAdminSite(name='edc_sync_admin')
@@ -97,12 +97,12 @@ class HostAdmin(admin.ModelAdmin):
         list_filter = ('is_active', 'last_sync_datetime', 'last_sync_status',)
 
 
-if edc_sync_app.role == SERVER:
+if edc_sync_app_config.role == SERVER:
     @admin.register(Client, site=edc_sync_admin)
     class ClientAdmin(HostAdmin):
         pass
 
-if edc_sync_app.role == CLIENT:
+if edc_sync_app_config.role == CLIENT:
     @admin.register(Server, site=edc_sync_admin)
     class ServerAdmin(HostAdmin):
         pass

@@ -2,8 +2,9 @@ from rest_framework import serializers
 
 from edc_rest.binary_field import BinaryField
 from edc_rest.serializers import BaseModelSerializerMixin
-from edc_sync.choices import ACTIONS
-from edc_sync.models import IncomingTransaction, OutgoingTransaction
+
+from .choices import ACTIONS
+from .models import IncomingTransaction, OutgoingTransaction
 
 
 class BaseTransactionSerializer(BaseModelSerializerMixin, serializers.Serializer):
