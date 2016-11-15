@@ -28,6 +28,62 @@ Try the `example` app in the repo. For example:
     $ python manage.py --settings='example.settings' runserver
 
 
+### Installation
+
+In settings.py:
+
+    INSTALLED_APPS = [
+    ...
+    'edc_sync.apps.AppConfig',
+    ...]
+
+###Configure a model for synchronization
+
+To include a model for synchronization declare the model with `BaseUuidModel` from `edc-base`, define the `natural_key` method and the model manager method `get_by_natural_key` and add the `HistoricalRecords` manager from `edc-base`.
+
+For example the base class for all CRFs in a module might look like this:
+
+    from edc_base.model.models import BaseUuidModel, HistoricalRecords
+    
+    from .visit import Visit
+
+    class CrfModel(BaseUuidModel):
+    
+        visit = models.OneToOneField(Visit)
+    
+        objects = CrfModelManager()
+
+        history = HistoricalRecords()
+        
+        def natural_key(self):
+            return (self.visit.natural_key(), )
+        natural_key.dependencies = ['myapp.visit']
+    
+        class Meta:
+            abstract = True
+
+### Add a model to the site global
+
+In your app, add module `sync_models.py`.
+
+    # sync_models.py
+    
+    from edc_sync.site_sync_models import site_sync_models
+    from edc_sync.sync_model import SyncModel
+    
+    sync_models = [
+        'my_app.CrfModel',
+    ]
+    
+    site_sync_models.register(sync_models, SyncModel)
+    
+        
+### Settings
+
+to disable the `SyncModelMixin` add this to your settings.py
+
+ALLOW_MODEL_SERIALIZATION = False  # (default: True)
+
 Description
 ===========
 
@@ -48,102 +104,3 @@ __edc-sync__ uses either the REST API or FILE transfer:
 - field client ---REST---> middleman (and modelre inspector) ---REST---> community server
 - site server ---FILE---> central server
 
-It is also possible to use Django's DB router if connections are good and reliable (this option may be removed in future).
-
-
-### Installation
-
-In settings.py:
-
-    INSTALLED_APPS = [
-    ...
-    'django_crypto_fields.apps.DjangoCryptoFieldsAppConfig',
-    'edc_sync.apps.EdcSyncAppConfig',
-    ...]
-
-### Encryption and `edc_sync`
-To use `edc_sync` and `django_crypto_fields` together requires additional configuration.
-
-#### Model `Crypt`
-Although transactions are serialized to JSON, encrypted, and stored in models such as `IncomingTransaction` and `OutgoingTransaction`, the JSON objects use AES encryption and do not update the reference model in `django_crypto_fields`, `django_crypto_fields.models.crypt`. However, it is very likely that your app has models that use encrypted fields and do update the `Crypt` model. If so, the `Crypt` model must also be synchronized so that the receiving database can decrypt. To enable this, you need to declare the model in your app with the `SyncModelMixin` and used the `BaseUuidModel` to change the `primary_key` from an `IntegerField` to a `UUIDField`. 
-For example: 
-    
-    from django_crypto_fields.crypt_model_mixin import CryptModelMixin
-    from edc_base.model.models import BaseUuidModel
-    from edc_sync.models import SyncModelMixin
-
-    class Crypt(CryptModelMixin, SyncModelMixin, BaseUuidModel):
-
-        class Meta:
-            app_label = 'example'
-            unique_together = (('hash', 'algorithm', 'mode'),)
-
-then in your `example.apps.py`: 
-
-    from django_crypto_fields.apps import DjangoCryptoFieldsAppConfig
-
-    class DjangoCryptoFieldsApp(DjangoCryptoFieldsAppConfig):
-        name = 'django_crypto_fields'
-        model = ('example', 'crypt')
-
-then in settings:
-
-    INSTALLED_APPS = [
-    ...
-    'edc_sync.apps.DjangoCryptoFieldsApp',
-    'edc_sync.apps.EdcSyncAppConfig',
-    ...]
-        
-#### DATABASES attribute in `settings`
-Using `edc_sync` suggests a multi-database environment. In the rare case that the default database named in your `settings.DATABASES` is not named `default`, you need to tell `django_crypto_fields` to get the `using` value from the app config attribute `crypto_model_using`. This attribute only affects access to the `Crypt` model.
-
-For example, in your `example.apps.py`: 
-
-    from django_crypto_fields.apps import AppConfig as DjangoCryptoFieldsAppConfigParent
-
-    class DjangoCryptoFieldsAppConfig(DjangoCryptoFieldsAppConfigParent):
-        name = 'django_crypto_fields'
-        model = ('edc_example', 'crypt')
-        crypt_model_using = 'client'
-
-### Audit trail manager on models
-Edc apps use `django_simple_history` to keep a full audit trail of data modifications. For an audit trail to synchronize with `edc_sync`, use class `edc_sync.models.SyncHistoricalRecords` in place of `simple_history.model.HistoricalRecords`. See section below on configuring a model. 
-
-###Configure a model for synchronization
-
-To include a model add the `SyncModelMixin`. For example the base class for all CRFs in a module might look like this:
-
-    from edc_base.model.models import BaseUuidModel
-    from edc_sync.models import SyncModelMixin, SyncHistoricalRecords
-    
-    from .visit import Visit
-
-    class CrfModel(SyncModelMixin, BaseUuidModel):
-    
-        visit = models.OneToOneField(Visit)
-    
-        history = SyncHistoricalRecords()
-        
-        def natural_key(self):
-            return (self.visit.natural_key(), )
-        natural_key.dependencies = ['myapp.visit']
-    
-        class Meta:
-            abstract = True
-
-        
-`SyncModelMixin` needs model method `natural_key` and the model manager method `get_by_natural_key`. If either or both do not exist, a `SyncError` Exception is raises. In the example above, the `CrfModelMixin` declares the `objects` model manager that includes the required manager method.
-
-For any insert, update or delete of concrete models based on `MaternalCrfModel`, the `SyncModelMixin` creates `OutgoingTransaction` instances on the same DB as the concrete model.
-
-### Settings
-
-to disable the `SyncModelMixin` add this to your settings.py
-
-ALLOW_MODEL_SERIALIZATION = False  # (default: True)
-
-## TODO
-
-* handle proxy models
-* producer
-* handle deleted transactions
