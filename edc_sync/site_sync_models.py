@@ -4,7 +4,7 @@ import sys
 from django.apps import apps as django_apps
 from django.utils.module_loading import import_module, module_has_submodule
 
-from .exceptions import RegistryNotLoaded, AlreadyRegistered
+from .exceptions import AlreadyRegistered
 
 
 class SiteSyncModels:
@@ -12,17 +12,11 @@ class SiteSyncModels:
     """ Main controller of :class:`sync_models` objects."""
 
     def __init__(self):
-        self._registry = {}
+        self.registry = {}
         self.loaded = False
 
-    @property
-    def registry(self):
-        #         if not self.loaded:
-        #             raise RegistryNotLoaded(
-        #                 'Registry not loaded. Is AppConfig for \'edc_sync\' declared in settings?.')
-        return self._registry
-
     def register(self, models, DefaultSyncModel):
+        """Registers with app_label.modelname, SyncModel."""
         self.loaded = True
         for model in models:
             try:
@@ -37,6 +31,7 @@ class SiteSyncModels:
                 raise AlreadyRegistered('Model is already registered for synchronization. Got {}.'.format(name))
 
     def get_as_sync_model(self, instance):
+        """Returns a model instance wrapped with Sync methods."""
         SyncModel = self.registry.get(instance._meta.label_lower)
         try:
             sync_model = SyncModel(instance)
@@ -54,13 +49,13 @@ class SiteSyncModels:
             try:
                 mod = import_module(app)
                 try:
-                    before_import_registry = copy.copy(site_sync_models._registry)
+                    before_import_registry = copy.copy(site_sync_models.registry)
                     import_module('{}.{}'.format(app, module_name))
                     sys.stdout.write(' * registered models from \'{}\'.\n'.format(app))
                 except Exception as e:
                     if 'No module named \'{}.{}\''.format(app, module_name) not in str(e):
                         raise Exception(e)
-                    site_sync_models._registry = before_import_registry
+                    site_sync_models.registry = before_import_registry
                     if module_has_submodule(mod, module_name):
                         raise
             except ImportError:

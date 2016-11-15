@@ -1,3 +1,4 @@
+import copy
 import json
 import socket
 
@@ -21,10 +22,27 @@ from rest_framework.reverse import reverse
 from rest_framework.views import APIView
 
 from edc_base.view_mixins import EdcBaseViewMixin
-from edc_sync.admin import edc_sync_admin
-from edc_sync.edc_sync_view_mixin import EdcSyncViewMixin
-from edc_sync.models import OutgoingTransaction, IncomingTransaction
-from edc_sync.serializers import OutgoingTransactionSerializer, IncomingTransactionSerializer
+
+from .admin import edc_sync_admin
+from .edc_sync_view_mixin import EdcSyncViewMixin
+from .models import OutgoingTransaction, IncomingTransaction
+from .serializers import OutgoingTransactionSerializer, IncomingTransactionSerializer
+from .site_sync_models import site_sync_models
+
+
+class M:
+    """Simple class to display models with sync attribute as True or False."""
+    def __init__(self, app_label, model_name, is_sync_model=None):
+        self.sync = is_sync_model
+        self.app_label, self.model_name = app_label, model_name
+        self.model = django_apps.get_model(app_label, model_name)
+        self.verbose_name = self.model._meta.verbose_name
+
+    def __repr__(self):
+        return 'M({}, {}, {})'.format(self.app_label, self.model_name, self.sync)
+
+    def __str__(self):
+        return self.verbose_name
 
 
 @api_view(['GET'])
@@ -118,6 +136,7 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
             cors_origin_whitelist=self.cors_origin_whitelist,
             hostname=socket.gethostname(),
             ip_address=self.ip_address,
+            site_models=self.site_models,
         )
         return context
 
@@ -139,6 +158,23 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
             response_data = {}
             return HttpResponse(json.dumps(response_data), content_type='application/json')
         return self.render_to_response(context)
+
+    @property
+    def site_models(self):
+        """Returns a dictionary of registered models indicating if they are sync models or not."""
+        site_models = {}
+        models = django_apps.get_models()
+        for model in models:
+            app_label, model_name = model._meta.label_lower.split('.')
+            app_models = site_models.get(app_label, [])
+            app_models.append(
+                M(app_label, model_name, True if model._meta.label_lower in site_sync_models.registry else False))
+            site_models.update({app_label: app_models})
+        site_models_copy = copy.copy(site_models)
+        for app_label, app_models in site_models_copy.items():
+            app_models.sort(key=lambda x: x.verbose_name)
+            site_models.update({app_label: app_models})
+        return site_models
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
