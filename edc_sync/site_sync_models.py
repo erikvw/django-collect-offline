@@ -16,7 +16,7 @@ class M:
         self.verbose_name = self.model._meta.verbose_name
 
     def __repr__(self):
-        return 'M({}, {}, {})'.format(self.app_label, self.model_name, self.sync)
+        return 'M({}.{}, sync={})'.format(self.app_label, self.model_name, self.sync)
 
     def __str__(self):
         return self.verbose_name
@@ -56,21 +56,28 @@ class SiteSyncModels:
             sync_model = None
         return sync_model
 
-    def site_models(self, app_label=None):
+    def site_models(self, app_name=None, is_sync=None):
         """Returns a dictionary of registered models indicating if they are sync models or not."""
+        is_sync = None if is_sync is None else is_sync
         site_models = {}
-        models = django_apps.get_models()
-        for model in models:
-            app_label, model_name = model._meta.label_lower.split('.')
-            app_models = site_models.get(app_label, [])
-            app_models.append(
-                M(app_label, model_name, True if model._meta.label_lower in site_sync_models.registry else False))
-            site_models.update({app_label: app_models})
-        site_models_copy = copy.copy(site_models)
-        for app_label, app_models in site_models_copy.items():
-            app_models.sort(key=lambda x: x.verbose_name)
-            site_models.update({app_label: app_models})
-        return site_models.get(app_label) if app_label else site_models
+        for app_config in django_apps.get_app_configs():
+            model_list = []
+            for model in app_config.get_models():
+                app_label, model_name = model._meta.label_lower.split('.')
+                model_list.append(
+                    M(app_label, model_name, True if model._meta.label_lower in site_sync_models.registry else False))
+            if model_list:
+                model_list.sort(key=lambda x: x.verbose_name)
+                site_models.update({app_label: model_list})
+        if is_sync is True or is_sync is False:
+            filtered_models = {}
+            for app_label, model_list in site_models.items():
+                model_list = [m for m in model_list if m.sync == is_sync]
+                if model_list:
+                    filtered_models.update({app_label: model_list})
+            return filtered_models.get(app_name) if app_name else filtered_models
+        else:
+            return site_models.get(app_name) if app_name else site_models
 
     def autodiscover(self, module_name=None):
         """Autodiscovers classes in the sync_models.py file of any INSTALLED_APP."""
