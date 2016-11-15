@@ -34,3 +34,11 @@ class UsingSourceError(Exception):
 
 class UsingDestinationError(Exception):
     pass
+
+
+class RegistryNotLoaded(Exception):
+    pass
+
+
+class AlreadyRegistered(Exception):
+    pass

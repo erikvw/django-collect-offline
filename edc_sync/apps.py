@@ -4,6 +4,8 @@ from django.apps import AppConfig as DjangoAppConfig
 from django.apps import apps as django_apps
 from django.core.management.color import color_style
 
+from .site_sync_models import site_sync_models
+
 style = color_style()
 
 
@@ -20,6 +22,7 @@ class AppConfig(DjangoAppConfig):
                 ' Warning: Project uses \'edc_sync\' but has not defined a role for this '
                 'app instance. See AppConfig.\n'))
         sys.stdout.write('  * device is a {} with ID {}\n'.format(self.role.lower(), self.device_id))
+        site_sync_models.autodiscover()
         sys.stdout.write(' Done loading {}.\n'.format(self.verbose_name))
 
     @property

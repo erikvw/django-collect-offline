@@ -4,6 +4,8 @@ from django.dispatch import receiver
 
 from rest_framework.authtoken.models import Token
 
+from .site_sync_models import site_sync_models
+
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
@@ -19,7 +21,8 @@ def serialize_m2m_on_save(sender, action, instance, using, **kwargs):
     """
     if action == 'post_add':
         try:
-            instance.to_outgoing_transaction(using, created=True)
+            sync_model = site_sync_models.get_as_sync_model(instance)
+            sync_model.to_outgoing_transaction(using, created=True)
         except AttributeError as e:
             if 'to_outgoing_transaction' not in str(e):
                 raise AttributeError(str(e))
@@ -30,7 +33,8 @@ def serialize_on_save(sender, instance, raw, created, using, **kwargs):
     """ Serialize the model instance as an OutgoingTransaction."""
     if not raw:
         try:
-            instance.to_outgoing_transaction(using, created=created)
+            sync_model = site_sync_models.get_as_sync_model(instance)
+            sync_model.to_outgoing_transaction(using, created=created)
         except AttributeError as e:
             if 'to_outgoing_transaction' not in str(e):
                 raise AttributeError(str(e))
@@ -40,7 +44,8 @@ def serialize_on_save(sender, instance, raw, created, using, **kwargs):
 def serialize_on_post_delete(sender, instance, using, **kwargs):
     """Creates a serialized OutgoingTransaction when a model instance is deleted."""
     try:
-        instance.to_outgoing_transaction(using, created=False, deleted=True)
+        sync_model = site_sync_models.get_as_sync_model(instance)
+        sync_model.to_outgoing_transaction(using, created=False, deleted=True)
     except AttributeError as e:
         if 'to_outgoing_transaction' not in str(e):
             raise AttributeError(str(e))
@@ -51,7 +56,8 @@ def to_inspector_on_post_save(sender, instance, raw, created, using, **kwargs):
     """Middleman"""
     if not raw:
         try:
-            instance.to_inspector_on_post_save(instance, raw, created, using, **kwargs)
+            sync_model = site_sync_models.get_as_sync_model(instance)
+            sync_model.to_inspector_on_post_save(instance, raw, created, using, **kwargs)
         except AttributeError as e:
             if 'to_inspector_on_post_save' not in str(e):
                 raise AttributeError(str(e))

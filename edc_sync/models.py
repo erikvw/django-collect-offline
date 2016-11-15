@@ -2,101 +2,17 @@ import socket
 
 from django.apps import apps as django_apps
 from django.core import serializers
-from django.core.urlresolvers import reverse
 from django.db import models, transaction
 from django.utils import timezone
-from django_crypto_fields.constants import LOCAL_MODE
-from django_crypto_fields.cryptor import Cryptor
-
 from edc_base.model.models import BaseUuidModel
 
-from .choices import ACTIONS
 from .exceptions import SyncError
+from .model_mixins import TransactionMixin, HostModelMixin
 
 edc_device_app_config = django_apps.get_app_config('edc_device')
 
 
-class BaseTransaction(BaseUuidModel):
-
-    tx = models.BinaryField()
-
-    tx_name = models.CharField(
-        max_length=64)
-
-    tx_pk = models.UUIDField(
-        db_index=True)
-
-    producer = models.CharField(
-        max_length=200,
-        db_index=True,
-        help_text='Producer name')
-
-    action = models.CharField(
-        max_length=1,
-        choices=ACTIONS)
-
-    timestamp = models.CharField(
-        max_length=50,
-        db_index=True)
-
-    consumed_datetime = models.DateTimeField(
-        null=True,
-        blank=True)
-
-    consumer = models.CharField(
-        max_length=200,
-        null=True,
-        blank=True)
-
-    is_ignored = models.BooleanField(
-        default=False,
-    )
-
-    is_error = models.BooleanField(
-        default=False)
-
-    error = models.TextField(
-        max_length=1000,
-        null=True,
-        blank=True)
-
-    batch_seq = models.IntegerField(null=True, blank=True)
-
-    batch_id = models.IntegerField(null=True, blank=True)
-
-    def __repr__(self):
-        return '<{}: {}>'.format(self.__class__.__name__, self.tx_name)
-
-    def __str__(self):
-        return '</{}.{}/{}/{}/{}/>'.format(
-            self._meta.app_label, self._meta.model_name, self.id, self.tx_name, self.action)
-
-    def aes_decrypt(self, cipher):
-        cryptor = Cryptor()
-        plaintext = cryptor.aes_decrypt(cipher, LOCAL_MODE)
-        return plaintext
-
-    def aes_encrypt(self, plaintext):
-        cryptor = Cryptor()
-        cipher = cryptor.aes_encrypt(plaintext, LOCAL_MODE)
-        return cipher
-
-    def view(self):
-        url = reverse('render_url',
-                      kwargs={
-                          'model_name': self._meta.object_name.lower(),
-                          'pk': self.pk})
-        ret = ('<a href="{url}" class="add-another" id="add_id_report" '
-               'onclick="return showAddAnotherPopup(this);"> <img src="/static/admin/img/icon_addlink.gif" '
-               'width="10" height="10" alt="View"/></a>'.format(url=url))
-        return ret
-    view.allow_tags = True
-
-    class Meta:
-        abstract = True
-
-
-class IncomingTransaction(BaseTransaction):
+class IncomingTransaction(TransactionMixin, BaseUuidModel):
 
     """ Transactions received from a remote host. """
 
@@ -154,7 +70,7 @@ class IncomingTransaction(BaseTransaction):
         ordering = ['timestamp', 'producer']
 
 
-class OutgoingTransaction(BaseTransaction):
+class OutgoingTransaction(TransactionMixin, BaseUuidModel):
 
     """ Transactions produced locally to be consumed/sent to a queue or consumer. """
 
@@ -185,71 +101,11 @@ class HostManager(models.Manager):
         return self.get(hostname=hostname, port=port)
 
 
-class Host(BaseUuidModel):
-
-    """Abstract class for hosts (either client or server)."""
-
-    hostname = models.CharField(
-        max_length=200,
-        unique=True)
-
-    port = models.IntegerField(
-        default='80')
-
-    api_name = models.CharField(
-        max_length=15,
-        default='v1')
-
-    format = models.CharField(
-        max_length=15,
-        default='json')
-
-    authentication = models.CharField(
-        max_length=15,
-        default='api_key')
-
-    is_active = models.BooleanField(
-        default=True)
-
-    last_sync_datetime = models.DateTimeField(
-        null=True,
-        blank=True)
-
-    last_sync_status = models.CharField(
-        max_length=250,
-        default='-',
-        null=True,
-        blank=True)
-
-    comment = models.TextField(
-        max_length=50,
-        null=True,
-        blank=True)
-
-    objects = HostManager()
-
-    def __str__(self):
-        return '{}:{}'.format(self.hostname, self.port)
-
-    def natural_key(self):
-        return (self.hostname, self.port, )
-
-    @property
-    def url_template(self):
-        return 'http://{hostname}:{port}/edc-sync/api/{api_name}/'
-
-    @property
-    def url(self):
-        return self.url_template.format(
-            hostname=self.hostname, port=self.port, api_name=self.api_name)
-
-    class Meta:
-        abstract = True
-
-
-class Client(Host):
+class Client(HostModelMixin, BaseUuidModel):
 
     """A model to capture the attributes of hosts (clients) to be contacted by the server."""
+
+    objects = HostManager()
 
     class Meta:
         app_label = 'edc_sync'
@@ -257,9 +113,11 @@ class Client(Host):
         unique_together = (('hostname', 'port'), )
 
 
-class Server(Host):
+class Server(HostModelMixin, BaseUuidModel):
 
     """A model to capture the attributes of the server."""
+
+    objects = HostManager()
 
     class Meta:
         app_label = 'edc_sync'

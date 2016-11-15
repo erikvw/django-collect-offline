@@ -1,153 +1,148 @@
-import socket
-
-from django.conf import settings
-from django.core import serializers
-from django.core.exceptions import ImproperlyConfigured
 from django.db import models
-from django.db.models.fields import UUIDField
-from django.utils import timezone
+from django.core.urlresolvers import reverse
 from django_crypto_fields.constants import LOCAL_MODE
 from django_crypto_fields.cryptor import Cryptor
 
-from edc_base.model.models.historical_records import HistoricalRecords
-
-from .exceptions import SyncModelError
-from .models import OutgoingTransaction
+from .choices import ACTIONS
 
 
-class SyncMixin:
+class TransactionMixin(models.Model):
 
-    """Base model for all UUID models and adds synchronization
-    methods and signals. """
+    """Abstract model class for Incoming and Outgoing transactions."""
+
+    tx = models.BinaryField()
+
+    tx_name = models.CharField(
+        max_length=64)
+
+    tx_pk = models.UUIDField(
+        db_index=True)
+
+    producer = models.CharField(
+        max_length=200,
+        db_index=True,
+        help_text='Producer name')
+
+    action = models.CharField(
+        max_length=1,
+        choices=ACTIONS)
+
+    timestamp = models.CharField(
+        max_length=50,
+        db_index=True)
+
+    consumed_datetime = models.DateTimeField(
+        null=True,
+        blank=True)
+
+    consumer = models.CharField(
+        max_length=200,
+        null=True,
+        blank=True)
+
+    is_ignored = models.BooleanField(
+        default=False,
+    )
+
+    is_error = models.BooleanField(
+        default=False)
+
+    error = models.TextField(
+        max_length=1000,
+        null=True,
+        blank=True)
+
+    batch_seq = models.IntegerField(null=True, blank=True)
+
+    batch_id = models.IntegerField(null=True, blank=True)
+
+    def __repr__(self):
+        return '<{}: {}>'.format(self.__class__.__name__, self.tx_name)
+
+    def __str__(self):
+        return '</{}.{}/{}/{}/{}/>'.format(
+            self._meta.app_label, self._meta.model_name, self.id, self.tx_name, self.action)
+
+    def aes_decrypt(self, cipher):
+        cryptor = Cryptor()
+        plaintext = cryptor.aes_decrypt(cipher, LOCAL_MODE)
+        return plaintext
+
+    def aes_encrypt(self, plaintext):
+        cryptor = Cryptor()
+        cipher = cryptor.aes_encrypt(plaintext, LOCAL_MODE)
+        return cipher
+
+    def view(self):
+        url = reverse('render_url',
+                      kwargs={
+                          'model_name': self._meta.object_name.lower(),
+                          'pk': self.pk})
+        ret = ('<a href="{url}" class="add-another" id="add_id_report" '
+               'onclick="return showAddAnotherPopup(this);"> <img src="/static/admin/img/icon_addlink.gif" '
+               'width="10" height="10" alt="View"/></a>'.format(url=url))
+        return ret
+    view.allow_tags = True
+
+    class Meta:
+        abstract = True
+
+
+class HostModelMixin(models.Model):
+
+    """Abstract class for hosts (either client or server)."""
+
+    hostname = models.CharField(
+        max_length=200,
+        unique=True)
+
+    port = models.IntegerField(
+        default='80')
+
+    api_name = models.CharField(
+        max_length=15,
+        default='v1')
+
+    format = models.CharField(
+        max_length=15,
+        default='json')
+
+    authentication = models.CharField(
+        max_length=15,
+        default='api_key')
+
+    is_active = models.BooleanField(
+        default=True)
+
+    last_sync_datetime = models.DateTimeField(
+        null=True,
+        blank=True)
+
+    last_sync_status = models.CharField(
+        max_length=250,
+        default='-',
+        null=True,
+        blank=True)
+
+    comment = models.TextField(
+        max_length=50,
+        null=True,
+        blank=True)
+
+    def __str__(self):
+        return '{}:{}'.format(self.hostname, self.port)
+
+    def natural_key(self):
+        return (self.hostname, self.port, )
 
     @property
-    def primary_key_field(self):
-        """Return the primary key field.
+    def url_template(self):
+        return 'http://{hostname}:{port}/edc-sync/api/{api_name}/'
 
-        Is `id` in most cases. Is `history_id` for Historical models."""
-        try:
-            field = [field for field in self._meta.fields if field.primary_key][0]
-        except IndexError:
-            field = None
-        return field
-
-    def to_outgoing_transaction(self, using, created=None, deleted=None):
-        """ Serialize the model instance to an AES encrypted json object
-        and saves the json object to the OutgoingTransaction model."""
-
-        # TODO: i think using should always be default
-        created = True if created is None else created
-        action = 'I' if created else 'U'
-        if deleted:
-            action = 'D'
-        outgoing_transaction = None
-        if self.is_serialized():
-            hostname = socket.gethostname()
-            outgoing_transaction = OutgoingTransaction.objects.using(using).create(
-                tx_name='{}.{}'.format(self._meta.app_label, self._meta.object_name.lower()),
-                tx_pk=getattr(self, self.primary_key_field.name),
-                tx=self.encrypted_json(),
-                timestamp=timezone.now().strftime('%Y%m%d%H%M%S%f'),
-                producer='{}-{}'.format(hostname, using),
-                action=action,
-                using=using)
-        return outgoing_transaction
-
-    def is_serialized(self):
-        """Return the value of the settings.ALLOW_MODEL_SERIALIZATION or True.
-
-        If True, this instance will serialized and saved to OutgoingTransaction.
-        """
-        try:
-            is_serialized = settings.ALLOW_MODEL_SERIALIZATION
-        except AttributeError:
-            is_serialized = True
-        return is_serialized
-
-    def encrypted_json(self):
-        """Returns an encrypted json serialized from self."""
-        json = serializers.serialize(
-            "json", [self, ], ensure_ascii=True, use_natural_foreign_keys=True)
-        encrypted_json = Cryptor().aes_encrypt(json, LOCAL_MODE)
-        return encrypted_json
-
-    def skip_saving_criteria(self):
-        """Returns True to skip saving, False to save (default).
-
-        Users may override to avoid saving/persisting instances of a particular model that fit a certain
-           criteria as defined in the subclass's overriding method.
-
-        If there you want a certain model to not be persisted for what ever reason,
-        (Usually to deal with temporary data cleaning issues) then define the method skip_saving_criteria()
-        in your model which return True/False based on the criteria to be used for skipping.
-        """
-        False
-
-    def deserialize_on_duplicate(self):
-        """Users may override this to determine how to handle a duplicate
-        error on deserialization.
-
-        If you have a way to help decide if a duplicate should overwrite
-        the existing record or not, evaluate your criteria here and return
-        True or False. If False is returned to the deserializer, the
-        object will not be saved and the transaction WILL be flagged
-        as consumed WITHOUT error.
-        """
-        return True
-
-    def deserialize_get_missing_fk(self, attrname):
-        """Override to return a foreignkey object for 'attrname',
-        if possible, using criteria in self, otherwise return None"""
-        raise ImproperlyConfigured('Method deserialize_get_missing_fk() must '
-                                   'be overridden on model class {0}'.format(self._meta.object_name))
-
-
-class SyncHistoricalRecords(HistoricalRecords):
-
-    """Sync HistoricalRecords that uses a UUID primary key and has a natural key method."""
-
-    def get_extra_fields(self, model, fields):
-        """Override to set history_id (to UUIDField) and add the
-        SyncModelMixin methods."""
-        extra_fields = super(SyncHistoricalRecords, self).get_extra_fields(model, fields)
-        extra_fields.update(
-            {attr: getattr(SyncMixin, attr)
-             for attr in [attr for attr in dir(SyncMixin)if not attr.startswith('_')]
-             })
-        return extra_fields
-
-
-class SyncModelMixin(SyncMixin, models.Model):
-
-    def __init__(self, *args, **kwargs):
-        try:
-            self.natural_key
-        except AttributeError:
-            raise SyncModelError('Model \'{}.{}\' is missing method natural_key '.format(
-                self._meta.app_label, self._meta.model_name))
-        try:
-            self.__class__.objects.get_by_natural_key
-        except AttributeError:
-            raise SyncModelError('Model \'{}.{}\' is missing manager method get_by_natural_key '.format(
-                self._meta.app_label, self._meta.model_name))
-        try:
-            # if using history manager, historical model history_id (primary_key) must be UUIDField.
-            historical_model = self.__class__.history.model
-            field = [field for field in historical_model._meta.fields if field.name == 'history_id'][0]
-            if not isinstance(field, UUIDField):
-                raise SyncModelError(
-                    'Field \'history_id\' of historical model \'{}.{}\' must be an UUIDfield. '
-                    'Use history = SyncHistoricalRecords() instead of history = HistoricalRecords(). '
-                    'See \'{}.{}\'.'.format(
-                        historical_model._meta.app_label, historical_model._meta.model_name,
-                        self._meta.app_label, self._meta.model_name))
-        except AttributeError:
-            pass
-        if self.primary_key_field.get_internal_type() != 'UUIDField':
-            raise SyncModelError(
-                'Expected Model \'{}.{}\' primary key to be a UUIDField (e.g. AutoUUIDField). Got {}.'.format(
-                    self._meta.app_label, self._meta.model_name, self.primary_key_field.get_internal_type()))
-        super(SyncModelMixin, self).__init__(*args, **kwargs)
+    @property
+    def url(self):
+        return self.url_template.format(
+            hostname=self.hostname, port=self.port, api_name=self.api_name)
 
     class Meta:
         abstract = True
