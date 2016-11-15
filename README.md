@@ -71,6 +71,25 @@ to disable the `SyncModelMixin` add this to your settings.py
 ALLOW_MODEL_SERIALIZATION = False  # (default: True)
 
 
+### View models registered for synchronization
+
+    from edc_sync.site_sync_models import site_sync_models
+    
+    # list all models in app 'bcpp_household' set for sync
+    models = site_sync_models.site_models('bcpp_household', sync=True)
+    
+    # list all models in app 'bcpp_household' NOT set for sync
+    models = site_sync_models.site_models('bcpp_household', sync=False)
+
+    # list all models in app 'bcpp_household' not set for sync, excluding the "historical" models
+    sync_models = [m.model._meta.label_lower for m in models if 'historical' not in m.model_name]
+
+To create the model list for an apps `sync_models.py`, open a shell and list all models not yet registered for sync: 
+
+    models = site_sync_models.site_models('bcpp_household', sync=False)
+    [m.model._meta.label_lower for m in models if 'historical' not in m.model_name]
+
+    
 ### About Synchronization
 
 Synchronization is one-way and always toward a central server that has the master database for the project. Many clients push data to one server. 

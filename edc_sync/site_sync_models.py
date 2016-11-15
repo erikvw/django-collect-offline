@@ -56,9 +56,9 @@ class SiteSyncModels:
             sync_model = None
         return sync_model
 
-    def site_models(self, app_name=None, is_sync=None):
+    def site_models(self, app_name=None, sync=None):
         """Returns a dictionary of registered models indicating if they are sync models or not."""
-        is_sync = None if is_sync is None else is_sync
+        sync = None if sync is None else sync
         site_models = {}
         for app_config in django_apps.get_app_configs():
             model_list = []
@@ -69,10 +69,10 @@ class SiteSyncModels:
             if model_list:
                 model_list.sort(key=lambda x: x.verbose_name)
                 site_models.update({app_label: model_list})
-        if is_sync is True or is_sync is False:
+        if sync is True or sync is False:
             filtered_models = {}
             for app_label, model_list in site_models.items():
-                model_list = [m for m in model_list if m.sync == is_sync]
+                model_list = [m for m in model_list if m.sync == sync]
                 if model_list:
                     filtered_models.update({app_label: model_list})
             return filtered_models.get(app_name) if app_name else filtered_models

@@ -2,8 +2,8 @@ from django.apps import apps as django_apps
 from django.contrib import admin
 from django.contrib.admin.sites import AdminSite
 
-from rest_framework.authtoken.admin import TokenAdmin
 from rest_framework.authtoken.models import Token
+# from rest_framework.authtoken.admin import TokenAdmin
 
 from .actions import (
     reset_transaction_as_not_consumed, reset_transaction_as_consumed,
@@ -27,15 +27,15 @@ class EdcSyncAdminSite(AdminSite):
 
 edc_sync_admin = EdcSyncAdminSite(name='edc_sync_admin')
 
-admin.site.unregister(Token)
-
-
-@admin.register(Token, site=edc_sync_admin)
-class MyTokenAdmin(TokenAdmin):
-    raw_id_fields = ('user',)
-    list_display = ('key', 'user', 'created')
-    fields = ('user', )
-    ordering = ('-created',)
+# admin.site.unregister(Token)
+# 
+# 
+# @admin.register(Token, site=edc_sync_admin)
+# class MyTokenAdmin(TokenAdmin):
+#     raw_id_fields = ('user',)
+#     list_display = ('key', 'user', 'created')
+#     fields = ('user', )
+#     ordering = ('-created',)
 
 
 @admin.register(IncomingTransaction, site=edc_sync_admin)
