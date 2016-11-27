@@ -14,7 +14,6 @@ import os
 import sys
 
 from unipath import Path
-from django.utils import timezone
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = Path(os.path.dirname(os.path.realpath(__file__)))
@@ -173,7 +172,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+# USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
@@ -197,7 +196,7 @@ GIT_DIR = BASE_DIR.ancestor(1)
 KEY_PATH = os.path.join(BASE_DIR.ancestor(1), 'crypto_fields')
 EDC_CRYPTO_FIELDS_CLIENT_USING = 'client'
 SHOW_CRYPTO_FORM_DATA = True
-STUDY_OPEN_DATETIME = timezone.datetime(2016, 1, 18)
+
 LANGUAGES = (
     ('tn', 'Setswana'),
     ('en', 'English'),

@@ -5,9 +5,10 @@ from django.conf import settings
 from django.core import serializers
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models.fields import UUIDField
-from django.utils import timezone
 from django_crypto_fields.constants import LOCAL_MODE
 from django_crypto_fields.cryptor import Cryptor
+
+from edc_base.utils import get_utcnow
 
 from .exceptions import SyncModelError
 
@@ -83,7 +84,7 @@ class SyncModel:
                 tx_name='{}.{}'.format(self.instance._meta.app_label, self.instance._meta.object_name.lower()),
                 tx_pk=getattr(self.instance, self.primary_key_field.name),
                 tx=self.encrypted_json(),
-                timestamp=timezone.now().strftime('%Y%m%d%H%M%S%f'),
+                timestamp=get_utcnow().strftime('%Y%m%d%H%M%S%f'),
                 producer='{}-{}'.format(hostname, using),
                 action=action,
                 using=using)

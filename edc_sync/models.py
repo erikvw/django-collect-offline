@@ -3,8 +3,9 @@ import socket
 from django.apps import apps as django_apps
 from django.core import serializers
 from django.db import models, transaction
-from django.utils import timezone
+
 from edc_base.model.models import BaseUuidModel
+from edc_base.utils import get_utcnow
 
 from .exceptions import SyncError
 from .model_mixins import TransactionMixin, HostModelMixin
@@ -47,7 +48,7 @@ class IncomingTransaction(TransactionMixin, BaseUuidModel):
                 if any([inserted, deleted, updated]):
                     self.is_ignored = False
                     self.is_consumed = True
-                    self.consumed_datetime = timezone.now()
+                    self.consumed_datetime = get_utcnow()
                     self.consumer = '{}'.format(socket.gethostname())
                     self.save()
             else:
@@ -87,7 +88,7 @@ class OutgoingTransaction(TransactionMixin, BaseUuidModel):
         if not self.using:
             raise ValueError('Value for \'{}.using\' cannot be None.'.format(self._meta.model_name))
         if self.is_consumed_server and not self.consumed_datetime:
-            self.consumed_datetime = timezone.now()
+            self.consumed_datetime = get_utcnow()
         super(OutgoingTransaction, self).save(*args, **kwargs)
 
     class Meta:
@@ -142,7 +143,7 @@ class History(BaseUuidModel):
         max_length=100
     )
 
-    sent_datetime = models.DateTimeField(default=timezone.now)
+    sent_datetime = models.DateTimeField(default=get_utcnow)
 
     acknowledged = models.BooleanField(
         default=False,
@@ -150,7 +151,7 @@ class History(BaseUuidModel):
     )
 
     ack_datetime = models.DateTimeField(
-        default=timezone.now,
+        default=get_utcnow,
         null=True,
         blank=True)
 
