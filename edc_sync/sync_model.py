@@ -48,9 +48,9 @@ class SyncModel:
             pass
         if self.primary_key_field.get_internal_type() != 'UUIDField':
             raise SyncModelError(
-                'Expected Model \'{}.{}\' primary key to be a UUIDField (e.g. AutoUUIDField). Got {}.'.format(
+                'Expected Model \'{}.{}\' primary key {} to be a UUIDField (e.g. AutoUUIDField). Got {}.'.format(
                     self.instance._meta.app_label, self.instance._meta.model_name,
-                    self.primary_key_field.get_internal_type()))
+                    self.primary_key_field, self.primary_key_field.get_internal_type()))
 
     def __str__(self):
         return '{}'.format(self.instance._meta.label_lower)
