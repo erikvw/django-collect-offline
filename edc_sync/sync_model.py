@@ -81,7 +81,7 @@ class SyncModel:
         if self.is_serialized:
             hostname = socket.gethostname()
             outgoing_transaction = OutgoingTransaction.objects.using(using).create(
-                tx_name='{}.{}'.format(self.instance._meta.app_label, self.instance._meta.object_name.lower()),
+                tx_name=self.instance._meta.label_lower,
                 tx_pk=getattr(self.instance, self.primary_key_field.name),
                 tx=self.encrypted_json(),
                 timestamp=get_utcnow().strftime('%Y%m%d%H%M%S%f'),
