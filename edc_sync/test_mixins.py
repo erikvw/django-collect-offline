@@ -14,7 +14,7 @@ class SyncTestError(Exception):
 class SyncTestSerializerMixin:
 
     def sync_test_natural_key_attr(self, *app_labels):
-        """Asserts all models in given apps have a natural_key method"""
+        """Asserts all models in given apps have a natural_key model method"""
         for app_label in app_labels:
             models = django_apps.get_app_config(app_label).get_models()
             for model in models:
@@ -24,7 +24,7 @@ class SyncTestSerializerMixin:
                         model._meta.label_lower))
 
     def sync_test_get_by_natural_key_attr(self, *app_labels):
-        """Asserts all models in given apps have a natural_key method"""
+        """Asserts all models in given apps have a get_by_natural_key manager method"""
         for app_label in app_labels:
             models = django_apps.get_app_config(app_label).get_models()
             for model in models:
@@ -34,6 +34,8 @@ class SyncTestSerializerMixin:
                         model._meta.label_lower))
 
     def sync_test_natural_keys(self, complete_required_crfs, verbose=None):
+        """Asserts tuple from natural_key when passed to get_by_natural_key
+        successfully gets the model instance."""
         for objs in complete_required_crfs.values():
             for obj in objs:
                 if verbose:
@@ -48,14 +50,21 @@ class SyncTestSerializerMixin:
                 except TypeError as e:
                     raise SyncTestError('{} See {}. Got {}.'.format(str(e), obj._meta.label_lower, options))
 
-    def sync_test_natural_keys_by_schedule(self, enrollment, verbose=True):
+    def sync_test_natural_keys_by_schedule(self, visits=None, visit_attr=None, verbose=True, ):
         """A wrapper method for sync_test_natural_keys that uses the enrollment instance
         to test each CRF in each visit in the schedule linked to the enrollment model."""
-        for visit in enrollment.schedule.visits:
+        complete_required_crfs = {}
+        for visit in visits:
             if verbose:
-                print(visit.code)
-            complete_required_crfs = self.complete_required_crfs(visit.code)
-            self.sync_test_natural_keys(complete_required_crfs, verbose=verbose)
+                print(visit.visit_code)
+            complete_required_crfs.update({
+                visit.visit_code: self.complete_required_crfs(
+                    visit_code=visit.visit_code,
+                    visit=visit,
+                    visit_attr=visit_attr,
+                    subject_identifier=visit.subject_identifier)
+            })
+        self.sync_test_natural_keys(complete_required_crfs, verbose=verbose)
 
     def sync_test_serializers_for_visit(self, complete_required_crfs, verbose=None):
         """Assert CRF model instances have transactions and that the
