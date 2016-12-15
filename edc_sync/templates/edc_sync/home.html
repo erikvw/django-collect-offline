@@ -8,10 +8,8 @@
 
   <!-- begin edc-sync extra-scripts -->
   <script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/edc_sync.js" %}"></script>
-  <script type="text/javascript" charset="utf8" src="{% static "edc_sync_files/js/edc_sync_files.js" %}"></script>
   <script type="text/javascript" charset="utf8" class="init">
       $(document).ready( function() {
-    	  edcSyncMediaFilesReady('{{ hosts|escapejs }}', "{% url 'edc-sync-files:pull-media-file' %}");
     	  edcSyncReady('{{ hosts|escapejs }}', '{{ user.username }}', '{{ api_token }}');
       });
   </script>
@@ -53,8 +51,6 @@
             {% endif%}
         </div>
   
-        {% include "edc_sync_files/edc_sync_files.html" %}
- 
         {% endif%}
     </div>
 
