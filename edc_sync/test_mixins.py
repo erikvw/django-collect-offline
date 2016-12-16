@@ -70,20 +70,21 @@ class SyncTestSerializerMixin:
         """Assert CRF model instances have transactions and that the
         transactions can be deserialized and compared to their original
         model instances."""
-        for obj in complete_required_crfs:
-            try:
-                outgoing_transaction = OutgoingTransaction.objects.get(
-                    tx_name=obj._meta.label_lower,
-                    tx_pk=obj.pk)
-                self.sync_test_deserialize(obj, outgoing_transaction, verbose=verbose)
-            except MultipleObjectsReturned:
-                for outgoing_transaction in OutgoingTransaction.objects.filter(
-                        tx_name=obj._meta.label_lower, tx_pk=obj.pk):
+        for visit_code in [visit_code for visit_code in complete_required_crfs.keys()]:
+            for obj in complete_required_crfs.get(visit_code):
+                try:
+                    outgoing_transaction = OutgoingTransaction.objects.get(
+                        tx_name=obj._meta.label_lower,
+                        tx_pk=obj.pk)
                     self.sync_test_deserialize(obj, outgoing_transaction, verbose=verbose)
-            except OutgoingTransaction.DoesNotExist:
-                self.fail(
-                    'OutgoingTransaction.DoesNotExist unexpectedly '
-                    'raised for {}'.format(obj._meta.label_lower))
+                except MultipleObjectsReturned:
+                    for outgoing_transaction in OutgoingTransaction.objects.filter(
+                            tx_name=obj._meta.label_lower, tx_pk=obj.pk):
+                        self.sync_test_deserialize(obj, outgoing_transaction, verbose=verbose)
+                except OutgoingTransaction.DoesNotExist:
+                    self.fail(
+                        'OutgoingTransaction.DoesNotExist unexpectedly '
+                        'raised for {}'.format(obj._meta.label_lower))
 
     def sync_test_deserialize(self, obj, outgoing_transaction, verbose=None):
         """Assert object matches its deserialized transaction."""
