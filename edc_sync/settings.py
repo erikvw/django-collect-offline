@@ -74,7 +74,6 @@ if 'test' in sys.argv:
         "edc_identifier": None,
         "edc_metadata": None,
         "edc_registration": None,
-        "edc_rule_groups": None,
         "edc_sync": None,
         "edc_visit_schedule": None,
         "edc_visit_tracking": None,
