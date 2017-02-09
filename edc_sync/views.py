@@ -61,11 +61,13 @@ class TransactionCountView(APIView):
     renderer_classes = (JSONRenderer, )
 
     def get(self, request, format=None):
-        outgoingtransaction_count = OutgoingTransaction.objects.filter(is_consumed_server=False).count()
+        outgoingtransaction_count = OutgoingTransaction.objects.filter(
+            is_consumed_server=False).count()
         outgoingtransaction_middleman_count = OutgoingTransaction.objects.filter(
             is_consumed_server=False,
             is_consumed_middleman=False).count()
-        incomingtransaction_count = IncomingTransaction.objects.filter(is_consumed=False).count()
+        incomingtransaction_count = IncomingTransaction.objects.filter(
+            is_consumed=False).count()
         content = {'outgoingtransaction_count': outgoingtransaction_count,
                    'outgoingtransaction_middleman_count': outgoingtransaction_middleman_count,
                    'incomingtransaction_count': incomingtransaction_count,
@@ -114,14 +116,16 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        app_config = django_apps.get_app_config('edc_map')
         context.update(
             edc_sync_admin=edc_sync_admin,
-            project_name=context.get('project_name') + ': ' + self.role.title(),
+            project_name=context.get(
+                'project_name') + ': ' + self.role.title(),
             cors_origin_whitelist=self.cors_origin_whitelist,
             hostname=socket.gethostname(),
             ip_address=self.ip_address,
             site_models=site_sync_models.site_models,
-        )
+            base_template_name=app_config.base_template_name)
         return context
 
     @property
