@@ -5,11 +5,12 @@ from requests.exceptions import RequestException
 from rest_framework.authtoken.models import Token
 
 from django.apps import apps as django_apps
-from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
 
 
 from .constants import SERVER, CLIENT
 from .models import Client, Server
+from edc_device.constants import CENTRAL_SERVER
 
 
 class EdcSyncViewMixin:
@@ -22,21 +23,26 @@ class EdcSyncViewMixin:
     @property
     def host_model(self):
         host_model = None
-        if self.role == SERVER:
+        if self.role in [SERVER, CENTRAL_SERVER]:
             host_model = Client
-        if self.role == CLIENT:
+        elif self.role == CLIENT:
             host_model = Server
-        if not self.role:
+        else:
             raise ImproperlyConfigured(
-                'Project uses \'edc_sync\' but has not defined a role for this app instance. See AppConfig.')
+                'Project uses \'edc_sync\' but has not defined a valid role for this '
+                'app instance. See AppConfig. Got {}.'.format(self.role))
         return host_model
 
     @property
     def resource(self):
-        if self.role == SERVER:
+        if self.role in [SERVER, CENTRAL_SERVER]:
             resource = 'outgoingtransaction'
-        if self.role == CLIENT:
+        elif self.role == CLIENT:
             resource = 'incomingtransaction'
+        else:
+            raise ImproperlyConfigured(
+                'Project uses \'edc_sync\' but has not defined a valid role for this '
+                'app instance. See AppConfig. Got {}.'.format(self.role))
         return resource
 
     @property
@@ -53,8 +59,9 @@ class EdcSyncViewMixin:
 
     def get_api_token(self, username):
         try:
+            print(Token)
             api_token = Token.objects.get(user__username=username).key
-        except (Token.DoesNotExist):
+        except ObjectDoesNotExist:
             api_token = None
         return api_token
 

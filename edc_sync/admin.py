@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.contrib.admin.sites import AdminSite
 
 from rest_framework.authtoken.models import Token
-# from rest_framework.authtoken.admin import TokenAdmin
+from rest_framework.authtoken.admin import TokenAdmin
 
 from .actions import (
     reset_transaction_as_not_consumed, reset_transaction_as_consumed,
@@ -27,15 +27,15 @@ class EdcSyncAdminSite(AdminSite):
 
 edc_sync_admin = EdcSyncAdminSite(name='edc_sync_admin')
 
-# admin.site.unregister(Token)
-# 
-# 
-# @admin.register(Token, site=edc_sync_admin)
-# class MyTokenAdmin(TokenAdmin):
-#     raw_id_fields = ('user',)
-#     list_display = ('key', 'user', 'created')
-#     fields = ('user', )
-#     ordering = ('-created',)
+admin.site.unregister(Token)
+
+
+@admin.register(Token, site=edc_sync_admin)
+class MyTokenAdmin(TokenAdmin):
+    raw_id_fields = ('user',)
+    list_display = ('key', 'user', 'created')
+    fields = ('user', )
+    ordering = ('-created',)
 
 
 @admin.register(IncomingTransaction, site=edc_sync_admin)
@@ -90,11 +90,11 @@ class OutgoingTransactionAdmin (admin.ModelAdmin):
 
 class HostAdmin(admin.ModelAdmin):
 
-        list_display = (
-            'hostname', 'port', 'is_active',
-            'last_sync_datetime', 'last_sync_status', 'comment')
+    list_display = (
+        'hostname', 'port', 'is_active',
+        'last_sync_datetime', 'last_sync_status', 'comment')
 
-        list_filter = ('is_active', 'last_sync_datetime', 'last_sync_status',)
+    list_filter = ('is_active', 'last_sync_datetime', 'last_sync_status',)
 
 
 if edc_sync_app_config.role == SERVER:
