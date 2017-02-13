@@ -6,11 +6,12 @@
 
 {{ block.super }}
 
+   <script type="text/javascript" charset="utf8" src="{% static "django_js_reverse/js/reverse.js" %}"></script>	
   <!-- begin edc-sync extra-scripts -->
   <script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/edc_sync.js" %}"></script>
   <script type="text/javascript" charset="utf8" class="init">
       $(document).ready( function() {
-    	  edcSyncReady('{{ hosts|escapejs }}', '{{ user.username }}', '{{ api_token }}');
+    	  edcSyncReady('{{ hosts|escapejs }}', '{{ user.username }}', '{{ api_token }}', "{% url 'edc-sync:home_url' %}");
       });
   </script>
   <!-- end edc-sync extra-scripts -->
@@ -25,11 +26,12 @@
                 <li><a href="#">{{ edc_sync_role|title }}: {{ hostname }} <span class="pull-right">{{ ip_address }}</span></a></li>
             </ul>
         </div>
-        {% if edc_sync_role == 'server' %}
+
+        {% if edc_sync_role == 'Server' %}
         <div class="panel panel-default">
-            {% if edc_sync_role == 'server' %}
+            {% if edc_sync_role == 'Server' %}
                 <div class="panel-heading">Client Resources
-                <a id="link-refresh-clients" title="click to refresh" href=""><i id="bdg-refresh-clients" class="fa fa-refresh fa-1x fa-fw pull-right"></i></a>
+                	<a id="link-refresh-clients" title="click to refresh" href=""><i id="bdg-refresh-clients" class="fa fa-refresh fa-1x fa-fw pull-right"></i></a>
                 </div>
                 <div id="id-div-resource-alert"></div>
                 {% if user.is_authenticated %}
@@ -44,7 +46,7 @@
                   </ul>
                 {% endif %}
                 
-            {% elif edc_sync_role == 'client' %}
+            {% elif edc_sync_role == 'Client' %}
             {% else %}
                 <div class="panel-heading">Resources</div>
                 <div class="alert alert-danger text-center">Edc-Sync role undefined. See AppConfig.</div>
@@ -59,12 +61,14 @@
             <div class="panel-heading">Administration</div>
             <ul id="nav-pill-admin" class="nav nav-pills nav-stacked">
                 <li><a href="{% url 'edc-sync:edc_sync_admin:index'%} ">{{ edc_sync_admin.index_title }}</a></li>
-                {% if edc_sync_role == 'server' %}
+                {% if edc_sync_role == 'Server' %}
                     <li><a href="{% url 'edc-sync:edc_sync_admin:edc_sync_client_changelist'%} ">Clients</a></li>
-                {% elif edc_sync_role == 'client' %}
+                {% elif edc_sync_role == 'Client' %}
                     <li><a href="{% url 'edc-sync:edc_sync_admin:edc_sync_server_changelist'%} ">Servers</a></li>
                 {% endif %}
-                <li><a href="{% url 'edc-sync:edc_sync_admin:authtoken_token_changelist'%} ">User Tokens</a></li>
+                {% comment %}
+                	<li><a href="{% url 'edc-sync:edc_sync_admin:authtoken_token_changelist'%} ">User Tokens</a></li>
+                {% endcomment %}
             </ul>
         </div>
         <div class="panel panel-default">

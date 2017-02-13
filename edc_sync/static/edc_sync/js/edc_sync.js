@@ -1,7 +1,7 @@
 var outgoingListUrl = Urls[ 'edc-sync:outgoingtransaction-list' ]();
 var server = 'http://' + document.location.host
 
-function edcSyncReady(hosts, userName, apiToken) {
+function edcSyncReady(hosts, userName, apiToken, homeUrl) {
 	/* Prepare page elements */
 	var hosts = JSON.parse( hosts );
 	var csrftoken = Cookies.get('csrftoken');
@@ -33,7 +33,11 @@ function edcSyncReady(hosts, userName, apiToken) {
         e.preventDefault();
         updateFromHosts( hosts );
     });
-
+    
+    $('#id-link-apply').click( function(e) {
+        e.preventDefault();
+        processIncomingTransactions( homeUrl, userName );
+    });
 }
 
 function processOutgoingTransactions( host, userName ) {
@@ -201,3 +205,79 @@ function updateFromHost( host ) {
 	});
 }
 
+function processIncomingTransactions( homeUrl, userName ) {
+	/*
+	Process each IncomingTransaction one at a time.
+	Requests are chained: 
+		1. GET incoming from server;
+		2. POST as incomingtransaction to server (me)
+		3. Apply IncomingTransaction to server(me)
+		4. Update IncomingTransaction to consumed
+   	Called recursively until incomingtransactions are all applied.
+   	*/
+	var initial_data = {'action': 'apply_incomingtransactions'};
+	var ajGetIncoming = $.ajax({
+		url: homeUrl,
+		type: 'GET',
+		dataType: 'json',
+        data: {'action': 'apply_incomingtransactions'},
+	});
+	alert("ajGetIncoming ajGetIncoming ajGetIncoming");
+	ajPostIncoming = ajGetIncoming.then( function( incomingtransactions ) {
+		alert("incomingtransaction 1");
+		var incomingListUrl = Urls[ 'edc-sync:incomingtransaction-list' ]();
+		alert("incomingtransaction");
+		incomingtransaction_count = incomingtransactions.count;
+		incomingtransaction = incomingtransactions.results[0];
+		alert("incomingtransaction");
+		//$( '#id-resource-alert-text' ).text( hostAlertText( host, incomingtransaction_count ) );
+		
+		var incoming_fields = {
+				'user_modified': userName,
+				'modified': moment().utc().format("YYYY-MM-DDTHH:mm:ss.SSSZZ"),
+				'is_consumed_server': true,
+				'consumed_datetime': moment().utc().format("YYYY-MM-DDTHH:mm:ss.SSSZZ"),
+				'consumer': host,
+				'tx_pk': incomingtransaction.tx_pk,
+				'action': 'apply_incoming',
+		};
+		return $.ajax({
+			url: server + incomingListUrl + '?format=json',
+			type: 'POST',
+			dataType: 'json',
+			contentType: 'application/json',
+			processData: false,
+			data: incoming_fields,
+		});
+	});
+	
+	ajGetIncoming.done( function ( data ) {
+		if ( data != null ) {
+			processIncomingTransactions( serverUrl, userName );  //recursive
+		}
+	});
+
+	ajGetIncoming.fail(function(jqXHR, textStatus, errorThrown){
+		//$("#id-tx-spinner").removeClass( 'fa-spin' );
+		//updateIcon(iconElement, 'error');
+		alert("An error "+errorThrown);
+		//error_message = 'An error consuming transactions:'+server+' Got '+errorThrown;
+		//displayProgresStatus('alert-progess', error_message, 'alert-danger');
+	});
+}
+
+function displayProgresStatus(element, message, alert_class) {
+	if (alert_class == 'alert-danger' ) {
+		$( '#'+element ).text( message );
+		$( '#'+element ).removeClass( 'alert-info' ).addClass( 'alert-danger' );	
+	} else if ( alert_class == 'alert-success' ) {
+		$( '#'+element ).text( message );
+		$("#alert-progress-status").removeClass( 'alert-info' ).addClass( 'alert-success' );	
+	} else {
+		
+		$( '#'+element ).text( message );
+		$( '#'+element ).removeClass( 'alert-danger' ).addClass( 'alert-info' );	
+	}
+
+	$( '#'+element  ).show();
+}

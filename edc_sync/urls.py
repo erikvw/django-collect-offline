@@ -12,6 +12,7 @@ router.register(r'outgoingtransaction', views.OutgoingTransactionViewSet)
 router.register(r'incomingtransaction', views.IncomingTransactionViewSet)
 
 urlpatterns = [
+    url(r'^admin/', edc_sync_admin.urls),
     url(r'^api/transaction-count/$',
         views.TransactionCountView.as_view(), name='transaction-count'),
     url(r'^api/', include(router.urls)),
@@ -22,6 +23,5 @@ urlpatterns = [
     url(r'render/(?P<model_name>\w+)/(?P<pk>[\w]{8}-[\w]{4}-[\w]{4}-[\w]{4}-[\w]{12})/',
         views.RenderView.as_view(), name='render_url'),
     url(r'^jsreverse/$', urls_js, name='js_reverse'),
-    url(r'^admin/', edc_sync_admin.urls),
     url(r'^', views.HomeView.as_view(), name='home_url'),
 ]
