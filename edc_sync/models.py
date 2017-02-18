@@ -57,7 +57,7 @@ class IncomingTransaction(TransactionMixin, BaseUuidModel):
 
     def _deserialize_insert_tx(self, deserialized_object):
         with transaction.atomic():
-            deserialized_object.save()
+            deserialized_object.object.save()
         return 1
 
     def _deserialize_update_tx(self, deserialized_object):
