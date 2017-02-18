@@ -1,4 +1,4 @@
-var outgoingListUrl = Urls[ 'edc-sync:outgoingtransaction-list' ]();
+var outgoingListUrl = '/edc_sync/api/outgoingtransaction/'; //Urls[ 'edc-sync:outgoingtransaction-list' ]();
 var server = 'http://' + document.location.host
 
 function edcSyncReady(hosts, userName, apiToken, homeUrl) {
@@ -60,7 +60,7 @@ function processOutgoingTransactions( host, userName ) {
 	});
 
 	ajPostIncoming = ajGetOutgoing.then( function( outgoingtransactions ) {
-		var incomingListUrl = Urls[ 'edc-sync:incomingtransaction-list' ]();
+		var incomingListUrl = '/edc_sync/api/incomingtransaction/'; //Urls[ 'edc-sync:incomingtransaction-list' ]();
 		outgoingtransaction_count = outgoingtransactions.count;
 		outgoingtransaction = outgoingtransactions.results[0];
 		$( '#id-resource-alert-text' ).text( hostAlertText( host, outgoingtransaction_count ) );
@@ -76,7 +76,8 @@ function processOutgoingTransactions( host, userName ) {
 
 	ajPatchOutgoing = ajPostIncoming.then( function( incomingtransaction ) {
 		var json_data = {};
-		var outgoingDetailUrl = Urls[ 'edc-sync:outgoingtransaction-detail' ]( outgoingtransaction.pk );
+		var outgoingDetailUrl = '/edc_sync/api/outgoingtransaction/'+ outgoingtransaction.pk + '/';
+			//Urls[ 'edc-sync:outgoingtransaction-detail' ]( outgoingtransaction.pk );
 		var outgoingtransaction_fields = {
 			'user_modified': userName,
 			'modified': moment().utc().format("YYYY-MM-DDTHH:mm:ss.SSSZZ"),
@@ -190,7 +191,8 @@ function updateFromHosts( hosts ) {
 
 function updateFromHost( host ) {
 	var host_string = host.replace( ':', '-' ).split( '.' ).join( '-' );
-	var url = 'http://' + host + Urls['edc-sync:transaction-count']();
+	var url = 'http://' + host + '/edc_sync/api/transaction-count/';
+	//Urls['edc-sync:transaction-count']();
 	ajTransactionCount = $.ajax({
 		url: url,
 		type: 'GET',
@@ -215,35 +217,38 @@ function processIncomingTransactions( homeUrl, userName ) {
 		4. Update IncomingTransaction to consumed
    	Called recursively until incomingtransactions are all applied.
    	*/
-	var initial_data = {'action': 'apply_incomingtransactions'};
+	alert("incomingListUrl");
+	var incomingListUrl = '/edc_sync/api/incomingtransaction/'; 
+	//Urls[ 'edc-sync:incomingtransaction-list' ]();
+	alert(incomingListUrl);
 	var ajGetIncoming = $.ajax({
-		url: homeUrl,
+		url: server + incomingListUrl + '?format=json',
 		type: 'GET',
 		dataType: 'json',
-        data: {'action': 'apply_incomingtransactions'},
+		contentType: 'application/json',
+		processData: false,
 	});
-	alert("ajGetIncoming ajGetIncoming ajGetIncoming");
+
 	ajPostIncoming = ajGetIncoming.then( function( incomingtransactions ) {
-		alert("incomingtransaction 1");
-		var incomingListUrl = Urls[ 'edc-sync:incomingtransaction-list' ]();
-		alert("incomingtransaction");
+
 		incomingtransaction_count = incomingtransactions.count;
 		incomingtransaction = incomingtransactions.results[0];
-		alert("incomingtransaction");
-		//$( '#id-resource-alert-text' ).text( hostAlertText( host, incomingtransaction_count ) );
+		
+		//Set controls...
 		
 		var incoming_fields = {
-				'user_modified': userName,
-				'modified': moment().utc().format("YYYY-MM-DDTHH:mm:ss.SSSZZ"),
-				'is_consumed_server': true,
-				'consumed_datetime': moment().utc().format("YYYY-MM-DDTHH:mm:ss.SSSZZ"),
-				'consumer': host,
-				'tx_pk': incomingtransaction.tx_pk,
-				'action': 'apply_incoming',
+			'user_modified': userName,
+			'modified': moment().utc().format("YYYY-MM-DDTHH:mm:ss.SSSZZ"),
+			'is_consumed_server': true,
+			'consumed_datetime': moment().utc().format("YYYY-MM-DDTHH:mm:ss.SSSZZ"),
+			'consumer': host,
+			'tx_pk': incomingtransaction.tx_pk,
+			'action': 'apply_incomingtransactions',
+			'total': incomingtransactions.count,
 		};
 		return $.ajax({
-			url: server + incomingListUrl + '?format=json',
-			type: 'POST',
+			url: homeUrl,
+			type: 'GET',
 			dataType: 'json',
 			contentType: 'application/json',
 			processData: false,
@@ -251,13 +256,19 @@ function processIncomingTransactions( homeUrl, userName ) {
 		});
 	});
 	
-	ajGetIncoming.done( function ( data ) {
-		if ( data != null ) {
+	ajPostIncoming.done( function ( data ) {
+		if ( data.total >  0 ) {
 			processIncomingTransactions( serverUrl, userName );  //recursive
+		} else if(total == -1){
+			//
+			alert("Error occurred!");
+		} else {
+			//
+			alert("All transactions played!");
 		}
 	});
 
-	ajGetIncoming.fail(function(jqXHR, textStatus, errorThrown){
+	ajGetIncoming.fail(function(jqXHR, textStatus, errorThrown) {
 		//$("#id-tx-spinner").removeClass( 'fa-spin' );
 		//updateIcon(iconElement, 'error');
 		alert("An error "+errorThrown);
@@ -274,7 +285,6 @@ function displayProgresStatus(element, message, alert_class) {
 		$( '#'+element ).text( message );
 		$("#alert-progress-status").removeClass( 'alert-info' ).addClass( 'alert-success' );	
 	} else {
-		
 		$( '#'+element ).text( message );
 		$( '#'+element ).removeClass( 'alert-danger' ).addClass( 'alert-info' );	
 	}

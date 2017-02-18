@@ -149,11 +149,15 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
                     incoming_transaction = IncomingTransaction.objects.get(
                         tx_pk=request.GET.get('tx_pk')
                     )
-                    incoming_transaction.deserialize_transaction(
+                    inserted, updated, deleted = incoming_transaction.deserialize_transaction(
                         check_device=False,
                         check_hostname=False)
+                    total = request.GET.get('total')
+                    total = total - 1
+                    response_data = {
+                        'total': total, 'inserted': inserted, 'updated': updated, 'deleted': deleted}
                 except IncomingTransaction.DoesNotExist:
-                    response_data = {}
+                    response_data = {'total': -1}
             else:
                 response_data = {}
             return HttpResponse(json.dumps(response_data), content_type='application/json')

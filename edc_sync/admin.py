@@ -25,7 +25,7 @@ class EdcSyncAdminSite(AdminSite):
     site_url = '/edc-sync/'
 edc_sync_admin = EdcSyncAdminSite(name='edc_sync_admin')
 
-#admin.site.unregister(Token) TODO why is it unregistered
+admin.site.unregister(Token)  # TODO why is it unregistered
 
 
 @admin.register(Token, site=edc_sync_admin)
