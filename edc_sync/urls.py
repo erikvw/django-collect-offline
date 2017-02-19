@@ -5,6 +5,7 @@ from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.routers import DefaultRouter
 
 from edc_sync import views
+from edc_constants.constants import UUID_PATTERN
 from edc_sync.admin import edc_sync_admin
 
 router = DefaultRouter()
@@ -20,7 +21,7 @@ urlpatterns = [
     # will reply given username and password
     url(r'^api-token-auth/', obtain_auth_token),
     # url(r'^docs/', include('rest_framework_swagger.urls')),
-    url(r'render/(?P<model_name>\w+)/(?P<pk>[\w]{8}-[\w]{4}-[\w]{4}-[\w]{4}-[\w]{12})/',
+    url(r'render/(?P<model_name>\w+)/(?P<pk>{})/'.format(UUID_PATTERN.pattern),
         views.RenderView.as_view(), name='render_url'),
     url(r'^jsreverse/$', urls_js, name='js_reverse'),
     url(r'^', views.HomeView.as_view(), name='home_url'),
