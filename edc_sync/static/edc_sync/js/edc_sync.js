@@ -1,4 +1,5 @@
 var outgoingListUrl = '/edc_sync/api/outgoingtransaction/'; //Urls[ 'edc-sync:outgoingtransaction-list' ]();
+
 var server = 'http://' + document.location.host
 
 function edcSyncReady(hosts, userName, apiToken, homeUrl) {
@@ -19,11 +20,12 @@ function edcSyncReady(hosts, userName, apiToken, homeUrl) {
 	// make elements for each host, set the onClick event
 	$.each( hosts, function( host ) {
 		var divId = 'id-nav-pill-resources';
-		makePageElements( divId, host, userName )
+		alert('host:'+host);
+		makePageElements( divId, host, userName );
 		// this is the onClick event that starts the data transfer for this host.
 		$( '#id-link-fetch-' + host.replace( ':', '-' ).split( '.' ).join( '-' ) ).click( function (e) {
-		e.preventDefault();
-			displayGetDataAlert( host );	
+			e.preventDefault();
+			displayGetDataAlert( host );
 			processOutgoingTransactions( host, userName );
 		});
 	});
@@ -60,9 +62,11 @@ function processOutgoingTransactions( host, userName ) {
 	});
 
 	ajPostIncoming = ajGetOutgoing.then( function( outgoingtransactions ) {
+
 		var incomingListUrl = '/edc_sync/api/incomingtransaction/'; //Urls[ 'edc-sync:incomingtransaction-list' ]();
 		outgoingtransaction_count = outgoingtransactions.count;
 		outgoingtransaction = outgoingtransactions.results[0];
+
 		$( '#id-resource-alert-text' ).text( hostAlertText( host, outgoingtransaction_count ) );
 		return $.ajax({
 			url: server + incomingListUrl + '?format=json',
@@ -103,20 +107,22 @@ function processOutgoingTransactions( host, userName ) {
 
 	ajGetOutgoing.fail( function( jqXHR, textStatus, errorThrown ) {
 		console.log( textStatus + ': ' + errorThrown );
+		alert(jqXHR.status);
 		$( '#id-resource-alert' ).removeClass( 'alert-success' ).addClass( 'alert-danger' );
 		$( '#id-resource-alert-text' ).text( 'An error has occured while contacting ' +  host  + '. Got ' + errorThrown );
 	});
 
 	ajPostIncoming.fail( function( jqXHR, textStatus, errorThrown ) {
+		alert(jqXHR.status);
 		console.log( textStatus + ': ' + errorThrown + '(on POST)' );
 		$( '#id-resource-alert-text' ).text( 'Done. Host ' + host + '.');
 	});
 
 	ajPatchOutgoing.fail(function( jqXHR, textStatus, errorThrown ) {
+		alert(jqXHR.status);
 		console.log( textStatus + ': ' + errorThrown + '(on PATCH)');
 		$( '#id-resource-alert-text' ).text( 'Done. Host ' + host + '.');
 	});
-
 }
 
 function convertToIncomingTransaction( outgoingtransaction, userName ) {
@@ -217,10 +223,10 @@ function processIncomingTransactions( homeUrl, userName ) {
 		4. Update IncomingTransaction to consumed
    	Called recursively until incomingtransactions are all applied.
    	*/
-	alert("incomingListUrl");
+
 	var incomingListUrl = '/edc_sync/api/incomingtransaction/'; 
 	//Urls[ 'edc-sync:incomingtransaction-list' ]();
-	alert(incomingListUrl);
+
 	var ajGetIncoming = $.ajax({
 		url: server + incomingListUrl + '?format=json',
 		type: 'GET',
@@ -244,7 +250,7 @@ function processIncomingTransactions( homeUrl, userName ) {
 			'consumer': host,
 			'tx_pk': incomingtransaction.tx_pk,
 			'action': 'apply_incomingtransactions',
-			'total': incomingtransactions.count,
+			'total': incomingtransaction_count,
 		};
 		return $.ajax({
 			url: homeUrl,

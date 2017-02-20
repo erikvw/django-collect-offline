@@ -3,6 +3,7 @@ import socket
 from django.apps import apps as django_apps
 from django.core import serializers
 from django.db import models, transaction
+from django.db.utils import IntegrityError
 
 from edc_base.model.models import BaseUuidModel
 from edc_base.utils import get_utcnow
@@ -57,13 +58,13 @@ class IncomingTransaction(TransactionMixin, BaseUuidModel):
 
     def _deserialize_insert_tx(self, deserialized_object):
         with transaction.atomic():
-            deserialized_object.object.save()
+            deserialized_object.object.save_base(raw=True)
         return 1
 
     def _deserialize_update_tx(self, deserialized_object):
         return self._deserialize_insert_tx(deserialized_object)
 
-    def _deserialize_delete_tx(self, deserialized_object, using):
+    def _deserialize_delete_tx(self, deserialized_object, using=None):
         pass
 
     class Meta:
