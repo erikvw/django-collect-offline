@@ -1,2 +1,2 @@
-SERVER = 'server'
-CLIENT = 'client'
+SERVER = 'Server'
+CLIENT = 'Client'

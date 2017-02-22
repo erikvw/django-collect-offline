@@ -125,7 +125,8 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
             hostname=socket.gethostname(),
             ip_address=self.ip_address,
             site_models=site_sync_models.site_models,
-            base_template_name=app_config.base_template_name)
+            base_template_name=app_config.base_template_name,
+        )
         return context
 
     @property
@@ -143,7 +144,22 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
         if request.is_ajax():
-            response_data = {}
+            if request.GET.get('action') == 'apply_incomingtransactions':
+                try:
+                    incoming_transaction = IncomingTransaction.objects.get(
+                        tx_pk=request.GET.get('tx_pk')
+                    )
+                    inserted, updated, deleted = incoming_transaction.deserialize_transaction(
+                        check_device=False,
+                        check_hostname=False)
+                    total = request.GET.get('total')
+                    total = total - 1
+                    response_data = {
+                        'total': total, 'inserted': inserted, 'updated': updated, 'deleted': deleted}
+                except IncomingTransaction.DoesNotExist:
+                    response_data = {'total': -1}
+            else:
+                response_data = {}
             return HttpResponse(json.dumps(response_data), content_type='application/json')
         return self.render_to_response(context)
 

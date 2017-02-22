@@ -1,12 +1,11 @@
 import json
-
 from json.decoder import JSONDecodeError
-from requests.exceptions import RequestException
-from rest_framework.authtoken.models import Token
 
 from django.apps import apps as django_apps
 from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
 
+from requests.exceptions import RequestException
+from rest_framework.authtoken.models import Token
 
 from .constants import SERVER, CLIENT
 from .models import Client, Server
@@ -24,6 +23,8 @@ class EdcSyncViewMixin:
     def host_model(self):
         host_model = None
         if self.role in [SERVER, CENTRAL_SERVER]:
+            host_model = Server
+        if self.role == SERVER:
             host_model = Client
         elif self.role == CLIENT:
             host_model = Server
@@ -35,6 +36,7 @@ class EdcSyncViewMixin:
 
     @property
     def resource(self):
+        resource = 'outgoingtransaction'
         if self.role in [SERVER, CENTRAL_SERVER]:
             resource = 'outgoingtransaction'
         elif self.role == CLIENT:
@@ -59,7 +61,6 @@ class EdcSyncViewMixin:
 
     def get_api_token(self, username):
         try:
-            print(Token)
             api_token = Token.objects.get(user__username=username).key
         except ObjectDoesNotExist:
             api_token = None

@@ -74,10 +74,10 @@ class TransactionMixin(models.Model):
         return cipher
 
     def view(self):
-        url = reverse('render_url',
+        url = reverse('edc-sync:render_url',
                       kwargs={
                           'model_name': self._meta.object_name.lower(),
-                          'pk': self.pk})
+                          'pk': str(self.pk)})
         ret = ('<a href="{url}" class="add-another" id="add_id_report" '
                'onclick="return showAddAnotherPopup(this);"> <img src="/static/admin/img/icon_addlink.gif" '
                'width="10" height="10" alt="View"/></a>'.format(url=url))
