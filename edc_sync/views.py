@@ -1,6 +1,7 @@
 import json
 import socket
 
+
 from django.apps import apps as django_apps
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -11,6 +12,7 @@ from django.views.generic.base import TemplateView
 from django_crypto_fields.constants import LOCAL_MODE
 from django_crypto_fields.cryptor import Cryptor
 
+from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
@@ -72,7 +74,7 @@ class TransactionCountView(APIView):
                    'outgoingtransaction_middleman_count': outgoingtransaction_middleman_count,
                    'incomingtransaction_count': incomingtransaction_count,
                    'hostname': socket.gethostname()}
-        return Response(content)
+        return Response(content, status=status.HTTP_200_OK)
 
 
 class RenderView(EdcBaseViewMixin, TemplateView):
@@ -146,12 +148,16 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
         if request.is_ajax():
             if request.GET.get('action') == 'apply_incomingtransactions':
                 try:
-                    incoming_transaction = IncomingTransaction.objects.get(
+                    incoming_transactions = IncomingTransaction.objects.filter(
                         tx_pk=request.GET.get('tx_pk')
                     )
-                    inserted, updated, deleted = incoming_transaction.deserialize_transaction(
-                        check_device=False,
-                        check_hostname=False)
+                    inserted = 0
+                    updated = 0
+                    deleted = 0
+                    for incoming_transaction in incoming_transactions:
+                        inserted, updated, deleted = incoming_transaction.deserialize_transaction(
+                            check_device=False,
+                            check_hostname=False)
                     total = request.GET.get('total')
                     total = total - 1
                     response_data = {

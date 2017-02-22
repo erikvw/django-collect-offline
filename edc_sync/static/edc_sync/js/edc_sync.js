@@ -16,11 +16,9 @@ function edcSyncReady(hosts, userName, apiToken, homeUrl) {
 			xhr.setRequestHeader("Authorization", "Token " + apiToken);
 		}
 	});	
-
 	// make elements for each host, set the onClick event
 	$.each( hosts, function( host ) {
 		var divId = 'id-nav-pill-resources';
-		alert('host:'+host);
 		makePageElements( divId, host, userName );
 		// this is the onClick event that starts the data transfer for this host.
 		$( '#id-link-fetch-' + host.replace( ':', '-' ).split( '.' ).join( '-' ) ).click( function (e) {
@@ -29,7 +27,9 @@ function edcSyncReady(hosts, userName, apiToken, homeUrl) {
 			processOutgoingTransactions( host, userName );
 		});
 	});
-	// updateFromHosts( hosts );
+
+	updateFromHosts( hosts );
+	
 	$( '#id-nav-pill-apply' ).append( '<li><a id="id-link-apply" href="#">Apply Incoming Transactions<span id="bdg-incomingtransaction-count" class="badge pull-right">0</span></a></li>' );
     $('#bdg-refresh-clients').click( function(e) {
         e.preventDefault();
@@ -54,6 +54,7 @@ function processOutgoingTransactions( host, userName ) {
 	var outgoingtransaction = null;
 	var outgoingtransaction_total_count = 0;
 	var url = 'http://' + host + outgoingListUrl + '?format=json'  // limit=1
+
 	var ajGetOutgoing = $.ajax({
 		url: url,
 		type: 'GET',
@@ -66,7 +67,7 @@ function processOutgoingTransactions( host, userName ) {
 		var incomingListUrl = '/edc_sync/api/incomingtransaction/'; //Urls[ 'edc-sync:incomingtransaction-list' ]();
 		outgoingtransaction_count = outgoingtransactions.count;
 		outgoingtransaction = outgoingtransactions.results[0];
-
+		
 		$( '#id-resource-alert-text' ).text( hostAlertText( host, outgoingtransaction_count ) );
 		return $.ajax({
 			url: server + incomingListUrl + '?format=json',
@@ -113,7 +114,6 @@ function processOutgoingTransactions( host, userName ) {
 	});
 
 	ajPostIncoming.fail( function( jqXHR, textStatus, errorThrown ) {
-		alert(jqXHR.status);
 		console.log( textStatus + ': ' + errorThrown + '(on POST)' );
 		$( '#id-resource-alert-text' ).text( 'Done. Host ' + host + '.');
 	});
@@ -296,6 +296,5 @@ function displayProgresStatus(element, message, alert_class) {
 		$( '#'+element ).text( message );
 		$( '#'+element ).removeClass( 'alert-danger' ).addClass( 'alert-info' );	
 	}
-
 	$( '#'+element  ).show();
 }
