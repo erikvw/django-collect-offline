@@ -39,7 +39,7 @@ class IncomingTransaction(TransactionMixin, BaseUuidModel):
                 raise SyncError('Incoming transactions exist that are from this host.')
             elif commit:
                 if self.action == 'D':
-                    deleted += self._deserialize_delete_tx(deserialized_object)
+                    deleted += self._deserialize_delete_tx(deserialized_object) or 0
                 elif self.action == 'I':
                     inserted += self._deserialize_insert_tx(deserialized_object)
                 elif self.action == 'U':

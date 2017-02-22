@@ -239,9 +239,8 @@ function processIncomingTransactions( homeUrl, userName ) {
 
 		incomingtransaction_count = incomingtransactions.count;
 		incomingtransaction = incomingtransactions.results[0];
-		
-		//Set controls...
-		
+
+		$( '#id-resource-alert-text' ).text( hostAlertText( host, outgoingtransaction_count ) );
 		var incoming_fields = {
 			'user_modified': userName,
 			'modified': moment().utc().format("YYYY-MM-DDTHH:mm:ss.SSSZZ"),
@@ -263,14 +262,17 @@ function processIncomingTransactions( homeUrl, userName ) {
 	});
 	
 	ajPostIncoming.done( function ( data ) {
+		consumedAll = incomingtransaction_count - total
 		if ( data.total >  0 ) {
 			processIncomingTransactions( serverUrl, userName );  //recursive
 		} else if(total == -1){
 			//
 			alert("Error occurred!");
-		} else {
+			displayProgresStatus( 'id-resource-alert-text', 'Error occurred, playing transactions',  'alert-danger');
+		} else if(consumedAll == 0){
 			//
 			alert("All transactions played!");
+			displayProgresStatus( 'id-resource-alert-text', 'All transactions has been consumed.',  'alert-success');
 		}
 	});
 

@@ -8,12 +8,21 @@
 
    <script type="text/javascript" charset="utf8" src="{% static "django_js_reverse/js/reverse.js" %}"></script>	
   <!-- begin edc-sync extra-scripts -->
-  <script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/edc_sync.js" %}"></script>
-  <script type="text/javascript" charset="utf8" class="init">
-      $(document).ready( function() {
-    	  edcSyncReady('{{ hosts|escapejs }}', '{{ user.username }}', '{{ api_token }}', "{% url 'edc-sync:home_url' %}");
-      });
-  </script>
+  {% if edc_sync_role == 'Server' %}
+	  <script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/edc_sync.js" %}"></script>
+	  <script type="text/javascript" charset="utf8" class="init">
+	      $(document).ready( function() {
+	    	  edcSyncReady('{{ hosts|escapejs }}', '{{ user.username }}', '{{ api_token }}', "{% url 'edc-sync:home_url' %}");
+	      });
+	  </script>
+  {% else %}
+	<script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/edc_sync_push.js" %}"></script>
+	<script type="text/javascript" charset="utf8" class="init">
+     $(document).ready( function() {
+   	  edcSyncReady('{{ server|escapejs }}', '{{ host |escapejs }}', '{{ user.username }}', '{{ api_token }}', "{% url 'edc-sync:home_url' %}");
+     });
+ </script>
+  {% endif %}
   <!-- end edc-sync extra-scripts -->
 {% endblock extra-scripts %}
 
@@ -26,34 +35,16 @@
                 <li><a href="#">{{ edc_sync_role|title }}: {{ hostname }} <span class="pull-right">{{ ip_address }}</span></a></li>
             </ul>
         </div>
-
-        {% if edc_sync_role == 'Server' %}
         <div class="panel panel-default">
             {% if edc_sync_role == 'Server' %}
-                <div class="panel-heading">Client Resources
-                	<a id="link-refresh-clients" title="click to refresh" href=""><i id="bdg-refresh-clients" class="fa fa-refresh fa-1x fa-fw pull-right"></i></a>
-                </div>
-                <div id="id-div-resource-alert"></div>
-                {% if user.is_authenticated %}
-                  <ul id="id-nav-pill-resources" class="nav nav-pills nav-stacked">
-                  </ul>
-                {% endif %}
-                <div class="panel-heading">Incoming Transactions
-                <a id="link-refresh-self" href=""><i id="bdg-refresh-self" class="fa fa-refresh fa-1x fa-fw pull-right"></i></a>
-                </div>
-                {% if user.is_authenticated %}
-                  <ul id="id-nav-pill-apply" class="nav nav-pills nav-stacked" style="text-transform: capitalize;">
-                  </ul>
-                {% endif %}
-                
+                {% include 'edc_sync/server.html' %}
             {% elif edc_sync_role == 'Client' %}
+            	{% include 'edc_sync/client.html' %}
             {% else %}
                 <div class="panel-heading">Resources</div>
                 <div class="alert alert-danger text-center">Edc-Sync role undefined. See AppConfig.</div>
             {% endif%}
         </div>
-  
-        {% endif%}
     </div>
 
     <div id="div-home-middle" class="col-md-4">
