@@ -35,16 +35,19 @@ class IncomingTransaction(TransactionMixin, BaseUuidModel):
         for deserialized_object in serializers.deserialize(
                 "json", self.aes_decrypt(self.tx), use_natural_foreign_keys=True, use_natural_primary_keys=True):
             if deserialized_object.object.hostname_modified == socket.gethostname() and check_hostname:
-                raise SyncError('Incoming transactions exist that are from this host.')
+                raise SyncError(
+                    'Incoming transactions exist that are from this host.')
             elif commit:
                 if self.action == 'D':
                     deleted += self._deserialize_delete_tx(deserialized_object)
                 elif self.action == 'I':
-                    inserted += self._deserialize_insert_tx(deserialized_object)
+                    inserted += self._deserialize_insert_tx(
+                        deserialized_object)
                 elif self.action == 'U':
                     updated += self._deserialize_update_tx(deserialized_object)
                 else:
-                    raise SyncError('Unexpected value for action. Got {}'.format(self.action))
+                    raise SyncError(
+                        'Unexpected value for action. Got {}'.format(self.action))
                 if any([inserted, deleted, updated]):
                     self.is_ignored = False
                     self.is_consumed = True
@@ -86,7 +89,8 @@ class OutgoingTransaction(TransactionMixin, BaseUuidModel):
 
     def save(self, *args, **kwargs):
         if not self.using:
-            raise ValueError('Value for \'{}.using\' cannot be None.'.format(self._meta.model_name))
+            raise ValueError(
+                'Value for \'{}.using\' cannot be None.'.format(self._meta.model_name))
         if self.is_consumed_server and not self.consumed_datetime:
             self.consumed_datetime = get_utcnow()
         super(OutgoingTransaction, self).save(*args, **kwargs)
@@ -127,6 +131,7 @@ class Server(HostModelMixin, BaseUuidModel):
 
 
 class HistoryManager(models.Manager):
+
     def get_by_natural_key(self, filename, sent_datetime):
         return self.get(filename=filename, sent_datetime=sent_datetime)
 
