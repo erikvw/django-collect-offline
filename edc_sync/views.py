@@ -145,25 +145,25 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
+        data = {}
         if request.is_ajax():
-            if request.GET.get('action') == 'apply_incomingtransactions':
-                try:
-                    incoming_transactions = IncomingTransaction.objects.filter(
-                        tx_pk=request.GET.get('tx_pk')
-                    )
-                    inserted = 0
-                    updated = 0
-                    deleted = 0
-                    for incoming_transaction in incoming_transactions:
-                        inserted, updated, deleted = incoming_transaction.deserialize_transaction(
-                            check_device=False,
-                            check_hostname=False)
-                    total = request.GET.get('total')
-                    total = total - 1
-                    response_data = {
-                        'total': total, 'inserted': inserted, 'updated': updated, 'deleted': deleted}
-                except IncomingTransaction.DoesNotExist:
-                    response_data = {'total': -1}
+            if len(list(request.GET.keys())) > 0:
+                data = json.loads(list(request.GET.keys())[0])
+            if data.get('action') == 'apply_incomingtransactions':
+                incoming_transactions = IncomingTransaction.objects.filter(
+                    tx_pk=data.get('tx_pk')
+                )
+                inserted = 0
+                updated = 0
+                deleted = 0
+                for incoming_transaction in incoming_transactions:
+                    inserted, updated, deleted = incoming_transaction.deserialize_transaction(
+                        check_device=False,
+                        check_hostname=False)
+                total = data.get('total')
+                total = total - 1
+                response_data = {
+                    'total': total, 'inserted': inserted, 'updated': updated, 'deleted': deleted}
             else:
                 response_data = {}
             return HttpResponse(json.dumps(response_data), content_type='application/json')

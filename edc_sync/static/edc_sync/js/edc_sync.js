@@ -28,7 +28,8 @@ function edcSyncReady(hosts, userName, apiToken, homeUrl) {
 		});
 	});
 
-	updateFromHosts( hosts );
+	updateFromHosts( hosts ); //Pending transactions hosts
+	updateFromHost( server, true ); // Pending incoming transactions count
 	
 	$( '#id-nav-pill-apply' ).append( '<li><a id="id-link-apply" href="#">Apply Incoming Transactions<span id="bdg-incomingtransaction-count" class="badge pull-right">0</span></a></li>' );
     $('#bdg-refresh-clients').click( function(e) {
@@ -190,14 +191,18 @@ function makePageElements ( divId, host, resourceName, listUrl, userName ) {
 function updateFromHosts( hosts ) {
     $("#bdg-refresh-clients").addClass('fa-spin');
 	$.each( hosts, function( host ) {
-		updateFromHost( host );
+		var isServer = false;
+		updateFromHost( host , isServer);
 	});	
 	$("#bdg-refresh-clients").removeClass('fa-spin');		
 }
 
-function updateFromHost( host ) {
+function updateFromHost( host , isServer) {
 	var host_string = host.replace( ':', '-' ).split( '.' ).join( '-' );
 	var url = 'http://' + host + '/edc_sync/api/transaction-count/';
+	if (isServer == true){
+		var url = host + '/edc_sync/api/transaction-count/';
+	}
 	//Urls['edc-sync:transaction-count']();
 	ajTransactionCount = $.ajax({
 		url: url,
@@ -205,10 +210,18 @@ function updateFromHost( host ) {
 		dataType: 'json',
 		processData: false,
 	});
+	ajTransactionCount.fail( function ( jqXHR, textStatus, errorThrown ) {
+		alert("Errors "+ jqXHR.status +" Incoming Transactions "+errorThrown);
+	});
 	ajTransactionCount.done( function ( data ) {
 		if ( data != null ) {
-			$( '#bdg-outgoingtransaction-count-' + host_string + '').text(data.outgoingtransaction_count)			
-			$( '#id-hostname-' + host_string +'').text(' -- ' + data.hostname.toLowerCase() + '')			
+			if(isServer == false){
+				$( '#bdg-outgoingtransaction-count-' + host_string + '').text(data.outgoingtransaction_count)			
+				$( '#id-hostname-' + host_string +'').text(' -- ' + data.hostname.toLowerCase() + '')
+			} else {
+				$( '#bdg-incomingtransaction-count').text(data.incomingtransaction_count)			
+				$( '#id-hostname-' + host_string +'').text(' -- ' + data.hostname.toLowerCase() + '')
+			}
 		}
 	});
 }
@@ -239,32 +252,37 @@ function processIncomingTransactions( homeUrl, userName ) {
 
 		incomingtransaction_count = incomingtransactions.count;
 		incomingtransaction = incomingtransactions.results[0];
-
-		$( '#id-resource-alert-text' ).text( hostAlertText( host, outgoingtransaction_count ) );
+		
+		alert(incomingtransaction.tx_pk);
+		//$( '#id-resource-alert-text' ).text( hostAlertText( host, outgoingtransaction_count ) );
 		var incoming_fields = {
 			'user_modified': userName,
 			'modified': moment().utc().format("YYYY-MM-DDTHH:mm:ss.SSSZZ"),
 			'is_consumed_server': true,
 			'consumed_datetime': moment().utc().format("YYYY-MM-DDTHH:mm:ss.SSSZZ"),
-			'consumer': host,
+//			'consumer': host,
 			'tx_pk': incomingtransaction.tx_pk,
 			'action': 'apply_incomingtransactions',
 			'total': incomingtransaction_count,
 		};
+		var playIncomingUrl = server + homeUrl;
 		return $.ajax({
-			url: homeUrl,
+			url: playIncomingUrl,
 			type: 'GET',
 			dataType: 'json',
 			contentType: 'application/json',
 			processData: false,
-			data: incoming_fields,
+			data: JSON.stringify( incoming_fields ),
 		});
 	});
-	
+
 	ajPostIncoming.done( function ( data ) {
-		consumedAll = incomingtransaction_count - total
-		if ( data.total >  0 ) {
-			processIncomingTransactions( serverUrl, userName );  //recursive
+		var consumedAll = incomingtransaction_count;
+		new_total = data.total
+		alert(new_total);
+		if ( new_total >  0 ) {
+			alert("Recurse");
+			processIncomingTransactions( homeUrl, userName );  //recursive
 		} else if(total == -1){
 			//
 			alert("Error occurred!");
