@@ -55,6 +55,9 @@ class IncomingTransactionViewSet(viewsets.ModelViewSet):
     queryset = IncomingTransaction.objects.all()
     serializer_class = IncomingTransactionSerializer
 
+    def filter_queryset(self, queryset):
+        return self.queryset.filter(is_consumed=False)
+
 
 class TransactionCountView(APIView):
     """
