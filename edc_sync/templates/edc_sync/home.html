@@ -7,23 +7,23 @@
 {{ block.super }}
 
    <script type="text/javascript" charset="utf8" src="{% static "django_js_reverse/js/reverse.js" %}"></script>	
-  <!-- begin edc-sync extra-scripts -->
+  <!-- begin edc_sync extra-scripts -->
   {% if edc_sync_role == 'Server' %}
 	  <script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/edc_sync.js" %}"></script>
 	  <script type="text/javascript" charset="utf8" class="init">
 	      $(document).ready( function() {
-	    	  edcSyncReady('{{ hosts|escapejs }}', '{{ user.username }}', '{{ api_token }}', "{% url 'edc-sync:home_url' %}");
+	    	  edcSyncReady('{{ hosts|escapejs }}', '{{ user.username }}', '{{ api_token }}', "{% url 'edc_sync:home_url' %}");
 	      });
 	  </script>
   {% else %}
 	<script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/edc_sync_push.js" %}"></script>
 	<script type="text/javascript" charset="utf8" class="init">
      $(document).ready( function() {
-   	  edcSyncReady('{{ server|escapejs }}', '{{ host |escapejs }}', '{{ user.username }}', '{{ api_token }}', "{% url 'edc-sync:home_url' %}");
+   	  edcSyncReady('{{ server|escapejs }}', '{{ host |escapejs }}', '{{ user.username }}', '{{ api_token }}', "{% url 'edc_sync:home_url' %}");
      });
  </script>
   {% endif %}
-  <!-- end edc-sync extra-scripts -->
+  <!-- end edc_sync extra-scripts -->
 {% endblock extra-scripts %}
 
 {% block main %}
@@ -51,14 +51,14 @@
         <div class="panel panel-default">
             <div class="panel-heading">Administration</div>
             <ul id="nav-pill-admin" class="nav nav-pills nav-stacked">
-                <li><a href="{% url 'edc-sync:edc_sync_admin:index'%} ">{{ edc_sync_admin.index_title }}</a></li>
+                <li><a href="{% url 'edc_sync:edc_sync_admin:index'%} ">{{ edc_sync_admin.index_title }}</a></li>
                 {% if edc_sync_role == 'Server' %}
-                    <li><a href="{% url 'edc-sync:edc_sync_admin:edc_sync_client_changelist'%} ">Clients</a></li>
+                    <li><a href="{% url 'edc_sync:edc_sync_admin:edc_sync_client_changelist'%} ">Clients</a></li>
                 {% elif edc_sync_role == 'Client' %}
-                    <li><a href="{% url 'edc-sync:edc_sync_admin:edc_sync_server_changelist'%} ">Servers</a></li>
+                    <li><a href="{% url 'edc_sync:edc_sync_admin:edc_sync_server_changelist'%} ">Servers</a></li>
                 {% endif %}
                 {% comment %}
-                	<li><a href="{% url 'edc-sync:edc_sync_admin:authtoken_token_changelist'%} ">User Tokens</a></li>
+                	<li><a href="{% url 'edc_sync:edc_sync_admin:authtoken_token_changelist'%} ">User Tokens</a></li>
                 {% endcomment %}
             </ul>
         </div>
@@ -69,8 +69,8 @@
                 {% endif %}
                 <ul id="nav-pill-api" class="nav nav-pills nav-stacked">
                 {% if user.is_authenticated %}
-                    <li><a href="{% url 'edc-sync:outgoingtransaction-list' %}?format=json">Show My Outgoingtransaction</a></li>
-                    <li><a href="{% url 'edc-sync:incomingtransaction-list' %}?format=json">Show My Incomingtransaction</a></li>
+                    <li><a href="{% url 'edc_sync:outgoingtransaction-list' %}?format=json">Show My Outgoingtransaction</a></li>
+                    <li><a href="{% url 'edc_sync:incomingtransaction-list' %}?format=json">Show My Incomingtransaction</a></li>
                 {% endif %}
                 </ul>
             </div>

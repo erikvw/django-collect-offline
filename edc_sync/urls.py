@@ -12,6 +12,8 @@ router = DefaultRouter()
 router.register(r'outgoingtransaction', views.OutgoingTransactionViewSet)
 router.register(r'incomingtransaction', views.IncomingTransactionViewSet)
 
+app_name = 'edc_sync'
+
 urlpatterns = [
     url(r'^admin/', edc_sync_admin.urls),
     url(r'^api/transaction-count/$',

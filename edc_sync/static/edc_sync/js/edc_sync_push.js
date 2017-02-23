@@ -1,4 +1,4 @@
-var outgoingListUrl = '/edc_sync/api/outgoingtransaction/'; //Urls[ 'edc-sync:outgoingtransaction-list' ]();
+var outgoingListUrl = '/edc_sync/api/outgoingtransaction/'; //Urls[ 'edc_sync:outgoingtransaction-list' ]();
 
 var server = 'http://' + document.location.host
 
@@ -46,7 +46,7 @@ function processOutgoingTransactions( server, localhost, userName ) {
 
 	ajPostIncoming = ajGetOutgoing.then( function( outgoingtransactions ) {
 		// POST TO COMMUNITY SERVER
-		var incomingListUrl = '/edc_sync/api/incomingtransaction/'; //Urls[ 'edc-sync:incomingtransaction-list' ]();
+		var incomingListUrl = '/edc_sync/api/incomingtransaction/'; //Urls[ 'edc_sync:incomingtransaction-list' ]();
 		outgoingtransaction_count = outgoingtransactions.count;
 		outgoingtransaction = outgoingtransactions.results[0];
 
@@ -66,7 +66,7 @@ function processOutgoingTransactions( server, localhost, userName ) {
 		//UPDATE CLIENT MACHINE
 		var json_data = {};
 		var outgoingDetailUrl = '/edc_sync/api/outgoingtransaction/'+ outgoingtransaction.pk + '/';
-			//Urls[ 'edc-sync:outgoingtransaction-detail' ]( outgoingtransaction.pk );
+			//Urls[ 'edc_sync:outgoingtransaction-detail' ]( outgoingtransaction.pk );
 		var outgoingtransaction_fields = {
 			'user_modified': userName,
 			'modified': moment().utc().format("YYYY-MM-DDTHH:mm:ss.SSSZZ"),
@@ -158,7 +158,7 @@ function updateFromHosts( host ) {
 
 function updateFromHost( host ) {
 	var url = 'http://' + host + '/edc_sync/api/transaction-count/';
-	//Urls['edc-sync:transaction-count']();
+	//Urls['edc_sync:transaction-count']();
 	ajTransactionCount = $.ajax({
 		url: url,
 		type: 'GET',

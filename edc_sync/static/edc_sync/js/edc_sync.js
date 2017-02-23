@@ -1,4 +1,4 @@
-var outgoingListUrl = '/edc_sync/api/outgoingtransaction/'; //Urls[ 'edc-sync:outgoingtransaction-list' ]();
+var outgoingListUrl = '/edc_sync/api/outgoingtransaction/'; //Urls[ 'edc_sync:outgoingtransaction-list' ]();
 
 var server = 'http://' + document.location.host
 
@@ -64,7 +64,7 @@ function processOutgoingTransactions( host, userName ) {
 
 	ajPostIncoming = ajGetOutgoing.then( function( outgoingtransactions ) {
 
-		var incomingListUrl = '/edc_sync/api/incomingtransaction/'; //Urls[ 'edc-sync:incomingtransaction-list' ]();
+		var incomingListUrl = '/edc_sync/api/incomingtransaction/'; //Urls[ 'edc_sync:incomingtransaction-list' ]();
 		outgoingtransaction_count = outgoingtransactions.count;
 		outgoingtransaction = outgoingtransactions.results[0];
 		
@@ -82,7 +82,7 @@ function processOutgoingTransactions( host, userName ) {
 	ajPatchOutgoing = ajPostIncoming.then( function( incomingtransaction ) {
 		var json_data = {};
 		var outgoingDetailUrl = '/edc_sync/api/outgoingtransaction/'+ outgoingtransaction.pk + '/';
-			//Urls[ 'edc-sync:outgoingtransaction-detail' ]( outgoingtransaction.pk );
+			//Urls[ 'edc_sync:outgoingtransaction-detail' ]( outgoingtransaction.pk );
 		var outgoingtransaction_fields = {
 			'user_modified': userName,
 			'modified': moment().utc().format("YYYY-MM-DDTHH:mm:ss.SSSZZ"),
@@ -198,7 +198,7 @@ function updateFromHosts( hosts ) {
 function updateFromHost( host ) {
 	var host_string = host.replace( ':', '-' ).split( '.' ).join( '-' );
 	var url = 'http://' + host + '/edc_sync/api/transaction-count/';
-	//Urls['edc-sync:transaction-count']();
+	//Urls['edc_sync:transaction-count']();
 	ajTransactionCount = $.ajax({
 		url: url,
 		type: 'GET',
@@ -225,7 +225,7 @@ function processIncomingTransactions( homeUrl, userName ) {
    	*/
 
 	var incomingListUrl = '/edc_sync/api/incomingtransaction/'; 
-	//Urls[ 'edc-sync:incomingtransaction-list' ]();
+	//Urls[ 'edc_sync:incomingtransaction-list' ]();
 
 	var ajGetIncoming = $.ajax({
 		url: server + incomingListUrl + '?format=json',

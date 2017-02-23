@@ -1,5 +1,5 @@
 from django.db import models
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django_crypto_fields.constants import LOCAL_MODE
 from django_crypto_fields.cryptor import Cryptor
 
@@ -74,7 +74,7 @@ class TransactionMixin(models.Model):
         return cipher
 
     def view(self):
-        url = reverse('edc-sync:render_url',
+        url = reverse('edc_sync:render_url',
                       kwargs={
                           'model_name': self._meta.object_name.lower(),
                           'pk': str(self.pk)})
@@ -137,7 +137,7 @@ class HostModelMixin(models.Model):
 
     @property
     def url_template(self):
-        return 'http://{hostname}:{port}/edc-sync/api/{api_name}/'
+        return 'http://{hostname}:{port}/edc_sync/api/{api_name}/'
 
     @property
     def url(self):
