@@ -1,14 +1,12 @@
 var outgoingListUrl = '/edc_sync/api/outgoingtransaction/'; //Urls[ 'edc-sync:outgoingtransaction-list' ]();
 
-var server = 'http://' + document.location.host
+var client = 'http://' + document.location.host
 
-function edcSyncReady(server, localhost, userName, apiToken) {
+function edcSyncReady(server, userName, apiToken) {
 	/* Prepare page elements */
-	var hosts = JSON.parse( hosts );
 	var csrftoken = Cookies.get('csrftoken');
-
+	
 	// configure AJAX header with csrf and authorization tokens
-	alert(this.crossDomain);
 	$.ajaxSetup({
 	beforeSend: function(xhr, settings) {
 		if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
@@ -17,15 +15,14 @@ function edcSyncReady(server, localhost, userName, apiToken) {
 			xhr.setRequestHeader("Authorization", "Token " + apiToken);
 		}
 	});
-	updateFromHost( localhost );
-
+	updateFromHost( client );
     $('#btn-sync').click( function(e) {
         e.preventDefault();
-        processOutgoingTransactions(server, localhost, userName );
+        processOutgoingTransactions(server, userName );
     });
 }
 
-function processOutgoingTransactions( server, localhost, userName ) {
+function processOutgoingTransactions( server, userName ) {
 	/* 
 	Process each OutgoingTransaction one at a time.
 	Requests are chained: 
@@ -36,23 +33,22 @@ function processOutgoingTransactions( server, localhost, userName ) {
 	*/
 	var outgoingtransaction = null;
 	var outgoingtransaction_total_count = 0;
-	var url = 'http://' + host + outgoingListUrl + '?format=json'  // limit=1
+	var url = client + outgoingListUrl + '?format=json'  // limit=1
 	var ajGetOutgoing = $.ajax({
 		url: url,
 		type: 'GET',
 		dataType: 'json ',
 		processData: false,
-	}); //GET CLIENT TRANSACTIONS
+	});
 
 	ajPostIncoming = ajGetOutgoing.then( function( outgoingtransactions ) {
-		// POST TO COMMUNITY SERVER
 		var incomingListUrl = '/edc_sync/api/incomingtransaction/'; //Urls[ 'edc-sync:incomingtransaction-list' ]();
 		outgoingtransaction_count = outgoingtransactions.count;
-		outgoingtransaction = outgoingtransactions.results[0];
 
-		$( '#id-resource-alert-text' ).text( hostAlertText( host, outgoingtransaction_count ) );
+		outgoingtransaction = outgoingtransactions.results[0];
+		//$( '#id-resource-alert-text' ).text( hostAlertText( host, outgoingtransaction_count ) );
 		return $.ajax({
-			url: server + incomingListUrl + '?format=json',
+			url: 'http://' + server + incomingListUrl + '?format=json',
 			type: 'POST',
 			dataType: 'json',
 			contentType: 'application/json',
@@ -63,7 +59,6 @@ function processOutgoingTransactions( server, localhost, userName ) {
 
 	ajPatchOutgoing = ajPostIncoming.then( function( incomingtransaction ) {
 		
-		//UPDATE CLIENT MACHINE
 		var json_data = {};
 		var outgoingDetailUrl = '/edc_sync/api/outgoingtransaction/'+ outgoingtransaction.pk + '/';
 			//Urls[ 'edc-sync:outgoingtransaction-detail' ]( outgoingtransaction.pk );
@@ -75,7 +70,7 @@ function processOutgoingTransactions( server, localhost, userName ) {
 			'consumer': server,
 		};
 		return $.ajax({
-			url: 'http://' + host + outgoingDetailUrl,
+			url: client + outgoingDetailUrl,
 			type: 'PATCH',
 			dataType: 'json',
 			contentType: 'application/json',
@@ -85,12 +80,20 @@ function processOutgoingTransactions( server, localhost, userName ) {
 	});
 
 	ajPatchOutgoing.done( function ( data ) {
-		if ( data != null ) {
-			processOutgoingTransactions( host, userName );  //recursive
+		if (outgoingtransaction_count == 1){
+			$( '#id-pending-transactions' ).text( 0 );
+			$( '#btn-sync' ).removeClass( 'btn-warning' ).addClass( 'btn-default' );
+		} else {
+			$( '#id-pending-transactions' ).text( outgoingtransaction_count );
+		}
+		
+		if ( outgoingtransaction_count > 1 ) {
+			processOutgoingTransactions( server, userName );  //recursive
 		}
 	});
 
 	ajGetOutgoing.fail( function( jqXHR, textStatus, errorThrown ) {
+		alert("First request error");
 		console.log( textStatus + ': ' + errorThrown );
 		alert(jqXHR.status);
 		$( '#id-sync-status' ).removeClass( 'alert-success' ).addClass( 'alert-danger' );
@@ -99,12 +102,12 @@ function processOutgoingTransactions( server, localhost, userName ) {
 
 	ajPostIncoming.fail( function( jqXHR, textStatus, errorThrown ) {
 		$( '#id-sync-status' ).removeClass( 'alert-success' ).addClass( 'alert-danger' );
-		$( '#id-sync-status' ).text( 'An error has occured while contacting ' +  host  + '. Got ' + errorThrown );
+		$( '#id-sync-status' ).text( 'An error has occured while contacting ' +  server  + '. Got ' + errorThrown );
 	});
 
 	ajPatchOutgoing.fail(function( jqXHR, textStatus, errorThrown ) {
 		$( '#id-sync-status' ).removeClass( 'alert-success' ).addClass( 'alert-danger' );
-		$( '#id-sync-status' ).text( 'An error has occured while contacting ' +  host  + '. Got ' + errorThrown );
+		$( '#id-sync-status' ).text( 'An error has occured while contacting ' +  server  + '. Got ' + errorThrown );
 	});
 }
 
@@ -157,7 +160,7 @@ function updateFromHosts( host ) {
 }
 
 function updateFromHost( host ) {
-	var url = 'http://' + host + '/edc_sync/api/transaction-count/';
+	var url = host + '/edc_sync/api/transaction-count/';
 	//Urls['edc-sync:transaction-count']();
 	ajTransactionCount = $.ajax({
 		url: url,
@@ -167,7 +170,10 @@ function updateFromHost( host ) {
 	});
 	ajTransactionCount.done( function ( data ) {
 		if ( data != null ) {
-			$( '#id-pending-transactions').text('Pending: ' + data.outgoingtransaction_count)			
+			$( '#id-pending-transactions').text(' ' + data.outgoingtransaction_count)
+			if( data.outgoingtransaction_count == 0 ) {
+				$( '#btn-sync' ).removeClass( 'btn-warning' ).addClass( 'btn-default' );
+			}
 		}
 	});
 }
