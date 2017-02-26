@@ -47,7 +47,8 @@ class OutgoingTransactionViewSet(viewsets.ModelViewSet):
     serializer_class = OutgoingTransactionSerializer
 
     def filter_queryset(self, queryset):
-        return self.queryset.filter(is_consumed_server=False)
+        return self.queryset.filter(
+            is_consumed_server=False).order_by('timestamp')
 
 
 class IncomingTransactionViewSet(viewsets.ModelViewSet):
@@ -56,7 +57,8 @@ class IncomingTransactionViewSet(viewsets.ModelViewSet):
     serializer_class = IncomingTransactionSerializer
 
     def filter_queryset(self, queryset):
-        return self.queryset.filter(is_consumed=False)
+        return self.queryset.filter(
+            is_consumed=False, is_ignored=False).order_by('timestamp')
 
 
 class TransactionCountView(APIView):
@@ -72,7 +74,7 @@ class TransactionCountView(APIView):
             is_consumed_server=False,
             is_consumed_middleman=False).count()
         incomingtransaction_count = IncomingTransaction.objects.filter(
-            is_consumed=False).count()
+            is_consumed=False, is_ignored=False).count()
         content = {'outgoingtransaction_count': outgoingtransaction_count,
                    'outgoingtransaction_middleman_count': outgoingtransaction_middleman_count,
                    'incomingtransaction_count': incomingtransaction_count,
@@ -136,7 +138,7 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
     @property
     def ip_address(self):
-        return None
+        return django_apps.get_app_config('edc_sync').server
 
     @property
     def cors_origin_whitelist(self):

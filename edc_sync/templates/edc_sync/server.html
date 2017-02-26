@@ -1,15 +1,20 @@
- <div class="panel-heading">Client Resources
- 	<a id="link-refresh-clients" title="click to refresh" href=""><i id="bdg-refresh-clients" class="fa fa-refresh fa-1x fa-fw pull-right"></i></a>
+<div class="panel panel-default">
+	 <div class="panel-heading">Client Resources
+	 	<a id="link-refresh-clients" title="click to refresh" href=""><i id="bdg-refresh-clients" class="fa fa-refresh fa-1x fa-fw pull-right"></i></a>
+	 </div>
+	 <div id="id-div-resource-alert"></div>
+	 {% if user.is_authenticated %}
+	   <ul id="id-nav-pill-resources" class="nav nav-pills nav-stacked">
+	   </ul>
+	 {% endif %}
+	 <div class="panel-heading">Incoming Transactions
+	 <a id="link-refresh-self" href="">
+	 	<i id="bdg-refresh-self" class="fa fa-refresh fa-1x fa-fw pull-right"></i>
+	 </a>
+	 </div>
+	 {% if user.is_authenticated %}
+	   <ul id="id-nav-pill-apply" class="nav nav-pills nav-stacked" style="text-transform: capitalize;">
+	   </ul>
+	 {% endif %}
  </div>
- <div id="id-div-resource-alert"></div>
- {% if user.is_authenticated %}
-   <ul id="id-nav-pill-resources" class="nav nav-pills nav-stacked">
-   </ul>
- {% endif %}
- <div class="panel-heading">Incoming Transactions
- <a id="link-refresh-self" href=""><i id="bdg-refresh-self" class="fa fa-refresh fa-1x fa-fw pull-right"></i></a>
- </div>
- {% if user.is_authenticated %}
-   <ul id="id-nav-pill-apply" class="nav nav-pills nav-stacked" style="text-transform: capitalize;">
-   </ul>
- {% endif %}
+ 
