@@ -28,11 +28,11 @@ function edcSyncReady(hosts, userName, apiToken, homeUrl) {
 		});
 	});
 
-	updateFromHosts( hosts ); //Pending transactions hosts
-	updateFromHost( server, true ); // Pending incoming transactions count
+	updateFromHosts( hosts ); //Pending transactions client 
+	updateFromHost( server, true ); // Pending incoming transactions count server
 	
 	$( '#id-nav-pill-apply' ).append( '<li><a id="id-link-apply" href="#">Apply Incoming Transactions<span id="bdg-incomingtransaction-count" class="badge pull-right">0</span></a></li>' );
-    $('#bdg-refresh-clients').click( function(e) {
+	$('#bdg-refresh-clients').click( function(e) {
         e.preventDefault();
         updateFromHosts( hosts );
     });
@@ -68,8 +68,8 @@ function processOutgoingTransactions( host, userName ) {
 		var incomingListUrl = '/edc_sync/api/incomingtransaction/'; //Urls[ 'edc-sync:incomingtransaction-list' ]();
 		outgoingtransaction_count = outgoingtransactions.count;
 		outgoingtransaction = outgoingtransactions.results[0];
-		
 		$( '#id-resource-alert-text' ).text( hostAlertText( host, outgoingtransaction_count ) );
+		
 		return $.ajax({
 			url: server + incomingListUrl + '?format=json',
 			type: 'POST',
@@ -102,6 +102,8 @@ function processOutgoingTransactions( host, userName ) {
 	});
 
 	ajPatchOutgoing.done( function ( data ) {
+		var host_string = host.replace( ':', '-' ).split( '.' ).join( '-' );
+		$( '#bdg-outgoingtransaction-count-' + host_string ).text(outgoingtransaction_count);
 		if ( data != null ) {
 			processOutgoingTransactions( host, userName );  //recursive
 		}
@@ -109,7 +111,6 @@ function processOutgoingTransactions( host, userName ) {
 
 	ajGetOutgoing.fail( function( jqXHR, textStatus, errorThrown ) {
 		console.log( textStatus + ': ' + errorThrown );
-		alert(jqXHR.status);
 		$( '#id-resource-alert' ).removeClass( 'alert-success' ).addClass( 'alert-danger' );
 		$( '#id-resource-alert-text' ).text( 'An error has occured while contacting ' +  host  + '. Got ' + errorThrown );
 	});
@@ -120,7 +121,6 @@ function processOutgoingTransactions( host, userName ) {
 	});
 
 	ajPatchOutgoing.fail(function( jqXHR, textStatus, errorThrown ) {
-		alert(jqXHR.status);
 		console.log( textStatus + ': ' + errorThrown + '(on PATCH)');
 		$( '#id-resource-alert-text' ).text( 'Done. Host ' + host + '.');
 	});
@@ -252,9 +252,6 @@ function processIncomingTransactions( homeUrl, userName ) {
 
 		incomingtransaction_count = incomingtransactions.count;
 		incomingtransaction = incomingtransactions.results[0];
-		
-		alert(incomingtransaction.tx_pk);
-		//$( '#id-resource-alert-text' ).text( hostAlertText( host, outgoingtransaction_count ) );
 		var incoming_fields = {
 			'user_modified': userName,
 			'modified': moment().utc().format("YYYY-MM-DDTHH:mm:ss.SSSZZ"),
@@ -277,42 +274,25 @@ function processIncomingTransactions( homeUrl, userName ) {
 	});
 
 	ajPostIncoming.done( function ( data ) {
+
 		var consumedAll = incomingtransaction_count;
-		new_total = data.total
-		alert(new_total);
+		new_total = data.total;
+		$( '#bdg-incomingtransaction-count' ).text( new_total );
 		if ( new_total >  0 ) {
-			alert("Recurse");
 			processIncomingTransactions( homeUrl, userName );  //recursive
-		} else if(total == -1){
-			//
-			alert("Error occurred!");
-			displayProgresStatus( 'id-resource-alert-text', 'Error occurred, playing transactions',  'alert-danger');
-		} else if(consumedAll == 0){
-			//
-			alert("All transactions played!");
-			displayProgresStatus( 'id-resource-alert-text', 'All transactions has been consumed.',  'alert-success');
 		}
+	});
+	
+	ajPostIncoming.fail(function(jqXHR, textStatus, errorThrown) {
+		console.log( textStatus + ': ' + errorThrown );
+		$( '#id-apply-incoming' ).remove();
+		$( '#id-nav-pill-apply').prepend( makeHostAlert( 'id-apply-incoming', server, 'alert-danger' ));
+		$( '#id-apply-incoming' ).removeClass( 'alert-success' ).addClass( 'alert-danger' );
+		error_message = 'An error has occured while contacting ' +  server  + '. Got ' + errorThrown;
+		$( '#id-apply-incoming' ).append( '<span>'+error_message+'</span>' );
 	});
 
 	ajGetIncoming.fail(function(jqXHR, textStatus, errorThrown) {
-		//$("#id-tx-spinner").removeClass( 'fa-spin' );
-		//updateIcon(iconElement, 'error');
-		alert("An error "+errorThrown);
-		//error_message = 'An error consuming transactions:'+server+' Got '+errorThrown;
-		//displayProgresStatus('alert-progess', error_message, 'alert-danger');
+		$( '#bdg-incomingtransaction-count' ).text( '?' );
 	});
-}
-
-function displayProgresStatus(element, message, alert_class) {
-	if (alert_class == 'alert-danger' ) {
-		$( '#'+element ).text( message );
-		$( '#'+element ).removeClass( 'alert-info' ).addClass( 'alert-danger' );	
-	} else if ( alert_class == 'alert-success' ) {
-		$( '#'+element ).text( message );
-		$("#alert-progress-status").removeClass( 'alert-info' ).addClass( 'alert-success' );	
-	} else {
-		$( '#'+element ).text( message );
-		$( '#'+element ).removeClass( 'alert-danger' ).addClass( 'alert-info' );	
-	}
-	$( '#'+element  ).show();
 }
