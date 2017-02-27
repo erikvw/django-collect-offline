@@ -74,7 +74,7 @@ class SyncModel:
         # TODO: i think using should always be default
         OutgoingTransaction = django_apps.get_model('edc_sync', 'OutgoingTransaction')
         created = True if created is None else created
-        action = 'I', self.instance.created if created else 'U'
+        action = 'I' if created else 'U'
         timestamp_datetime = self.instance.created if created else self.instance.modified
         if not timestamp_datetime:
             timestamp_datetime = get_utcnow()
