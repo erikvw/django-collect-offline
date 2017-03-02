@@ -22,6 +22,10 @@ function edcSyncReady(server, userName, apiToken) {
         e.preventDefault();
         dumpTransactionFile(server , userName);
     });
+
+    $( '#btn-approve' ).click( function(e) {
+    	saveApproval();
+    });
 }
 
 function File (filename, filesize, index) {
@@ -77,14 +81,14 @@ function sendTransactionFile(file) {
 		processData: true,
 		data: {
 			'action': 'transfer_transaction_file',
-			'file': file.filename
+			'filename': file.filename,
 		},
 	});
 	
 	ajSendFile.done( function( data ) {
 		updateIcon(file.index, 'success');
 		$.each(window.fileObjs, function(index, fileObj) {
-			if(fileObj.index == file.index ){
+			if(fileObj.index == file.index ) {
 				fileObj.isSend  = true;
 				window.fileObjs[index] = fileObj;
 				return false;
@@ -100,15 +104,17 @@ function sendTransactionFile(file) {
 		});
 		if (tmpObj != null) {
 			sendTransactionFile(tmpObj);
+		} else {
+			$( "#btn-progress" ).click();
+			$( '#progress-status-div' ).
 		}
 	});
 
 	ajSendFile.then( function() {
-		//
+		monitorFileSending( file );
 	});
 	
 	ajSendFile.fail( function( jqXHR, textStatus, errorThrown ) {
-		alert("Got an error" + errorThrown);
 		updateIcon(file.index, 'error');
 //		$( '#id-sync-status' ).removeClass( 'alert-success' ).addClass( 'alert-danger' );
 //		$( '#id-sync-status' ).text( 'An error occurred. Got ' + errorThrown);
@@ -127,9 +133,14 @@ function monitorFileSending( file ) {
 
 	ajTransferingFileProgress.done( function( data ) {
 		//currentRowElement.find( "td" ).eq( 3 ).text( data.progress );
+		//alert(data.progress);
+		//alert(data.progress);
+		$( "tr:eq( " +file.index+ " )" ).find('td:eq(3)').html("<span>100%. sent.</span>");
+		//console.log(data.progress);
 	});
-	ajTransferingFileProgress.fail(function(){
+	ajTransferingFileProgress.fail(function(jqXHR, textStatus, errorThrown) {
 		//alert("Error");
+		//console.log(jqXHR.status, textStatus, errorThrown);
 	});
 }
 
@@ -144,7 +155,7 @@ function updateFromHost( host ) {
 	});
 	ajTransactionCount.done( function ( data ) {
 		if ( data != null ) {
-			$( '#id-pending-transactions').text(' ' + data.outgoingtransaction_count)
+			$( '#id-pending-transactions').text(' ' + data.outgoingtransaction_count);
 			if( data.outgoingtransaction_count == 0 ) {
 				$( '#btn-sync' ).removeClass( 'btn-warning' ).addClass( 'btn-default' );
 			}
@@ -158,5 +169,33 @@ function updateIcon( index, status ) {
 		$( "tr:eq( " +index+ " )" ).find('td:eq(3)').html("<span class='glyphicon glyphicon-saved alert-success'></span>");
 	} else if( status=='error' ) {
 		$( "tr:eq( " +index+ " )" ).find('td:eq(3)').html("<span class='glyphicon glyphicon-remove alert-danger'></span>");
+	}
+}
+
+function saveApproval() {
+	var url = client + '/edc_sync/';
+	files = []
+	
+	$.each(window.fileObjs, function(index, fileObj) {
+		if(fileObj.isSend ==  true) {
+			files.push(fileObj.filename)
+		}
+	});
+	if (files.length > 0) {
+		var ajSaveApproval = $.ajax({
+			url: url,
+			type: 'GET',
+			dataType: 'json',
+			processData: false,
+			data={'files': files.toString()}
+		});
+	
+		ajSaveApproval.fail(function(jqXHR, textStatus, errorThrown) {
+			console.log(jqXHR.status, textStatus, errorThrown);
+		});
+		
+		ajSaveApproval.done( function ( data ) {
+			window.location.href = url;
+		});
 	}
 }

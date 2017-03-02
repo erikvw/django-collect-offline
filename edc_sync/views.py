@@ -176,14 +176,20 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
                 if request.GET.get('action') == 'dump_transaction_file':
                     # dump transactions to a file
                     edc_sync_files_app = django_apps.get_app_config('edc_sync_files')
-                    # export_outgoing_transactions(edc_sync_files_app.source_folder)
+                    export_outgoing_transactions(
+                        edc_sync_files_app.source_folder,
+                        hostname=self.tx_file_manager.host_identifier)
                     response_data.update({
                         'transactionFiles': self.tx_file_manager.file_transfer.files_dict})
                 elif request.GET.get('action') == 'transfer_transaction_file':
+                    self.tx_file_manager.filename = request.GET.get('filename')
                     self.tx_file_manager.send_files()
                 elif request.GET.get('action') == 'get_file_transfer_progress':
                     response_data.update({
                         'progress': self.tx_file_manager.sending_progress})
+                elif request.GET.get('action') == 'approve_files':
+                    files = request.GET.get('files')
+                    self.tx_file_manager.approve_transfer_files(files)
                 return HttpResponse(json.dumps(response_data), content_type='application/json')
         return self.render_to_response(context)
 

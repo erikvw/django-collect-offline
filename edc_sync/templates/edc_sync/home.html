@@ -6,6 +6,7 @@
 
 {{ block.super }}
 
+ 	<script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/file_transfer.js" %}"></script>
    <script type="text/javascript" charset="utf8" src="{% static "django_js_reverse/js/reverse.js" %}"></script>	
   <!-- begin edc_sync extra-scripts -->
   {% if edc_sync_role == 'Server' %}
@@ -16,8 +17,7 @@
 	      });
 	  </script>
   {% elif edc_sync_role == 'Client'  %}
-  <div>sdafhaskhjfahkfahkafhkafhkafhkfahkfshkfhkfhk</div>
- 	 <script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/file_transfer.js" %}"></script>	
+ 	<script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/file_transfer.js" %}"></script>	
 	<script type="text/javascript" charset="utf8" class="init">
 	     $(document).ready( function() {
 	   	  edcSyncReady('{{ ip_address|escapejs }}', '{{ user.username }}', '{{ api_token }}');
