@@ -211,7 +211,7 @@ function updateFromHost( host , isServer) {
 		processData: false,
 	});
 	ajTransactionCount.fail( function ( jqXHR, textStatus, errorThrown ) {
-		alert("Errors "+ jqXHR.status +" Incoming Transactions "+errorThrown);
+		console.log( textStatus + ': ' + errorThrown + '(on GET, count transactions)' );
 	});
 	ajTransactionCount.done( function ( data ) {
 		if ( data != null ) {

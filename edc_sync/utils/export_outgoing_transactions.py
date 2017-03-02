@@ -1,5 +1,5 @@
 import os
-
+from django.conf import settings
 from django.core import serializers
 from django.db import transaction
 
@@ -8,7 +8,7 @@ from edc_base.utils import get_utcnow
 from ..models import OutgoingTransaction
 
 
-def export_outgoing_transactions(path):
+def export_outgoing_transactions(path, hostname=None):
     """Serializes OutgoingTransactions to a file from a netbook to the MIDDLEMAN.
 
     * Updates transactions as consumed by the middleman (is_consumed_middleman = True).
@@ -16,7 +16,10 @@ def export_outgoing_transactions(path):
     """
     exported = 0
     is_consumed_middleman_count = 0
-    path = path or os.path.join('/tmp', 'edc_tx_{}.json'.format(str(get_utcnow().strftime("%Y%m%d%H%M"))))
+    filename = '{}_{}.json'.format(
+        hostname or settings.CURRENT_MAP_AREA,
+        str(get_utcnow().strftime("%Y%m%d%H%M")))
+    path = os.path.join(path, filename) or os.path.join('/tmp', filename)
     try:
         with open(path, 'w') as f:
             outgoing_transactions = OutgoingTransaction.objects.filter(
@@ -28,7 +31,7 @@ def export_outgoing_transactions(path):
             exported = outgoing_transactions.count()
             with transaction.atomic():
                 outgoing_transactions.update(
-                    is_consumed_middleman=True,
+                    is_consumed_server=True,
                     consumer='/'.join(path.split('/')[:-1]),
                     consumed_datetime=get_utcnow())
             is_consumed_middleman_count = exported

@@ -1,11 +1,37 @@
-<div class="panel panel-info">
+<div id='id-transfer-div' class="panel panel-info">
 	<div class="panel-heading">
  		Transactions <div id="id-div-resource-alert"></div><span id="id-tx-spinner" class="fa fa-refresh pull-right"></span>
+ 		<span class="clearfix"></span>
 	</div>
+	<div class="clearfix"></div>
 	<div class="panel-body">
 		<span id="">Pending Transactions</span>
-		<span id="id-pending-transactions" class="badge">10</span>
-		<button id="btn-sync" type="button" class="btn btn-warning pull-right">Sync Data</button>
+		<span id="id-pending-transactions" class="badge">0</span>
+		<button id="btn-sync" type="button" class="btn btn-warning pull-right">Transfer Data</button>
 	</div>
 	<span id="id-sync-status"></span>
  </div>
+ 
+ 
+ <div id='id-in-progress-div' class="panel panel-default" style="display: none">
+	<div class="panel-heading">
+ 		<button id="btn-send-file" type="button" class="btn btn-warning pull-right">Send Transaction File(s)</button>
+ 		<span class="clearfix"></span>
+	</div>
+	<div class='alert alert-warning' style='display:none'>
+ 		File transfer in progress, Please wait. <div id="id-div-resource-alert"></div>
+	</div>
+	<table class="table table-bordered" id='id-file-table'>
+	    <thead>
+	      <tr>
+	      	<th></th>
+	        <th>File</th>
+	        <th>Size</th>
+	        <th>Status</th>
+	      </tr>
+	    </thead>
+	    <tbody>
+	    </tbody>
+	  </table>
+ </div>
+ 

@@ -15,8 +15,9 @@
 	    	  edcSyncReady('{{ hosts|escapejs }}', '{{ user.username }}', '{{ api_token }}', "{% url 'edc_sync:home_url' %}");
 	      });
 	  </script>
-  {% else %}
-	<script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/edc_sync_push.js" %}"></script>
+  {% elif edc_sync_role == 'Client'  %}
+  <div>sdafhaskhjfahkfahkafhkafhkafhkfahkfshkfhkfhk</div>
+ 	 <script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/file_transfer.js" %}"></script>	
 	<script type="text/javascript" charset="utf8" class="init">
 	     $(document).ready( function() {
 	   	  edcSyncReady('{{ ip_address|escapejs }}', '{{ user.username }}', '{{ api_token }}');

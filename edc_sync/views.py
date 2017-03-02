@@ -1,5 +1,7 @@
 import json
 import socket
+import requests
+import os
 
 
 from django.apps import apps as django_apps
@@ -29,6 +31,9 @@ from .edc_sync_view_mixin import EdcSyncViewMixin
 from .models import OutgoingTransaction, IncomingTransaction
 from .serializers import OutgoingTransactionSerializer, IncomingTransactionSerializer
 from .site_sync_models import site_sync_models
+from edc_sync.utils.export_outgoing_transactions import export_outgoing_transactions
+from edc_sync_files.file_transfer import FileTransfer
+from edc_sync_files.transaction_file_manager import TransactionFileManager
 
 
 @api_view(['GET'])
@@ -118,6 +123,8 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
     template_name = 'edc_sync/home.html'
 
+    tx_file_manager = TransactionFileManager()
+
     def __init__(self, *args, **kwargs):
         super(HomeView, self).__init__(*args, **kwargs)
 
@@ -137,6 +144,19 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
         return context
 
     @property
+    def is_server_connected(self):
+        url = 'http://localhost:8000/'  #'http://' + self.ip_address + '/'
+        try:
+            request = requests.get(url, timeout=20)
+            if request.status_code in [200, 301]:
+                return True
+        except requests.ConnectionError as e:
+            print(e)
+        except requests.HTTPError:
+            print(e)
+        return False
+
+    @property
     def ip_address(self):
         return django_apps.get_app_config('edc_sync').server
 
@@ -150,28 +170,21 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
-        data = {}
+        response_data = {}
         if request.is_ajax():
-            if len(list(request.GET.keys())) > 0:
-                data = json.loads(list(request.GET.keys())[0])
-            if data.get('action') == 'apply_incomingtransactions':
-                incoming_transactions = IncomingTransaction.objects.filter(
-                    tx_pk=data.get('tx_pk')
-                )
-                inserted = 0
-                updated = 0
-                deleted = 0
-                for incoming_transaction in incoming_transactions:
-                    inserted, updated, deleted = incoming_transaction.deserialize_transaction(
-                        check_device=False,
-                        check_hostname=False)
-                total = data.get('total')
-                total = total - 1
-                response_data = {
-                    'total': total, 'inserted': inserted, 'updated': updated, 'deleted': deleted}
-            else:
-                response_data = {}
-            return HttpResponse(json.dumps(response_data), content_type='application/json')
+            if self.is_server_connected:
+                if request.GET.get('action') == 'dump_transaction_file':
+                    # dump transactions to a file
+                    edc_sync_files_app = django_apps.get_app_config('edc_sync_files')
+                    # export_outgoing_transactions(edc_sync_files_app.source_folder)
+                    response_data.update({
+                        'transactionFiles': self.tx_file_manager.file_transfer.files_dict})
+                elif request.GET.get('action') == 'transfer_transaction_file':
+                    self.tx_file_manager.send_files()
+                elif request.GET.get('action') == 'get_file_transfer_progress':
+                    response_data.update({
+                        'progress': self.tx_file_manager.sending_progress})
+                return HttpResponse(json.dumps(response_data), content_type='application/json')
         return self.render_to_response(context)
 
     @method_decorator(login_required)
