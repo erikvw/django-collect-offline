@@ -2,6 +2,8 @@ var outgoingListUrl = '/edc_sync/api/outgoingtransaction/'; //Urls[ 'edc_sync:ou
 
 var client = 'http://' + document.location.host
 
+var fileObjs = [];
+
 function edcSyncReady(server, userName, apiToken) {
 	/* Prepare page elements */
 	var csrftoken = Cookies.get('csrftoken');
@@ -22,8 +24,16 @@ function edcSyncReady(server, userName, apiToken) {
     });
 }
 
-function dumpTransactionFile(server , userName) {
+function File (filename, filesize, index) {
+    this.filename = filename;
+    this.filesize = filesize;
+    this.index = index;
+    this.isSend = false;
+    this.active = false;
+}
 
+function dumpTransactionFile(server , userName) {
+	
 	var url = client + '/edc_sync/';
 	var ajDumpFile = $.ajax({
 		url: url,
@@ -32,25 +42,23 @@ function dumpTransactionFile(server , userName) {
 		processData: true,
 		data: {'action': 'dump_transaction_file'},
 	});
-
+	
 	ajDumpFile.done( function ( data ) {
 	
 		$( '#id-transfer-div' ).hide();
 		$( '#id-in-progress-div' ).show();
 		//display files
-		$.each( data.transactionFiles, function(index,  transactionFile  ) {
+		$.each( data.transactionFiles, function(index,  file  ) {
 			index = index + 1;
-			spanElemStatus = "<span id=" + transactionFile.filename + "></span>"
-			$("<tr><td>" + index + "</td><td>" + transactionFile.filename + "</td><td>" + transactionFile.filesize + "</td><td>" + spanElemStatus + "</td></tr>").appendTo("#id-file-table tbody");
+			var txFile = new File(file.filename, file.filesize, index);
+			fileObjs.push(txFile);
+			$("<tr><td>" + index + "</td><td>" + file.filename + "</td><td>" + file.filesize + "</td><td></td></tr>").appendTo("#id-file-table tbody");
 		});
-		// transfer each file
-		var tIndex = 0;
-		$('#id-file-table tbody tr').each( function() {
-		    var filename = $(this).find("td").eq(1).html();
-		    tIndex = tIndex + 1;
-		    $(this).find("td").eq(3).append("<span class='fa fa-spinner fa-spin'></span>");
-		    currentRowElement = $(this);
-		    sendTransactionFile(currentRowElement, filename, tIndex, data.transactionFiles.length - 1 );
+
+		ajDumpFile.then( function() {
+				var firstFile = window.fileObjs[0];
+				$( "tr:eq( " +firstFile.index+ " )" ).find('td:eq(3)').html("<span class='fa fa-spinner fa-spin'></span>");
+				sendTransactionFile(firstFile);
 		});
 	});
 
@@ -60,34 +68,54 @@ function dumpTransactionFile(server , userName) {
 	});
 }
 
-function sendTransactionFile(currentRowElement, filename, tIndex, total) {
+function sendTransactionFile(file) {
 	var url = client + '/edc_sync/';
 	var ajSendFile = $.ajax({
 		url: url,
 		type: 'GET',
 		dataType: 'json ',
 		processData: true,
-		data: {'action': 'transfer_transaction_file', 'file': filename},
+		data: {
+			'action': 'transfer_transaction_file',
+			'file': file.filename
+		},
 	});
 	
-	ajSendFile.done(function(data){
-		updateIcon(currentRowElement, 'success');
+	ajSendFile.done( function( data ) {
+		updateIcon(file.index, 'success');
+		$.each(window.fileObjs, function(index, fileObj) {
+			if(fileObj.index == file.index ){
+				fileObj.isSend  = true;
+				window.fileObjs[index] = fileObj;
+				return false;
+			}
+		});	
+		//
+		var tmpObj = null;
+		$.each(window.fileObjs, function(index, fileObj) { 
+			if(fileObj.isSend == false ){
+				tmpObj = fileObj;
+				return false;
+			}
+		});
+		if (tmpObj != null) {
+			sendTransactionFile(tmpObj);
+		}
 	});
 
-	ajSendFile.then(function() {
-		//Monitor file transfer
-		while (tIndex < total + 1) {
-			monitorFileSending(currentRowElement, tIndex, total);
-		}
+	ajSendFile.then( function() {
+		//
 	});
 	
 	ajSendFile.fail( function( jqXHR, textStatus, errorThrown ) {
-		updateIcon(currentRowElement, 'error');
-		$( '#id-sync-status' ).removeClass( 'alert-success' ).addClass( 'alert-danger' );
-		$( '#id-sync-status' ).text( 'An error occurred. Got ' + errorThrown);
+		alert("Got an error" + errorThrown);
+		updateIcon(file.index, 'error');
+//		$( '#id-sync-status' ).removeClass( 'alert-success' ).addClass( 'alert-danger' );
+//		$( '#id-sync-status' ).text( 'An error occurred. Got ' + errorThrown);
 	});
 }
-function monitorFileSending( currentRowElement ) {
+
+function monitorFileSending( file ) {
 	var url = client + '/edc_sync/';
 	var ajTransferingFileProgress = $.ajax({
 		url: url,
@@ -98,10 +126,10 @@ function monitorFileSending( currentRowElement ) {
 	});
 
 	ajTransferingFileProgress.done( function( data ) {
-		currentRowElement.find( "td" ).eq( 3 ).text( data.progress );
+		//currentRowElement.find( "td" ).eq( 3 ).text( data.progress );
 	});
 	ajTransferingFileProgress.fail(function(){
-		alert("Error");
+		//alert("Error");
 	});
 }
 
@@ -124,11 +152,11 @@ function updateFromHost( host ) {
 	});
 }
 
-function updateIcon( currentRowElement, status ) {
+function updateIcon( index, status ) {
 
 	if ( status == 'success' ) {
-		currentRowElement.find("td").eq(3).html("<span class='glyphicon glyphicon-saved alert-success'></span>");
+		$( "tr:eq( " +index+ " )" ).find('td:eq(3)').html("<span class='glyphicon glyphicon-saved alert-success'></span>");
 	} else if( status=='error' ) {
-		currentRowElement.find("td").eq(3).html("<span class='glyphicon glyphicon-remove alert-danger'></span>");
+		$( "tr:eq( " +index+ " )" ).find('td:eq(3)').html("<span class='glyphicon glyphicon-remove alert-danger'></span>");
 	}
 }
