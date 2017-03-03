@@ -63,7 +63,8 @@ function dumpTransactionFile(server , userName) {
 				index = index + 1;
 				var txFile = new File(file.filename, file.filesize, index);
 				fileObjs.push(txFile);
-				$("<tr><td>" + index + "</td><td>" + file.filename + "</td><td>" + file.filesize + "</td><td></td></tr>").appendTo("#id-file-table tbody");
+				var spanFile = "<span class='glyphicon glyphicon-level-up'></span>";
+				$("<tr><td>" + index + "</td><td>" + spanFile +" "+ file.filename + "</td><td>" + file.filesize + "</td><td></td></tr>").appendTo("#id-file-table tbody");
 			});
 	
 			ajDumpFile.then( function() {
@@ -122,6 +123,17 @@ function sendTransactionFile(file) {
 			$( '#btn-sync').prop( "disabled", false );
 			$( '#progress-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-success' );
 			$( '#progress-status-div' ).text('Completed.');
+			$( '#btn-approve' ).removeClass( 'btn-default' ).addClass( 'btn-warning' );
+			$.each(window.fileObjs, function( index, fileObj ) {
+				if(fileObj.isSend ==  true) {
+					index = index + 1;
+					//display files
+					var spanFile = "<span class='glyphicon glyphicon-level-up'></span>";
+					var spanOK = "<span class='glyphicon glyphicon-ok'></span>";
+					$("<tr><td>" + index + "</td><td> " + spanFile + " "+fileObj.filename + ", "+ fileObj.filesize+"</td><td>"+spanOK+"</td></tr>").appendTo("#id-file-table-confirmation tbody");
+				}
+				
+			});
 		}
 	});
 
@@ -205,7 +217,8 @@ function saveApproval() {
 			type: 'GET',
 			dataType: 'json',
 			processData: true,
-			data:{'files': files.toString()}
+			data:{'files': files.toString(),
+				  'action': 'approve_files'}
 		});
 	
 		ajSaveApproval.fail(function(jqXHR, textStatus, errorThrown) {
