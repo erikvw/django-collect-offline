@@ -156,6 +156,8 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
             print(e)
         except requests.HTTPError:
             print(e)
+        except:
+            pass
         return False
 
     @property
@@ -188,10 +190,12 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
                     self.tx_file_manager.send_files()
                 elif request.GET.get('action') == 'get_file_transfer_progress':
                     response_data.update({
-                        'progress': self.tx_file_manager.sending_progress})
+                        'progress': self.tx_file_manager.file_transfer_progress})
                 elif request.GET.get('action') == 'approve_files':
                     files = request.GET.get('files')
-                    self.tx_file_manager.approve_transfer_files(files)
+                    if files:
+                        files = files.split(',')
+                        self.tx_file_manager.approve_transfer_files(files)
             else:
                 host = django_apps.get_app_config(
                     'edc_sync_files').host
