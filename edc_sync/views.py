@@ -154,7 +154,6 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
                 return True
         except requests.ConnectionError as e:
             print(e)
-            return False
         except requests.HTTPError:
             print(e)
         return False
@@ -173,7 +172,7 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
-        response_data = {}
+        response_data = {'network_error': False}
         if request.is_ajax():
             if self.is_server_connected:
                 if request.GET.get('action') == 'dump_transaction_file':

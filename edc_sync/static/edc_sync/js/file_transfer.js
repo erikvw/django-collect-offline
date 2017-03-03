@@ -120,6 +120,8 @@ function sendTransactionFile(file) {
 		} else {
 			$( "#btn-progress" ).click();
 			$( '#btn-sync').prop( "disabled", false );
+			$( '#progress-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-success' );
+			$( '#progress-status-div' ).text('Completed.');
 		}
 	});
 
@@ -129,6 +131,8 @@ function sendTransactionFile(file) {
 	
 	ajSendFile.fail( function( jqXHR, textStatus, errorThrown ) {
 		updateIcon(file.index, 'error');
+		$( '#progress-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-danger' );
+		$( '#progress-status-div' ).text('An error occurred. Got ' + errorThrown + '. Status '+ jqXHR.status);
 //		$( '#id-sync-status' ).removeClass( 'alert-success' ).addClass( 'alert-danger' );
 //		$( '#id-sync-status' ).text( 'An error occurred. Got ' + errorThrown);
 	});

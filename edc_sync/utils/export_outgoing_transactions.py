@@ -16,14 +16,16 @@ def export_outgoing_transactions(path, hostname=None):
     """
     exported = 0
     is_consumed_middleman_count = 0
+    print(hostname, "hostname hostname hostname", str(get_utcnow().strftime("%Y%m%d%H%M")))
     filename = '{}_{}.json'.format(
-        hostname or settings.CURRENT_MAP_AREA,
+        hostname,
         str(get_utcnow().strftime("%Y%m%d%H%M")))
+    print(filename, "filename filename filename")
     path = os.path.join(path, filename) or os.path.join('/tmp', filename)
     try:
         with open(path, 'w') as f:
             outgoing_transactions = OutgoingTransaction.objects.filter(
-                is_consumed_server=False, is_consumed_middleman=False)
+                is_consumed_server=False)
             json_txt = serializers.serialize(
                 "json", outgoing_transactions, ensure_ascii=True, use_natural_foreign_keys=True,
                 use_natural_primary_keys=False)
