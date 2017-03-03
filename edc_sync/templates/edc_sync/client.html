@@ -1,15 +1,18 @@
+<div id='id-transfer-status-div' class="alert alert-danger" style="display:none">
+	Your machine is not connected to the server. Check your network connectivity.
+</div>
 <div id='id-transfer-div' class="panel panel-info">
 	<div class="panel-heading">
  		Transactions <div id="id-div-resource-alert"></div><span id="id-tx-spinner" class="fa fa-refresh pull-right"></span>
- 		<span class="clearfix"></span>
 	</div>
 	<div class="clearfix"></div>
 	<div class="panel-body">
-		<span id="">Pending Transactions</span>
-		<span id="id-pending-transactions" class="badge">0</span>
-		<button id="btn-sync" type="button" class="btn btn-warning pull-right">Transfer Data</button>
+		<p>
+			<span id="">Pending Transactions</span>
+			<span id="id-pending-transactions" class="badge">0</span>
+			<button id="btn-sync" type="button" class="btn btn-warning pull-right">Transfer Data</button>
+		</p>
 	</div>
-	<span id="id-sync-status"></span>
  </div>
  
  
@@ -47,7 +50,7 @@
           <h4 class="modal-title">Confirmation</h4>
         </div>
         <div class="modal-body">
-          <p>.....</p>
+          <p id="id-confirmation"></p>
         </div>
         <div class="modal-footer">
           <button type="button" id="btn-approve" class="btn btn-default">Approve</button> <!-- data-dismiss="modal" -->

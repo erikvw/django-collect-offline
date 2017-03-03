@@ -145,13 +145,16 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
     @property
     def is_server_connected(self):
-        url = 'http://localhost:8000/'  #'http://' + self.ip_address + '/'
+        host = django_apps.get_app_config(
+            'edc_sync_files').host
+        url = 'http://' + host + '/'
         try:
-            request = requests.get(url, timeout=20)
+            request = requests.get(url, timeout=3)
             if request.status_code in [200, 301]:
                 return True
         except requests.ConnectionError as e:
             print(e)
+            return False
         except requests.HTTPError:
             print(e)
         return False
@@ -190,7 +193,14 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
                 elif request.GET.get('action') == 'approve_files':
                     files = request.GET.get('files')
                     self.tx_file_manager.approve_transfer_files(files)
-                return HttpResponse(json.dumps(response_data), content_type='application/json')
+            else:
+                host = django_apps.get_app_config(
+                    'edc_sync_files').host
+                response_data.update(
+                    {'network_error': True,
+                     'host': host}
+                )
+            return HttpResponse(json.dumps(response_data), content_type='application/json')
         return self.render_to_response(context)
 
     @method_decorator(login_required)

@@ -5,8 +5,6 @@
 {% block extra-scripts %}
 
 {{ block.super }}
-
- 	<script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/file_transfer.js" %}"></script>
    <script type="text/javascript" charset="utf8" src="{% static "django_js_reverse/js/reverse.js" %}"></script>	
   <!-- begin edc_sync extra-scripts -->
   {% if edc_sync_role == 'Server' %}

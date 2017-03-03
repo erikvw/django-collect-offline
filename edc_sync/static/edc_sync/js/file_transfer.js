@@ -20,6 +20,10 @@ function edcSyncReady(server, userName, apiToken) {
 	updateFromHost( client );
     $('#btn-sync').click( function(e) {
         e.preventDefault();
+        $( '#id-transfer-status-div' ).show();
+    	$( '#id-transfer-status-div' ).text( 'Connecting to the server. Please wait!' );
+    	$( '#id-transfer-status-div' ).removeClass( 'alert-danger' ).addClass( 'alert-warning' );
+        $(this).prop("disabled",true);
         dumpTransactionFile(server , userName);
     });
 
@@ -37,7 +41,7 @@ function File (filename, filesize, index) {
 }
 
 function dumpTransactionFile(server , userName) {
-	
+
 	var url = client + '/edc_sync/';
 	var ajDumpFile = $.ajax({
 		url: url,
@@ -48,22 +52,31 @@ function dumpTransactionFile(server , userName) {
 	});
 	
 	ajDumpFile.done( function ( data ) {
+		if(data.network_error == false) {
+			$( '#id-transfer-div' ).hide();
+			$( '#id-in-progress-div' ).show();
+			$( '#id-transfer-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-success' );
+			$( '#id-transfer-status-div' ).text('Connected to the server.')
+			
+			//display files
+			$.each( data.transactionFiles, function(index,  file  ) {
+				index = index + 1;
+				var txFile = new File(file.filename, file.filesize, index);
+				fileObjs.push(txFile);
+				$("<tr><td>" + index + "</td><td>" + file.filename + "</td><td>" + file.filesize + "</td><td></td></tr>").appendTo("#id-file-table tbody");
+			});
 	
-		$( '#id-transfer-div' ).hide();
-		$( '#id-in-progress-div' ).show();
-		//display files
-		$.each( data.transactionFiles, function(index,  file  ) {
-			index = index + 1;
-			var txFile = new File(file.filename, file.filesize, index);
-			fileObjs.push(txFile);
-			$("<tr><td>" + index + "</td><td>" + file.filename + "</td><td>" + file.filesize + "</td><td></td></tr>").appendTo("#id-file-table tbody");
-		});
-
-		ajDumpFile.then( function() {
-				var firstFile = window.fileObjs[0];
-				$( "tr:eq( " +firstFile.index+ " )" ).find('td:eq(3)').html("<span class='fa fa-spinner fa-spin'></span>");
-				sendTransactionFile(firstFile);
-		});
+			ajDumpFile.then( function() {
+					var firstFile = window.fileObjs[0];
+					$( "tr:eq( " +firstFile.index+ " )" ).find('td:eq(3)').html("<span class='fa fa-spinner fa-spin'></span>");
+					sendTransactionFile(firstFile);
+			});
+		} else {
+			$( '#btn-sync').prop( "disabled", false );
+			$( '#id-transfer-status-div' ).show();
+			$( '#id-transfer-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-danger' );
+			$( '#id-transfer-status-div' ).text('Your machine is not connected to the server:'+data.host+'. Check your network connectivity.')
+		}
 	});
 
 	ajDumpFile.fail( function( jqXHR, textStatus, errorThrown ) {
@@ -82,7 +95,7 @@ function sendTransactionFile(file) {
 		data: {
 			'action': 'transfer_transaction_file',
 			'filename': file.filename,
-		},
+		}
 	});
 	
 	ajSendFile.done( function( data ) {
@@ -106,7 +119,7 @@ function sendTransactionFile(file) {
 			sendTransactionFile(tmpObj);
 		} else {
 			$( "#btn-progress" ).click();
-			$( '#progress-status-div' ).
+			$( '#btn-sync').prop( "disabled", false );
 		}
 	});
 
@@ -174,20 +187,21 @@ function updateIcon( index, status ) {
 
 function saveApproval() {
 	var url = client + '/edc_sync/';
-	files = []
+	var files = [];
 	
-	$.each(window.fileObjs, function(index, fileObj) {
+	$.each(window.fileObjs, function( index, fileObj ) {
 		if(fileObj.isSend ==  true) {
 			files.push(fileObj.filename)
 		}
 	});
-	if (files.length > 0) {
+
+	if ( files.length > 0 ) {
 		var ajSaveApproval = $.ajax({
 			url: url,
 			type: 'GET',
 			dataType: 'json',
-			processData: false,
-			data={'files': files.toString()}
+			processData: true,
+			data:{'files': files.toString()}
 		});
 	
 		ajSaveApproval.fail(function(jqXHR, textStatus, errorThrown) {
