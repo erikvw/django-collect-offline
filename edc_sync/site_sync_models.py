@@ -9,6 +9,7 @@ from .exceptions import AlreadyRegistered
 
 class M:
     """Simple class to display models with sync attribute as True or False."""
+
     def __init__(self, app_label, model_name, is_sync_model=None):
         self.sync = is_sync_model
         self.app_label, self.model_name = app_label, model_name
@@ -41,9 +42,11 @@ class SiteSyncModels:
             name = name.lower()
             if name not in self.registry:
                 self.registry.update({name: SyncModel})
-                self.registry.update({'.historical'.join(name.split('.')): SyncModel})
+                self.registry.update(
+                    {'.historical'.join(name.split('.')): SyncModel})
             else:
-                raise AlreadyRegistered('Model is already registered for synchronization. Got {}.'.format(name))
+                raise AlreadyRegistered(
+                    'Model is already registered for synchronization. Got {}.'.format(name))
 
     def get_as_sync_model(self, instance):
         """Returns a model instance wrapped with Sync methods."""
@@ -87,9 +90,11 @@ class SiteSyncModels:
             try:
                 mod = import_module(app)
                 try:
-                    before_import_registry = copy.copy(site_sync_models.registry)
+                    before_import_registry = copy.copy(
+                        site_sync_models.registry)
                     import_module('{}.{}'.format(app, module_name))
-                    sys.stdout.write(' * registered models from \'{}\'.\n'.format(app))
+                    sys.stdout.write(
+                        ' * registered models from \'{}\'.\n'.format(app))
                 except Exception as e:
                     if 'No module named \'{}.{}\''.format(app, module_name) not in str(e):
                         raise Exception(e)
