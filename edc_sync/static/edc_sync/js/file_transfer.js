@@ -30,6 +30,8 @@ function edcSyncReady(server, userName, apiToken) {
     $( '#btn-approve' ).click( function(e) {
     	saveApproval();
     });
+
+    $('#element').popover('toggle');
 }
 
 function File (filename, filesize, index) {
@@ -52,7 +54,7 @@ function dumpTransactionFile(server , userName) {
 	});
 	
 	ajDumpFile.done( function ( data ) {
-		if(data.network_error == false) {
+		if(data.error == false) {
 			$( '#id-transfer-div' ).hide();
 			$( '#id-in-progress-div' ).show();
 			$( '#id-transfer-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-success' );
@@ -76,7 +78,11 @@ function dumpTransactionFile(server , userName) {
 			$( '#btn-sync').prop( "disabled", false );
 			$( '#id-transfer-status-div' ).show();
 			$( '#id-transfer-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-danger' );
-			$( '#id-transfer-status-div' ).text('Your machine is not connected to the server:'+data.host+'. Check your network connectivity.')
+			var error = "";
+			$.each( data.messages, function(index,  message  ) {
+				error = message.error.network
+			});
+			$( '#id-transfer-status-div' ).text('Network Error, unable to connect to the server. Got '+error);
 		}
 	});
 
@@ -100,40 +106,54 @@ function sendTransactionFile(file) {
 	});
 	
 	ajSendFile.done( function( data ) {
-		updateIcon(file.index, 'success');
-		$.each(window.fileObjs, function(index, fileObj) {
-			if(fileObj.index == file.index ) {
-				fileObj.isSend  = true;
-				window.fileObjs[index] = fileObj;
-				return false;
-			}
-		});	
-		//
-		var tmpObj = null;
-		$.each(window.fileObjs, function(index, fileObj) { 
-			if(fileObj.isSend == false ){
-				tmpObj = fileObj;
-				return false;
-			}
-		});
-		if (tmpObj != null) {
-			sendTransactionFile(tmpObj);
-		} else {
-			$( "#btn-progress" ).click();
-			$( '#btn-sync').prop( "disabled", false );
-			$( '#progress-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-success' );
-			$( '#progress-status-div' ).text('Completed.');
-			$( '#btn-approve' ).removeClass( 'btn-default' ).addClass( 'btn-warning' );
-			$.each(window.fileObjs, function( index, fileObj ) {
-				if(fileObj.isSend ==  true) {
-					index = index + 1;
-					//display files
-					var spanFile = "<span class='glyphicon glyphicon-level-up'></span>";
-					var spanOK = "<span class='glyphicon glyphicon-ok'></span>";
-					$("<tr><td>" + index + "</td><td> " + spanFile + " "+fileObj.filename + ", "+ fileObj.filesize+"</td><td>"+spanOK+"</td></tr>").appendTo("#id-file-table-confirmation tbody");
+		if(data.error == false) {
+			updateIcon(file.index, 'success');
+			$.each(window.fileObjs, function(index, fileObj) {
+				if(fileObj.index == file.index ) {
+					fileObj.isSend  = true;
+					window.fileObjs[index] = fileObj;
+					return false;
 				}
-				
+			});	
+			//
+			var tmpObj = null;
+			$.each(window.fileObjs, function(index, fileObj) { 
+				if(fileObj.isSend == false ){
+					tmpObj = fileObj;
+					return false;
+				}
 			});
+			if (tmpObj != null) {
+				sendTransactionFile(tmpObj);
+			} else {
+				$( "#btn-progress" ).click();
+				$( '#btn-sync').prop( "disabled", false );
+				$( '#progress-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-success' );
+				$( '#progress-status-div' ).text('Completed.');
+				$( '#btn-approve' ).removeClass( 'btn-default' ).addClass( 'btn-warning' );
+				$.each(window.fileObjs, function( index, fileObj ) {
+					if(fileObj.isSend ==  true) {
+						index = index + 1;
+						//display files
+						var spanFile = "<span class='glyphicon glyphicon-level-up'></span>";
+						var spanOK = "<span class='glyphicon glyphicon-ok'></span>";
+						$("<tr><td>" + index + "</td><td> " + spanFile + " "+fileObj.filename + ", "+ fileObj.filesize+"</td><td>"+spanOK+"</td></tr>").appendTo("#id-file-table-confirmation tbody");
+					}
+					
+				});
+			}
+		} else {
+			updateIcon(file.index, 'error');
+			var error = "";
+			$.each( data.messages, function(index,  message  ) {
+				try {
+					error = message.error.permission;
+				} catch(err) {
+					
+				}
+			});
+			$( '#progress-status-div' ).text('An error occured. Got ' + error);
+			$( '#progress-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-danger' );
 		}
 	});
 
@@ -222,7 +242,10 @@ function saveApproval() {
 		});
 	
 		ajSaveApproval.fail(function(jqXHR, textStatus, errorThrown) {
+			$( '#progress-status-div' ).text('An error occured. Got ' + error);
+			$( '#progress-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-danger' );
 			console.log(jqXHR.status, textStatus, errorThrown);
+			$('#progressModel').modal('hide');
 		});
 		
 		ajSaveApproval.done( function ( data ) {

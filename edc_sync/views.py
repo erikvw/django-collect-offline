@@ -32,8 +32,8 @@ from .models import OutgoingTransaction, IncomingTransaction
 from .serializers import OutgoingTransactionSerializer, IncomingTransactionSerializer
 from .site_sync_models import site_sync_models
 from edc_sync.utils.export_outgoing_transactions import export_outgoing_transactions
-from edc_sync_files.file_transfer import FileTransfer
-from edc_sync_files.transaction_file_manager import TransactionFileManager
+from edc_sync_files.classes import TransactionFileManager
+from edc_sync_files.classes import transaction_messages
 
 
 @api_view(['GET'])
@@ -144,23 +144,6 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
         return context
 
     @property
-    def is_server_connected(self):
-        host = django_apps.get_app_config(
-            'edc_sync_files').host
-        url = 'http://' + host + '/'
-        try:
-            request = requests.get(url, timeout=3)
-            if request.status_code in [200, 301]:
-                return True
-        except requests.ConnectionError as e:
-            print(e)
-        except requests.HTTPError:
-            print(e)
-        except:
-            pass
-        return False
-
-    @property
     def ip_address(self):
         return django_apps.get_app_config('edc_sync').server
 
@@ -174,20 +157,34 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
-        response_data = {'network_error': False}
+        response_data = {
+            'error': False,
+            'messages': transaction_messages.messages()}
         if request.is_ajax():
-            if self.is_server_connected:
+            connected = self.tx_file_manager.is_server_available()
+            if connected:
                 if request.GET.get('action') == 'dump_transaction_file':
                     # dump transactions to a file
                     edc_sync_files_app = django_apps.get_app_config('edc_sync_files')
-                    export_outgoing_transactions(
+                    result = export_outgoing_transactions(
                         edc_sync_files_app.source_folder,
-                        hostname=self.tx_file_manager.host_identifier)
-                    response_data.update({
-                        'transactionFiles': self.tx_file_manager.file_transfer.files_dict})
+                        hostname=self.tx_file_manager.device_id)
+                    if result:
+                        response_data.update({
+                            'transactionFiles': self.tx_file_manager.file_transfer.files_dict,
+                            'messages': transaction_messages.messages()
+                        })
+                    else:
+                        response_data.update({
+                            'messages': transaction_messages.messages(),
+                            'error': True})
                 elif request.GET.get('action') == 'transfer_transaction_file':
                     self.tx_file_manager.filename = request.GET.get('filename')
-                    self.tx_file_manager.send_files()
+                    sent, archived = self.tx_file_manager.send_files()
+                    if not (sent or archived):
+                        response_data.update({
+                            'messages': transaction_messages.messages(),
+                            'error': True})
                 elif request.GET.get('action') == 'get_file_transfer_progress':
                     response_data.update({
                         'progress': self.tx_file_manager.file_transfer_progress})
@@ -199,10 +196,12 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
             else:
                 host = django_apps.get_app_config(
                     'edc_sync_files').host
-                response_data.update(
-                    {'network_error': True,
-                     'host': host}
-                )
+                response_data.update({
+                    'error': True,
+                    'host': host,
+                    'messages': transaction_messages.messages(),
+                })
+            print(transaction_messages.messages())
             return HttpResponse(json.dumps(response_data), content_type='application/json')
         return self.render_to_response(context)
 
