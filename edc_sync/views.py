@@ -34,6 +34,7 @@ from .site_sync_models import site_sync_models
 from edc_sync.utils.export_outgoing_transactions import export_outgoing_transactions
 from edc_sync_files.classes import TransactionFileManager
 from edc_sync_files.classes import transaction_messages
+from edc_sync_files.models import History
 
 
 @api_view(['GET'])
@@ -125,6 +126,9 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
     tx_file_manager = TransactionFileManager()
 
+    def recent_sent_transactions(self):
+        return History.objects.all().order_by('created')[:20]
+
     def __init__(self, *args, **kwargs):
         super(HomeView, self).__init__(*args, **kwargs)
 
@@ -138,6 +142,7 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
             cors_origin_whitelist=self.cors_origin_whitelist,
             hostname=socket.gethostname(),
             ip_address=self.ip_address,
+            recent_sent_tx=self.recent_sent_transactions(),
             site_models=site_sync_models.site_models,
             base_template_name=app_config.base_template_name,
         )

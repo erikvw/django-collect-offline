@@ -34,6 +34,7 @@
 	  </table>
  </div>
  
+ {% if recent_sent_tx %}
   <div id='id-history' class="panel panel-success">
 	<div class='alert alert-success' id="progress-status-div-hist">
  		Recent Transactions Sent to the Server. <div id="id-div-resource-alert-hist"></div>
@@ -43,15 +44,24 @@
 	      <tr>
 	      	<th></th>
 	        <th>File</th>
-	        <th>Size</th>
+	        <th>Sent Date Time</th>
 	        <th>Status</th>
 	      </tr>
 	    </thead>
 	    <tbody>
+	    {% for history in recent_sent_tx %}
+	      <tr>
+	      	<th></th>
+	        <th>{{history.filename}}</th>
+	        <th>{{history.sent_datetime}}</th>
+	        <th></th>
+	      </tr>
+	       {% endfor %}
 	    </tbody>
 	  </table>
  </div>
- 
+ {% endif %}
+
  <div class="container">
   <!-- Trigger the modal with a button -->
   <button id="btn-progress" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#progressModel" style="display:none"></button>
