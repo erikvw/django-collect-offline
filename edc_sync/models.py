@@ -79,6 +79,10 @@ class OutgoingTransaction(TransactionMixin, BaseUuidModel):
 
     """ Transactions produced locally to be consumed/sent to a queue or consumer. """
 
+    previous_tx_pk = models.CharField(max_length=100, null=True)
+
+    current_tx_pk = models.CharField(max_length=100, null=True)
+
     is_consumed_middleman = models.BooleanField(
         default=False)
 
