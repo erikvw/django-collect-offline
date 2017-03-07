@@ -28,6 +28,7 @@ setup(
         'django-js-reverse',
         'django-cors-headers',
         'requests',
+        'Faker',
     ],
     classifiers=[
         'Environment :: Web Environment',

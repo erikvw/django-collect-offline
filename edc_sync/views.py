@@ -31,7 +31,8 @@ from .edc_sync_view_mixin import EdcSyncViewMixin
 from .models import OutgoingTransaction, IncomingTransaction
 from .serializers import OutgoingTransactionSerializer, IncomingTransactionSerializer
 from .site_sync_models import site_sync_models
-from edc_sync.utils.export_outgoing_transactions import export_outgoing_transactions
+from edc_sync.utils.transaction_tx_pk import previous_tx_pk_and_next_tx_pk
+from edc_sync_files.classes import TransactionFile
 from edc_sync_files.classes import TransactionFileManager
 from edc_sync_files.classes import transaction_messages
 from edc_sync_files.models import History
@@ -171,9 +172,12 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
                 if request.GET.get('action') == 'dump_transaction_file':
                     # dump transactions to a file
                     edc_sync_files_app = django_apps.get_app_config('edc_sync_files')
-                    result = export_outgoing_transactions(
-                        edc_sync_files_app.source_folder,
-                        hostname=self.tx_file_manager.device_id)
+                    previous_tx_pk, current_tx_pk = previous_tx_pk_and_next_tx_pk()
+                    outgoing_transactions = OutgoingTransaction.objects.filter(
+                        is_consumed_server=False)
+                    _, result, _ = TransactionFile(edc_sync_files_app.source_folder).export_to_json(
+                        outgoing_transactions, self.tx_file_manager.device_id,
+                        previous_tx_pk, current_tx_pk)
                     if result:
                         response_data.update({
                             'transactionFiles': self.tx_file_manager.file_transfer.files_dict,
