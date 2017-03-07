@@ -3,9 +3,8 @@ import socket
 from django.apps import apps as django_apps
 from django.core import serializers
 from django.db import models, transaction
-from django.db.utils import IntegrityError
 
-from edc_base.model.models import BaseUuidModel
+from edc_base.model_mixins import BaseUuidModel
 from edc_base.utils import get_utcnow
 
 from .exceptions import SyncError
@@ -40,7 +39,8 @@ class IncomingTransaction(TransactionMixin, BaseUuidModel):
                     'Incoming transactions exist that are from this host.')
             elif commit:
                 if self.action == 'D':
-                    deleted += self._deserialize_delete_tx(deserialized_object) or 0
+                    deleted += self._deserialize_delete_tx(
+                        deserialized_object) or 0
                 elif self.action == 'I':
                     inserted += self._deserialize_insert_tx(
                         deserialized_object)

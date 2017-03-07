@@ -6,9 +6,9 @@ from django.db import migrations, models
 import django.utils.timezone
 import django_extensions.db.fields
 import django_revision.revision_field
-import edc_base.model.fields.hostname_modification_field
-import edc_base.model.fields.userfield
-import edc_base.model.fields.uuid_auto_field
+import edc_base.model_fields.hostname_modification_field
+import edc_base.model_fields.userfield
+import edc_base.model_fields.uuid_auto_field
 
 
 class Migration(migrations.Migration):
@@ -23,12 +23,12 @@ class Migration(migrations.Migration):
             fields=[
                 ('created', django_extensions.db.fields.CreationDateTimeField(auto_now_add=True, verbose_name='created')),
                 ('modified', django_extensions.db.fields.ModificationDateTimeField(auto_now=True, verbose_name='modified')),
-                ('user_created', edc_base.model.fields.userfield.UserField(editable=False, max_length=50, verbose_name='user created')),
-                ('user_modified', edc_base.model.fields.userfield.UserField(editable=False, max_length=50, verbose_name='user modified')),
+                ('user_created', edc_base.model_fields.userfield.UserField(editable=False, max_length=50, verbose_name='user created')),
+                ('user_modified', edc_base.model_fields.userfield.UserField(editable=False, max_length=50, verbose_name='user modified')),
                 ('hostname_created', models.CharField(default='mac2-2.local', editable=False, help_text='System field. (modified on create only)', max_length=50)),
-                ('hostname_modified', edc_base.model.fields.hostname_modification_field.HostnameModificationField(editable=False, help_text='System field. (modified on every save)', max_length=50)),
+                ('hostname_modified', edc_base.model_fields.hostname_modification_field.HostnameModificationField(editable=False, help_text='System field. (modified on every save)', max_length=50)),
                 ('revision', django_revision.revision_field.RevisionField(blank=True, editable=False, help_text='System field. Git repository tag:branch:commit.', max_length=75, null=True, verbose_name='Revision')),
-                ('id', edc_base.model.fields.uuid_auto_field.UUIDAutoField(blank=True, editable=False, help_text='System auto field. UUID primary key.', primary_key=True, serialize=False)),
+                ('id', edc_base.model_fields.uuid_auto_field.UUIDAutoField(blank=True, editable=False, help_text='System auto field. UUID primary key.', primary_key=True, serialize=False)),
                 ('filename', models.CharField(max_length=100, unique=True)),
                 ('hostname', models.CharField(max_length=100)),
                 ('sent_datetime', models.DateTimeField(default=django.utils.timezone.now)),
@@ -45,22 +45,22 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='client',
             name='id',
-            field=edc_base.model.fields.uuid_auto_field.UUIDAutoField(blank=True, editable=False, help_text='System auto field. UUID primary key.', primary_key=True, serialize=False),
+            field=edc_base.model_fields.uuid_auto_field.UUIDAutoField(blank=True, editable=False, help_text='System auto field. UUID primary key.', primary_key=True, serialize=False),
         ),
         migrations.AlterField(
             model_name='incomingtransaction',
             name='id',
-            field=edc_base.model.fields.uuid_auto_field.UUIDAutoField(blank=True, editable=False, help_text='System auto field. UUID primary key.', primary_key=True, serialize=False),
+            field=edc_base.model_fields.uuid_auto_field.UUIDAutoField(blank=True, editable=False, help_text='System auto field. UUID primary key.', primary_key=True, serialize=False),
         ),
         migrations.AlterField(
             model_name='outgoingtransaction',
             name='id',
-            field=edc_base.model.fields.uuid_auto_field.UUIDAutoField(blank=True, editable=False, help_text='System auto field. UUID primary key.', primary_key=True, serialize=False),
+            field=edc_base.model_fields.uuid_auto_field.UUIDAutoField(blank=True, editable=False, help_text='System auto field. UUID primary key.', primary_key=True, serialize=False),
         ),
         migrations.AlterField(
             model_name='server',
             name='id',
-            field=edc_base.model.fields.uuid_auto_field.UUIDAutoField(blank=True, editable=False, help_text='System auto field. UUID primary key.', primary_key=True, serialize=False),
+            field=edc_base.model_fields.uuid_auto_field.UUIDAutoField(blank=True, editable=False, help_text='System auto field. UUID primary key.', primary_key=True, serialize=False),
         ),
         migrations.AlterUniqueTogether(
             name='history',

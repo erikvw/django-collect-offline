@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
-import edc_base.model.fields.uuid_auto_field
+import edc_base.model_fields.uuid_auto_field
 
 
 class Migration(migrations.Migration):
@@ -21,71 +21,71 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='anotherbadtestmodel',
             name='id',
-            field=edc_base.model.fields.uuid_auto_field.UUIDAutoField(blank=True, editable=False, help_text='System auto field. UUID primary key.', primary_key=True, serialize=False),
+            field=edc_base.model_fields.uuid_auto_field.UUIDAutoField(blank=True, editable=False, help_text='System auto field. UUID primary key.', primary_key=True, serialize=False),
         ),
         migrations.AlterField(
             model_name='badtestmodel',
             name='id',
-            field=edc_base.model.fields.uuid_auto_field.UUIDAutoField(blank=True, editable=False, help_text='System auto field. UUID primary key.', primary_key=True, serialize=False),
+            field=edc_base.model_fields.uuid_auto_field.UUIDAutoField(blank=True, editable=False, help_text='System auto field. UUID primary key.', primary_key=True, serialize=False),
         ),
         migrations.AlterField(
             model_name='complextestmodel',
             name='id',
-            field=edc_base.model.fields.uuid_auto_field.UUIDAutoField(blank=True, editable=False, help_text='System auto field. UUID primary key.', primary_key=True, serialize=False),
+            field=edc_base.model_fields.uuid_auto_field.UUIDAutoField(blank=True, editable=False, help_text='System auto field. UUID primary key.', primary_key=True, serialize=False),
         ),
         migrations.AlterField(
             model_name='crypt',
             name='id',
-            field=edc_base.model.fields.uuid_auto_field.UUIDAutoField(blank=True, editable=False, help_text='System auto field. UUID primary key.', primary_key=True, serialize=False),
+            field=edc_base.model_fields.uuid_auto_field.UUIDAutoField(blank=True, editable=False, help_text='System auto field. UUID primary key.', primary_key=True, serialize=False),
         ),
         migrations.AlterField(
             model_name='fk',
             name='id',
-            field=edc_base.model.fields.uuid_auto_field.UUIDAutoField(blank=True, editable=False, help_text='System auto field. UUID primary key.', primary_key=True, serialize=False),
+            field=edc_base.model_fields.uuid_auto_field.UUIDAutoField(blank=True, editable=False, help_text='System auto field. UUID primary key.', primary_key=True, serialize=False),
         ),
         migrations.AlterField(
             model_name='historicalcomplextestmodel',
             name='history_id',
-            field=edc_base.model.fields.uuid_auto_field.UUIDAutoField(primary_key=True, serialize=False),
+            field=edc_base.model_fields.uuid_auto_field.UUIDAutoField(primary_key=True, serialize=False),
         ),
         migrations.AlterField(
             model_name='historicalcomplextestmodel',
             name='id',
-            field=edc_base.model.fields.uuid_auto_field.UUIDAutoField(blank=True, db_index=True, editable=False, help_text='System auto field. UUID primary key.'),
+            field=edc_base.model_fields.uuid_auto_field.UUIDAutoField(blank=True, db_index=True, editable=False, help_text='System auto field. UUID primary key.'),
         ),
         migrations.AlterField(
             model_name='historicaltestencryptedmodel',
             name='history_id',
-            field=edc_base.model.fields.uuid_auto_field.UUIDAutoField(primary_key=True, serialize=False),
+            field=edc_base.model_fields.uuid_auto_field.UUIDAutoField(primary_key=True, serialize=False),
         ),
         migrations.AlterField(
             model_name='historicaltestencryptedmodel',
             name='id',
-            field=edc_base.model.fields.uuid_auto_field.UUIDAutoField(blank=True, db_index=True, editable=False, help_text='System auto field. UUID primary key.'),
+            field=edc_base.model_fields.uuid_auto_field.UUIDAutoField(blank=True, db_index=True, editable=False, help_text='System auto field. UUID primary key.'),
         ),
         migrations.AlterField(
             model_name='historicaltestmodel',
             name='history_id',
-            field=edc_base.model.fields.uuid_auto_field.UUIDAutoField(primary_key=True, serialize=False),
+            field=edc_base.model_fields.uuid_auto_field.UUIDAutoField(primary_key=True, serialize=False),
         ),
         migrations.AlterField(
             model_name='historicaltestmodel',
             name='id',
-            field=edc_base.model.fields.uuid_auto_field.UUIDAutoField(blank=True, db_index=True, editable=False, help_text='System auto field. UUID primary key.'),
+            field=edc_base.model_fields.uuid_auto_field.UUIDAutoField(blank=True, db_index=True, editable=False, help_text='System auto field. UUID primary key.'),
         ),
         migrations.AlterField(
             model_name='m2m',
             name='id',
-            field=edc_base.model.fields.uuid_auto_field.UUIDAutoField(blank=True, editable=False, help_text='System auto field. UUID primary key.', primary_key=True, serialize=False),
+            field=edc_base.model_fields.uuid_auto_field.UUIDAutoField(blank=True, editable=False, help_text='System auto field. UUID primary key.', primary_key=True, serialize=False),
         ),
         migrations.AlterField(
             model_name='testencryptedmodel',
             name='id',
-            field=edc_base.model.fields.uuid_auto_field.UUIDAutoField(blank=True, editable=False, help_text='System auto field. UUID primary key.', primary_key=True, serialize=False),
+            field=edc_base.model_fields.uuid_auto_field.UUIDAutoField(blank=True, editable=False, help_text='System auto field. UUID primary key.', primary_key=True, serialize=False),
         ),
         migrations.AlterField(
             model_name='testmodel',
             name='id',
-            field=edc_base.model.fields.uuid_auto_field.UUIDAutoField(blank=True, editable=False, help_text='System auto field. UUID primary key.', primary_key=True, serialize=False),
+            field=edc_base.model_fields.uuid_auto_field.UUIDAutoField(blank=True, editable=False, help_text='System auto field. UUID primary key.', primary_key=True, serialize=False),
         ),
     ]
