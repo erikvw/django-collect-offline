@@ -58,8 +58,7 @@ function dumpTransactionFile(server , userName) {
 			$( '#id-transfer-div' ).hide();
 			$( '#id-in-progress-div' ).show();
 			$( '#id-transfer-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-success' );
-			$( '#id-transfer-status-div' ).text('Connected to the server.')
-			
+			$( '#id-transfer-status-div' ).text('Connected to the server.');
 			//display files
 			$.each( data.transactionFiles, function(index,  file  ) {
 				index = index + 1;
@@ -77,12 +76,19 @@ function dumpTransactionFile(server , userName) {
 		} else {
 			$( '#btn-sync').prop( "disabled", false );
 			$( '#id-transfer-status-div' ).show();
-			$( '#id-transfer-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-danger' );
 			var error = "";
 			$.each( data.messages, function(index,  message  ) {
-				error = message.error.network
+				try {
+					error = message.error.network;
+					$( '#id-transfer-status-div' ).text('Network Error, unable to connect to the server. Got '+error);
+				} catch(err) { }
+				
+				try {
+					error = message.error.permission;
+					$( '#id-transfer-status-div' ).text('An error occurred. Got, '+error);
+				} catch(err) { }
 			});
-			$( '#id-transfer-status-div' ).text('Network Error, unable to connect to the server. Got '+error);
+			$( '#id-transfer-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-danger' );
 		}
 	});
 
