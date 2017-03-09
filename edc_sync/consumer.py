@@ -4,34 +4,41 @@ from .models import OutgoingTransaction, IncomingTransaction
 
 class Consumer(object):
 
-    def __init__(self, using=None, model_name=None, producer_name=None, check_hostname=None):
+    def __init__(self, transactions=[], using='default', model_name=None, producer_name=None, check_hostname=None):
         self.model_name = model_name
         self.producer_name = producer_name
         self.using = using or 'default'
+        self.transactions = transactions
         self.check_hostname = True if check_hostname is None else check_hostname
 
     def consume(self, model_name=None, producer_name=None, **kwargs):
         """Consumes ALL incoming transactions on \'using\' in order by ('producer', 'timestamp')."""
+        is_consume = False
         if model_name and not producer_name:
             incoming_transactions = IncomingTransaction.objects.using(self.using).filter(
                 is_consumed=False,
                 is_ignored=False,
                 tx_name=model_name).order_by('timestamp', 'producer')
+            is_consume = True
         elif producer_name and not model_name:
             incoming_transactions = IncomingTransaction.objects.using(self.using).filter(
                 is_consumed=False,
                 is_ignored=False,
                 producer=producer_name).order_by('timestamp', 'producer')
+            is_consume = True
         elif producer_name and model_name:
             incoming_transactions = IncomingTransaction.objects.using(self.using).filter(
                 is_consumed=False,
                 is_ignored=False,
                 tx_name=model_name,
                 producer=producer_name).order_by('timestamp', 'producer')
+            is_consume = True
         else:
             incoming_transactions = IncomingTransaction.objects.using(self.using).filter(
                 is_consumed=False,
-                is_ignored=False).order_by('timestamp', 'producer')
+                is_ignored=False,
+                tx_pk__in=self.transactions).order_by('timestamp', 'producer')
+            is_consume = True
         total_incoming_transactions = incoming_transactions.count()
         for index, incoming_transaction in enumerate(incoming_transactions):
             action = ''
@@ -40,10 +47,11 @@ class Consumer(object):
                                              incoming_transaction.tx_name))
             print('    tx_pk=\'{0}\''.format(incoming_transaction.tx_pk))
             action = 'failed'
-            if incoming_transaction.deserialize_transaction(using=self.using, check_hostname=True):
+            if incoming_transaction.deserialize_transaction(check_hostname=False):
                 action = 'saved'
             print('    {0}'.format(action))
         self.post_sync(self.using, **kwargs)
+        return is_consume
 
     def pre_sync(self, using=None, lock_name=None, **kwargs):
         pass
