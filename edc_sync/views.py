@@ -1,8 +1,10 @@
+import shutil
 import json
 import socket
 import requests
 import os
 
+from os.path import join
 
 from django.apps import apps as django_apps
 from django.conf import settings
@@ -25,16 +27,19 @@ from rest_framework.reverse import reverse
 from rest_framework.views import APIView
 
 from edc_base.view_mixins import EdcBaseViewMixin
+from edc_sync_files.classes import TransactionDumps
+from edc_sync_files.classes import TransactionFileManager
+from edc_sync_files.classes import transaction_messages
+from edc_sync_files.models import History
+from edc_sync_files.models.upload_transaction_file import UploadTransactionFile
 
 from .admin import edc_sync_admin
 from .edc_sync_view_mixin import EdcSyncViewMixin
 from .models import OutgoingTransaction, IncomingTransaction
 from .serializers import OutgoingTransactionSerializer, IncomingTransactionSerializer
 from .site_sync_models import site_sync_models
-from edc_sync_files.classes import TransactionDumps
-from edc_sync_files.classes import TransactionFileManager
-from edc_sync_files.classes import transaction_messages
-from edc_sync_files.models import History
+from edc_device.constants import SERVER
+from edc_constants.constants import ERROR
 
 
 @api_view(['GET'])
@@ -130,13 +135,25 @@ class DumpToUsbView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
         if request.is_ajax():
             if request.GET.get('action') == 'check_usb_connection':
                 if os.path.exists('/Volumes/BCPP'):
-                    transaction_messages.add_message('other', 'USB is connected.')
-                else:
-                    response_data = {
-                        'error': False,
-                        'messages': 'USB is not connected. Please connect and try again!'}
+                    response_data.update({'connection': True})
             elif request.GET.get('action') == 'dump_to_usb':
-                print("transfer file to usb")
+                try:
+                    destionation_dir = join('/Volumes/BCPP', 'transactions', 'incoming')
+                    if os.path.exists(destionation_dir):
+                        source_folder = django_apps.get_app_config('edc_sync_files').source_folder
+                        dump = TransactionDumps(source_folder)
+                        shutil.copy2(join(source_folder, dump.filename), destionation_dir)
+                        transaction_messages.add_message(
+                            'success', 'Copied {} to {}.'.format(
+                                join(source_folder, dump.filename),
+                                join(destionation_dir, dump.filename)))
+                        response_data.update({'copied': True})
+                except FileNotFoundError as e:
+                    transaction_messages.add_message(ERROR, 'Cannot find transactions folder in the USB.')
+                    response_data.update({'messages': transaction_messages.messages})
+                except OSError as e:
+                    transaction_messages.add_message(
+                        ERROR, 'Cannot find transactions folder in the USB. Got {}'.format(str(e)))
             return HttpResponse(json.dumps(response_data), content_type='application/json')
         return self.render_to_response(context)
 
@@ -150,6 +167,15 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
     def recent_sent_transactions(self):
         return History.objects.filter(
             sent=True).order_by('-created')[:20]
+
+    def upload_transaction_files(self):
+        if django_apps.get_app_config('edc_sync_files').role == SERVER:
+            files = UploadTransactionFile.objects.filter(
+                not_consumed__gt=0, is_played=False)
+            return files
+        else:
+            return []
+        return []
 
     def __init__(self, *args, **kwargs):
         super(HomeView, self).__init__(*args, **kwargs)
@@ -172,7 +198,7 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
     @property
     def ip_address(self):
-        return django_apps.get_app_config('edc_sync').server
+        return django_apps.get_app_config('edc_sync').role
 
     @property
     def cors_origin_whitelist(self):
@@ -185,12 +211,14 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
         context.update({
-            'pending_files': self.tx_file_manager.pending_files()})
+            'pending_files': self.tx_file_manager.pending_files(),
+            'upload_transaction_files': self.upload_transaction_files()})
         response_data = {
             'error': False,
             'messages': transaction_messages.messages(),
         }
         if request.is_ajax():
+            transaction_messages.clear()
             connected = self.tx_file_manager.is_server_available()
             if connected:
                 if request.GET.get('action') == 'dump_transaction_file':

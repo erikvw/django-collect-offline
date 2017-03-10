@@ -25,17 +25,8 @@ function edcSyncUSBReady(server, userName, apiToken) {
     	$( '#id-transfer-status-div' ).removeClass( 'alert-danger' ).addClass( 'alert-warning' );
         $(this).prop("disabled",true);
         checkUSBConnectivity(server, userName);
-        //dumpTransactionMiddlemanFile(server , userName);
     });
 }
-
-//function File (filename, filesize, index) {
-//    this.filename = filename;
-//    this.filesize = filesize;
-//    this.index = index;
-//    this.isSend = false;
-//    this.active = false;
-//}
 
 function checkUSBConnectivity(server , userName) {
 	var url = client + '/edc_sync/dump-to-usb/';
@@ -50,65 +41,46 @@ function checkUSBConnectivity(server , userName) {
 	});
 	
 	checkUSBConnection.done(function( data ) {
-		
-		if ( data.error == false ){
-			alert( data.messages );
+		if ( data.connection == false ) {
+			dumpTransactionMiddlemanFile(server, userName);
+		} else {
+	        $( '#id-transfer-status-div' ).show();
+	    	$( '#id-transfer-status-div' ).text( 'USB connected.' );
+	    	$( '#id-transfer-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-success' );	
 		}
-		
-		//dumpTransactionMiddlemanFile(server , userName);
 	});
 
 	checkUSBConnection.fail( function( jqXHR, textStatus, errorThrown ) {
+		$( '#id-transfer-status-div' ).removeClass( 'alert-success' ).addClass( 'alert-danger' );
+		$( '#id-transfer-status-div' ).text( 'An error occurred. Got ' + errorThrown);
+	});
+}
+
+function dumpTransactionMiddlemanFile(server , userName) {
+
+	var url = client + '/edc_sync/';
+	var ajDumpFile = $.ajax({
+		url: url,
+		type: 'GET',
+		dataType: 'json ',
+		processData: true,
+		data: {'action': 'dump_to_usb'},
+	});
+	
+	ajDumpFile.done( function ( data ) {
+		if(data.copied == true) {
+	        $( '#id-transfer-status-div' ).show();
+	    	$( '#id-transfer-status-div' ).text( 'Transaction file:'+ data.file+ 'have been copied to usb successfuly.' );
+	    	$( '#id-transfer-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-success' );
+		} else {
+	        $( '#id-transfer-status-div' ).show();
+	    	$( '#id-transfer-status-div' ).text( 'Failed to transfer :'+ data.file+ ' to usb.' );
+	    	$( '#id-transfer-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-danger' );
+		}
+	});
+
+	ajDumpFile.fail( function( jqXHR, textStatus, errorThrown ) {
 		$( '#id-sync-status' ).removeClass( 'alert-success' ).addClass( 'alert-danger' );
 		$( '#id-sync-status' ).text( 'An error occurred. Got ' + errorThrown);
 	});
 }
-
-//function dumpTransactionMiddlemanFile(server , userName) {
-//
-//	var url = client + '/edc_sync/';
-//	var ajDumpFile = $.ajax({
-//		url: url,
-//		type: 'GET',
-//		dataType: 'json ',
-//		processData: true,
-//		data: {'action': 'dump_to_usb'},
-//	});
-//	
-//	ajDumpFile.done( function ( data ) {
-//		if(data.error == false) {
-//			//Sending to USB. 
-//			sendTransactionFileToUSB()
-//		} else {
-//			
-//		}
-//	});
-//
-//	ajDumpFile.fail( function( jqXHR, textStatus, errorThrown ) {
-//		$( '#id-sync-status' ).removeClass( 'alert-success' ).addClass( 'alert-danger' );
-//		$( '#id-sync-status' ).text( 'An error occurred. Got ' + errorThrown);
-//	});
-//}
-
-//function sendTransactionFileToUSB() {
-//	var url = client + '/edc_sync/';
-//	var ajSendFileUSB = $.ajax({
-//		url: url,
-//		type: 'GET',
-//		dataType: 'json ',
-//		processData: true,
-//		data: {
-//			'action': 'send_to_usb',
-//		}
-//	});
-//	
-//	ajSendFileUSB.done( function( data ) {
-//		//
-//		
-//	});
-//	
-//	ajSendFileUSB.fail( function( jqXHR, textStatus, errorThrown ) {
-//		$( '#progress-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-danger' );
-//		$( '#progress-status-div' ).text('An error occurred. Got ' + errorThrown + '. Status '+ jqXHR.status);
-//	});
-//}

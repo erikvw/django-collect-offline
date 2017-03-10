@@ -1,3 +1,5 @@
+from edc_sync_files.classes.transaction_messages import transaction_messages
+
 from .exceptions import TransactionConsumerError
 from .models import OutgoingTransaction, IncomingTransaction
 
@@ -13,32 +15,32 @@ class Consumer(object):
 
     def consume(self, model_name=None, producer_name=None, **kwargs):
         """Consumes ALL incoming transactions on \'using\' in order by ('producer', 'timestamp')."""
-        is_consume = False
+        is_played = False
         if model_name and not producer_name:
             incoming_transactions = IncomingTransaction.objects.using(self.using).filter(
                 is_consumed=False,
                 is_ignored=False,
                 tx_name=model_name).order_by('timestamp', 'producer')
-            is_consume = True
+            is_played = True
         elif producer_name and not model_name:
             incoming_transactions = IncomingTransaction.objects.using(self.using).filter(
                 is_consumed=False,
                 is_ignored=False,
                 producer=producer_name).order_by('timestamp', 'producer')
-            is_consume = True
+            is_played = True
         elif producer_name and model_name:
             incoming_transactions = IncomingTransaction.objects.using(self.using).filter(
                 is_consumed=False,
                 is_ignored=False,
                 tx_name=model_name,
                 producer=producer_name).order_by('timestamp', 'producer')
-            is_consume = True
+            is_played = True
         else:
             incoming_transactions = IncomingTransaction.objects.using(self.using).filter(
                 is_consumed=False,
                 is_ignored=False,
                 tx_pk__in=self.transactions).order_by('timestamp', 'producer')
-            is_consume = True
+            is_played = True
         total_incoming_transactions = incoming_transactions.count()
         for index, incoming_transaction in enumerate(incoming_transactions):
             action = ''
@@ -47,11 +49,17 @@ class Consumer(object):
                                              incoming_transaction.tx_name))
             print('    tx_pk=\'{0}\''.format(incoming_transaction.tx_pk))
             action = 'failed'
-            if incoming_transaction.deserialize_transaction(check_hostname=False):
-                action = 'saved'
+            try:
+                if incoming_transaction.deserialize_transaction(check_hostname=False):
+                    action = 'saved'
+                    is_played = True
+            except ValueError as e:
+                is_played = False
+                message = 'Failed to play transactions. Got {}'.format(str(e))
+                transaction_messages.add_message('error', message)
             print('    {0}'.format(action))
         self.post_sync(self.using, **kwargs)
-        return is_consume
+        return is_played
 
     def pre_sync(self, using=None, lock_name=None, **kwargs):
         pass
