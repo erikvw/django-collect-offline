@@ -16,9 +16,16 @@
 	  </script>
   {% elif edc_sync_role == 'Client'  %}
  	<script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/file_transfer.js" %}"></script>	
+ 		<script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/middleman.js" %}"></script>	
 	<script type="text/javascript" charset="utf8" class="init">
 	     $(document).ready( function() {
 	   	  edcSyncReady('{{ ip_address|escapejs }}', '{{ user.username }}', '{{ api_token }}');
+	     });
+ 	</script>
+ 	
+	<script type="text/javascript" charset="utf8" class="init">
+	     $(document).ready( function() {
+	    	 edcSyncUSBReady('{{ ip_address|escapejs }}', '{{ user.username }}', '{{ api_token }}');
 	     });
  	</script>
   {% endif %}

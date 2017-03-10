@@ -120,6 +120,27 @@ class RenderView(EdcBaseViewMixin, TemplateView):
         return context
 
 
+class DumpToUsbView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        response_data = {
+            'error': False,
+            'messages': transaction_messages.messages()}
+        if request.is_ajax():
+            if request.GET.get('action') == 'check_usb_connection':
+                if os.path.exists('/Volumes/BCPP'):
+                    transaction_messages.add_message('other', 'USB is connected.')
+                else:
+                    response_data = {
+                        'error': False,
+                        'messages': 'USB is not connected. Please connect and try again!'}
+            elif request.GET.get('action') == 'dump_to_usb':
+                print("transfer file to usb")
+            return HttpResponse(json.dumps(response_data), content_type='application/json')
+        return self.render_to_response(context)
+
+
 class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
     template_name = 'edc_sync/home.html'
@@ -127,7 +148,8 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
     tx_file_manager = TransactionFileManager()
 
     def recent_sent_transactions(self):
-        return History.objects.all().order_by('-created')[:20]
+        return History.objects.filter(
+            sent=True).order_by('-created')[:20]
 
     def __init__(self, *args, **kwargs):
         super(HomeView, self).__init__(*args, **kwargs)
@@ -162,9 +184,12 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
+        context.update({
+            'pending_files': self.tx_file_manager.pending_files()})
         response_data = {
             'error': False,
-            'messages': transaction_messages.messages()}
+            'messages': transaction_messages.messages(),
+        }
         if request.is_ajax():
             connected = self.tx_file_manager.is_server_available()
             if connected:
@@ -197,6 +222,11 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
                     if files:
                         files = files.split(',')
                         self.tx_file_manager.approve_transfer_files(files)
+                elif request.GET.get('action') == 'pending_files':
+                    response_data.update({
+                        'messages': transaction_messages.messages(),
+                        'pendingFiles': self.tx_file_manager.pending_files(),
+                        'error': False})
             else:
                 host = django_apps.get_app_config(
                     'edc_sync_files').host
@@ -205,7 +235,6 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
                     'host': host,
                     'messages': transaction_messages.messages(),
                 })
-            print(transaction_messages.messages())
             return HttpResponse(json.dumps(response_data), content_type='application/json')
         return self.render_to_response(context)
 
