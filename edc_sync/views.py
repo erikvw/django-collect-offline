@@ -27,6 +27,8 @@ from rest_framework.reverse import reverse
 from rest_framework.views import APIView
 
 from edc_base.view_mixins import EdcBaseViewMixin
+from edc_device.constants import SERVER
+from edc_sync_files.classes import DumpToUsb, TransactionLoadUsbFile
 from edc_sync_files.classes import TransactionDumps
 from edc_sync_files.classes import TransactionFileManager
 from edc_sync_files.classes import transaction_messages
@@ -38,8 +40,6 @@ from .edc_sync_view_mixin import EdcSyncViewMixin
 from .models import OutgoingTransaction, IncomingTransaction
 from .serializers import OutgoingTransactionSerializer, IncomingTransactionSerializer
 from .site_sync_models import site_sync_models
-from edc_device.constants import SERVER
-from edc_constants.constants import ERROR
 
 
 @api_view(['GET'])
@@ -137,23 +137,18 @@ class DumpToUsbView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
                 if os.path.exists('/Volumes/BCPP'):
                     response_data.update({'connection': True})
             elif request.GET.get('action') == 'dump_to_usb':
-                try:
-                    destionation_dir = join('/Volumes/BCPP', 'transactions', 'incoming')
-                    if os.path.exists(destionation_dir):
-                        source_folder = django_apps.get_app_config('edc_sync_files').source_folder
-                        dump = TransactionDumps(source_folder)
-                        shutil.copy2(join(source_folder, dump.filename), destionation_dir)
-                        transaction_messages.add_message(
-                            'success', 'Copied {} to {}.'.format(
-                                join(source_folder, dump.filename),
-                                join(destionation_dir, dump.filename)))
-                        response_data.update({'copied': True})
-                except FileNotFoundError as e:
-                    transaction_messages.add_message(ERROR, 'Cannot find transactions folder in the USB.')
-                    response_data.update({'messages': transaction_messages.messages})
-                except OSError as e:
-                    transaction_messages.add_message(
-                        ERROR, 'Cannot find transactions folder in the USB. Got {}'.format(str(e)))
+                usb_dump = DumpToUsb()
+                if usb_dump.is_dumped_to_usb:
+                    response_data = {
+                        'error': False,
+                        'filename': usb_dump.filename,
+                        'messages': transaction_messages.messages()}
+            elif request.GET.get('action') == 'load_json_file':
+                usb_file = TransactionLoadUsbFile()
+                if usb_file.is_usb_transaction_file_loaded:
+                    response_data = {
+                        'error': False,
+                        'messages': transaction_messages.messages()}
             return HttpResponse(json.dumps(response_data), content_type='application/json')
         return self.render_to_response(context)
 
