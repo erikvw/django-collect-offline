@@ -1,6 +1,6 @@
 from django.contrib import messages
 
-from edc_base.encrypted_fields import FieldCryptor
+from django_crypto_fields.field_cryptor import FieldCryptor
 
 from .exceptions import SyncProducerError
 from .utils import update_producer_from_settings

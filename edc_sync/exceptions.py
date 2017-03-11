@@ -16,6 +16,10 @@ class SyncError(Exception):
     pass
 
 
+class SyncModelError(Exception):
+    pass
+
+
 class SyncProducerError(Exception):
     pass
 
@@ -29,4 +33,12 @@ class UsingSourceError(Exception):
 
 
 class UsingDestinationError(Exception):
+    pass
+
+
+class RegistryNotLoaded(Exception):
+    pass
+
+
+class AlreadyRegistered(Exception):
     pass

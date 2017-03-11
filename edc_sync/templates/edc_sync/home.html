@@ -1,0 +1,97 @@
+{% extends 'edc_base/base.html' %}
+
+{% load staticfiles %}
+
+{% block extra-scripts %}
+
+{{ block.super }}
+   <script type="text/javascript" charset="utf8" src="{% static "django_js_reverse/js/reverse.js" %}"></script>	
+  <!-- begin edc_sync extra-scripts -->
+  {% if edc_sync_role == 'Server' %}
+	  <script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/edc_sync.js" %}"></script>
+	  <script type="text/javascript" charset="utf8" class="init">
+	      $(document).ready( function() {
+	    	  edcSyncReady('{{ hosts|escapejs }}', '{{ user.username }}', '{{ api_token }}', "{% url 'edc_sync:home_url' %}");
+	      });
+	  </script>
+  {% elif edc_sync_role == 'Client'  %}
+ 	<script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/file_transfer.js" %}"></script>	
+ 		<script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/middleman.js" %}"></script>	
+	<script type="text/javascript" charset="utf8" class="init">
+	     $(document).ready( function() {
+	   	  edcSyncReady('{{ ip_address|escapejs }}', '{{ user.username }}', '{{ api_token }}');
+	     });
+ 	</script>
+ 	
+	<script type="text/javascript" charset="utf8" class="init">
+	     $(document).ready( function() {
+	    	 edcSyncUSBReady('{{ ip_address|escapejs }}', '{{ user.username }}', '{{ api_token }}');
+	     });
+ 	</script>
+  {% endif %}
+  <!-- end edc_sync extra-scripts -->
+{% endblock extra-scripts %}
+
+{% block main %}
+<div class="container">
+
+    <div id="div-home-right" class="col-md-8">
+        <div class="panel panel-default">
+            <ul id="nav-pill-host" class="nav nav-pills nav-stacked">
+                <li><a href="#">{{ edc_sync_role|title }}: {{ hostname }} <span class="pull-right">{{ ip_address }}</span></a></li>
+            </ul>
+        </div>
+        {% if edc_sync_role == 'Server' %}
+            {% include 'edc_sync/server.html' %}
+        {% elif edc_sync_role == 'Client' %}
+        	{% include 'edc_sync/client.html' %}
+        {% else %}
+            <div class="panel-heading">Resources</div>
+            <div class="alert alert-danger text-center">Edc-Sync role undefined. See AppConfig.</div>
+        {% endif%}
+    </div>
+
+    <div id="div-home-middle" class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">Administration</div>
+            <ul id="nav-pill-admin" class="nav nav-pills nav-stacked">
+                <li><a href="{% url 'edc_sync:edc_sync_admin:index'%} ">{{ edc_sync_admin.index_title }}</a></li>
+                {% if edc_sync_role == 'Server' %}
+                    <li><a href="{% url 'edc_sync:edc_sync_admin:edc_sync_client_changelist'%} ">Clients</a></li>
+                {% elif edc_sync_role == 'Client' %}
+                    <li><a href="{% url 'edc_sync:edc_sync_admin:edc_sync_server_changelist'%} ">Servers</a></li>
+                {% endif %}
+                {% comment %}
+                	<li><a href="{% url 'edc_sync:edc_sync_admin:authtoken_token_changelist'%} ">User Tokens</a></li>
+                {% endcomment %}
+            </ul>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">API</div>
+                {% if user.is_authenticated and api_token == None %}
+                    <div class="alert alert-danger text-center">Current user '{{ user.username }}' missing API token.</div>
+                {% endif %}
+                <ul id="nav-pill-api" class="nav nav-pills nav-stacked">
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'edc_sync:outgoingtransaction-list' %}?format=json">Show My Outgoingtransaction</a></li>
+                    <li><a href="{% url 'edc_sync:incomingtransaction-list' %}?format=json">Show My Incomingtransaction</a></li>
+                {% endif %}
+                </ul>
+            </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">CORS Origin Whitelist (from settings)</div>
+            {% if user.is_authenticated %}
+              <ul id="id-nav-pill-cors" class="nav nav-pills nav-stacked">
+                {% for host in cors_origin_whitelist %}
+                    <li><a>{{ host }}</a></li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+        </div>
+            
+    </div><!-- div-home-middle -->
+
+</div>
+
+{% endblock main %}

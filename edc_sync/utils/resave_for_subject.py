@@ -1,4 +1,4 @@
-from django.db.models import get_models, get_model
+from django.apps import apps as django_apps
 
 from edc_appointment.models import Appointment
 from edc_registration.models import RegisteredSubject
@@ -22,10 +22,10 @@ class ResaveSubject(object):
 
     def __init__(self, subject_identifier, consent, visit, visit_model_attr):
         self.subject_identifier = subject_identifier
-        self.visit_model = get_model(visit[APP_LABEL], visit[MODEL_NAME])
+        self.visit_model = django_apps.get_model(visit[APP_LABEL], visit[MODEL_NAME])
         self.visit_model_attr = visit_model_attr
         if consent:
-            self.consent_model = get_model(consent[APP_LABEL], consent[MODEL_NAME])
+            self.consent_model = django_apps.get_model(consent[APP_LABEL], consent[MODEL_NAME])
         else:
             self.consent_model = None
         self.field_contains = '%s__appointment__registered_subject__subject_identifier' % (visit_model_attr,)
@@ -51,7 +51,7 @@ class ResaveSubject(object):
 
     def resave_unscheduled_and_registration(self):
         """Resaves unscheduled and other models with a key to registered subject."""
-        for model in get_models():
+        for model in django_apps.get_models():
             if getattr(model, 'registered_subject'):
                 try:
                     obj = model.objects.get(registered_subject__subject_identifier=self.subject_identifier)
@@ -77,7 +77,7 @@ class ResaveSubject(object):
 
     def resave_scheduled(self):
         """Resaves scheduled forms, will also resave the audit record."""
-        for model in get_models():
+        for model in django_apps.get_models():
             try:
                 if getattr(model, self.visit_model_attr):
                     models = model.objects.filter(**{self.field_contains: self.subject_identifier})

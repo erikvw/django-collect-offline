@@ -1,0 +1,46 @@
+ 
+ <div id='id-upload-transaction-div' class="panel panel-default">
+	<div class='alert alert-warning' id="progress-status-div-pending">
+ 		Transactions History
+	</div>
+	<table class="table table-bordered" id='id-table-upload-transaction-table'>
+	    <thead>
+	      <tr>
+	      	<th></th>
+	        <th>Filename</th>
+	        <th>Date</th>
+	        <th>Consumed</th>
+	        <th>Not Consumed</th>
+	        <th>Comment</th>
+	        <th>Producer</th>
+	      </tr>
+	    </thead>
+	    <tbody>
+		    {% for file in upload_transaction_files %}
+		    	<tr>
+		    		<td>
+		    		</td>
+			    	<td>
+			    		{{file.filename}}
+			    	</td>
+			    	<td>
+			    		{{file.file_date}}
+			    	</td>
+			    	<td>
+		 				{{file.consumed}}
+			    	</td>
+			    	<td>
+		 				{{file.not_consumed}}
+			    	</td>
+			    	<td>
+		 				{{file.producer}}
+			    	</td>
+			    	<td>
+		 				{{file.comment}}
+			    	</td>
+		    	</tr>
+		    {% endfor %}
+	    </tbody>
+	  </table>
+ </div>
+ 

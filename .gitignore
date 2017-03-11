@@ -1,14 +1,14 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
 test-*
+etc
 *.py[cod]
 .project
 .pydevproject
 .settings
-db.sqlite3
-migrations/
-sync_old/
-
+db.sqlite3*
+example/db.sqlite3.server
+example/static/
 # C extensions
 *.so
 

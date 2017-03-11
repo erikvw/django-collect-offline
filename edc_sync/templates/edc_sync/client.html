@@ -1,0 +1,145 @@
+<div id='id-transfer-status-div' class="alert alert-danger" style="display:none">
+	Your machine is not connected to the server. Check your network connectivity.
+</div>
+<div id='id-transfer-div' class="panel panel-info">
+	<div class="panel-heading">
+ 		Transactions <div id="id-div-resource-alert"></div><span id="id-tx-spinner" class="fa fa-refresh pull-right"></span>
+	</div>
+	<div class="clearfix"></div>
+	<div class="panel-body">
+		<p>
+			<span id="">Pending Transactions</span>
+			<span id="id-pending-transactions" class="badge">0</span>
+			<button id="btn-sync" type="button" class="btn btn-warning pull-right">Transfer Data</button>
+		</p>
+	</div>
+ </div>
+ 
+ 
+ <div id='id-in-progress-div' class="panel panel-default" style="display: none">
+	<div class='alert alert-warning' id="progress-status-div">
+ 		File transfer in progress, Please wait. <div id="id-div-resource-alert"></div>
+	</div>
+	<table class="table table-bordered" id='id-file-table'>
+	    <thead>
+	      <tr>
+	      	<th></th>
+	        <th>File</th>
+	        <th>Size</th>
+	        <th>Status</th>
+	      </tr>
+	    </thead>
+	    <tbody>
+	    </tbody>
+	  </table>
+ </div>
+ 
+ {% if pending_files %}
+ <div id='id-in-progress-div-pending-files' class="panel panel-default">
+	<div class='alert alert-warning' id="progress-status-div-pending">
+ 		Pending files, failed to send. Try again 
+		<button id="btn-send-again" type="button" class="btn btn-warning pull-right">Send</button>
+	</div>
+	<table class="table table-bordered" id='id-file-table-pending'>
+	    <thead>
+	      <tr>
+	      	<th></th>
+	        <th>File</th>
+	        <th>Size</th>
+	        <th>Status</th>
+	      </tr>
+	    </thead>
+	    <tbody>
+	    	{% for file in pending_files %}
+	    	<tr><td><td>{{file.filename}}</td><td>{{file.filesize}}</td>
+	    		<td>
+    				{% if file.sent %}
+			        	<span class="glyphicon glyphicon-ok"></span> 
+			        {% else %}
+			        	<span class="glyphicon glyphicon-remove"></span>
+			        {% endif %}
+	    		</td>
+	    	</tr>
+	    	{% endfor %}
+	    </tbody>
+	  </table>
+ </div>
+{% endif %}
+
+<!-- <div id='id-transfer-div' class="panel panel-info" styles="display:none">
+	<div class="panel-heading">
+ 		Middleman <div id="id-div-resource-alert"></div><span id="id-tx-spinner" class="fa fa-refresh pull-right"></span>
+	</div>
+	<div class="clearfix"></div>
+	<div class="panel-body">
+		<p>
+			<span id="">Pending Transactions</span>
+			<span id="id-pending-transactions-middleman" class="badge">0</span>
+			<button id="btn-sync-middleman" type="button" class="btn btn-warning pull-right">Send to USB</button>
+		</p>
+	</div>
+ </div> -->
+ 
+ {% if recent_sent_tx %}
+  <div id='id-history' class="panel panel-success">
+	<div class='alert alert-success' id="progress-status-div-hist">
+ 		Recent Transactions Sent to the Server. <div id="id-div-resource-alert-hist"></div>
+	</div>
+	<table class="table table-bordered" id='id-file-table-hist'>
+	    <thead>
+	      <tr>
+	      	<th></th>
+	        <th>File</th>
+	        <th>Sent Date Time</th>
+	        <th>Status</th>
+	      </tr>
+	    </thead>
+	    <tbody>
+		    {% for history in recent_sent_tx %}
+		    	{% if history.sent %}
+			      <tr>
+			      	<th></th>
+			        <th>{{history.filename}}</th>
+			        <th>{{history.sent_datetime}}</th>
+			        <th>
+				        {% if history.sent %}
+				        	<span class="glyphicon glyphicon-ok"></span> 
+				        {% else %}
+				        	<span class="glyphicon glyphicon-remove"></span>
+				        {% endif %}
+			        </th>
+			      </tr>
+			      {% endif %}
+		       {% endfor %}
+	    </tbody>
+	  </table>
+ </div>
+ {% endif %}
+
+ <div class="container">
+  <!-- Trigger the modal with a button -->
+  <button id="btn-progress" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#progressModel" style="display:none"></button>
+
+  <!-- Modal -->
+  <div class="modal fade" id="progressModel" role="dialog">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Confirmation: Sent Files</h4>
+        </div>
+        <div class="modal-body">
+        <table class="table table-bordered" id='id-file-table-confirmation'>
+	    <tbody>
+	    </tbody>
+	  </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="btn-approve" class="btn btn-default">Approve</button> <!-- data-dismiss="modal" -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+ 
