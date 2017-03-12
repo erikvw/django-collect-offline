@@ -3,7 +3,7 @@
 </div>
 <div id='id-transfer-div' class="panel panel-info">
 	<div class="panel-heading">
- 		Transactions <div id="id-div-resource-alert"></div><span id="id-tx-spinner" class="fa fa-refresh pull-right"></span>
+ 		Transfer to the server. <div id="id-div-resource-alert"></div><span id="id-tx-spinner" class="fa fa-refresh pull-right"></span>
 	</div>
 	<div class="clearfix"></div>
 	<div class="panel-body">
@@ -32,6 +32,20 @@
 	    <tbody>
 	    </tbody>
 	  </table>
+ </div>
+ 
+<div id='id-transfer-div' class="panel panel-info">
+	<div class="panel-heading">
+ 		Transfer to USB <div id="id-div-resource-alert"></div><span id="id-tx-spinner" class="fa fa-refresh pull-right"></span>
+	</div>
+	<div class="clearfix"></div>
+	<div class="panel-body">
+		<p>
+			<span id="">Pending Transactions</span>
+			<span id="id-pending-transactions-middleman" class="badge">0</span>
+			<button id="btn-sync-middleman" type="button" class="btn btn-warning pull-right">Send to USB</button>
+		</p>
+	</div>
  </div>
  
  {% if pending_files %}
@@ -66,19 +80,6 @@
  </div>
 {% endif %}
 
-<!-- <div id='id-transfer-div' class="panel panel-info" styles="display:none">
-	<div class="panel-heading">
- 		Middleman <div id="id-div-resource-alert"></div><span id="id-tx-spinner" class="fa fa-refresh pull-right"></span>
-	</div>
-	<div class="clearfix"></div>
-	<div class="panel-body">
-		<p>
-			<span id="">Pending Transactions</span>
-			<span id="id-pending-transactions-middleman" class="badge">0</span>
-			<button id="btn-sync-middleman" type="button" class="btn btn-warning pull-right">Send to USB</button>
-		</p>
-	</div>
- </div> -->
  
  {% if recent_sent_tx %}
   <div id='id-history' class="panel panel-success">

@@ -1,10 +1,6 @@
-import shutil
 import json
 import socket
-import requests
 import os
-
-from os.path import join
 
 from django.apps import apps as django_apps
 from django.conf import settings
@@ -135,7 +131,11 @@ class DumpToUsbView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
         if request.is_ajax():
             if request.GET.get('action') == 'check_usb_connection':
                 if os.path.exists('/Volumes/BCPP'):
-                    response_data.update({'connection': True})
+                    response_data.update({'error': False})
+                else:
+                    response_data.update({
+                        'error': True,
+                        'error_message': 'USB not connected. Please connect BCPP USB.'})
             elif request.GET.get('action') == 'dump_to_usb':
                 usb_dump = DumpToUsb()
                 if usb_dump.is_dumped_to_usb:
@@ -143,11 +143,21 @@ class DumpToUsbView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
                         'error': False,
                         'filename': usb_dump.filename,
                         'messages': transaction_messages.messages()}
+                else:
+                    response_data = {
+                        'error': True,
+                        'messages': transaction_messages.messages()}
             elif request.GET.get('action') == 'load_json_file':
                 usb_file = TransactionLoadUsbFile()
                 if usb_file.is_usb_transaction_file_loaded:
                     response_data = {
                         'error': False,
+                        'messages': transaction_messages.messages(),
+                        'usb_files': usb_file.usb_files}
+                else:
+                    response_data = {
+                        'error': False,
+                        'usb_files': usb_file.usb_files,
                         'messages': transaction_messages.messages()}
             return HttpResponse(json.dumps(response_data), content_type='application/json')
         return self.render_to_response(context)
@@ -212,15 +222,18 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
             'error': False,
             'messages': transaction_messages.messages(),
         }
+        actions = [
+            'dump_transaction_file', 'transfer_transaction_file',
+            'get_file_transfer_progress', 'approve_files', 'pending_files']
         if request.is_ajax():
             transaction_messages.clear()
-            connected = self.tx_file_manager.is_server_available()
+            action = request.GET.get('action') in actions
+            connected = self.tx_file_manager.is_server_available() if action else False
             if connected:
                 if request.GET.get('action') == 'dump_transaction_file':
                     # dump transactions to a file
                     source_folder = django_apps.get_app_config('edc_sync_files').source_folder
                     dump = TransactionDumps(source_folder)
-                    print("dump.is_exported_to_json", dump.is_exported_to_json)
                     if dump.is_exported_to_json[0]:
                         response_data.update({
                             'transactionFiles': self.tx_file_manager.file_transfer.files_dict,

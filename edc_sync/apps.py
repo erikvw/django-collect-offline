@@ -24,6 +24,7 @@ class AppConfig(DjangoAppConfig):
     edc_sync_files_using = False
     base_template_name = 'edc_base/base.html'
     server_ip = None
+    role = None
 
     def ready(self):
         from .signals import create_auth_token, serialize_on_post_delete, serialize_m2m_on_save, serialize_on_save
@@ -32,17 +33,17 @@ class AppConfig(DjangoAppConfig):
             sys.stdout.write(style.NOTICE(
                 ' Warning: Project uses \'edc_sync\' but has not defined a role for this '
                 'app instance. See AppConfig.\n'))
-        sys.stdout.write(
-            '  * device is a {} with ID {}\n'.format(self.role.lower(), self.device_id))
+#         sys.stdout.write(
+#             '  * device is a {} with ID {}\n'.format(self.role.lower()))
         site_sync_models.autodiscover()
         sys.stdout.write(' Done loading {}.\n'.format(self.verbose_name))
 
-    @property
-    def role(self):
-        """Return the role of this device.
-
-        Role is configured through edc_device. Se edc_device.apps.AppConfig."""
-        return django_apps.get_app_config('edc_device').role
+#     @property
+#     def role(self):
+#         """Return the role of this device.
+#
+#         Role is configured through edc_device. Se edc_device.apps.AppConfig."""
+#         return django_apps.get_app_config('edc_device').role
 
     @property
     def server(self):
