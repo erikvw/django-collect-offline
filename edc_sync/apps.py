@@ -33,17 +33,17 @@ class AppConfig(DjangoAppConfig):
             sys.stdout.write(style.NOTICE(
                 ' Warning: Project uses \'edc_sync\' but has not defined a role for this '
                 'app instance. See AppConfig.\n'))
-#         sys.stdout.write(
-#             '  * device is a {} with ID {}\n'.format(self.role.lower()))
+        sys.stdout.write(
+            '  * device is a {} with ID {}\n'.format(self.device_id, self.role.lower()))
         site_sync_models.autodiscover()
         sys.stdout.write(' Done loading {}.\n'.format(self.verbose_name))
 
-#     @property
-#     def role(self):
-#         """Return the role of this device.
-#
-#         Role is configured through edc_device. Se edc_device.apps.AppConfig."""
-#         return django_apps.get_app_config('edc_device').role
+    @property
+    def role(self):
+        """Return the role of this device.
+
+        Role is configured through edc_device. Se edc_device.apps.AppConfig."""
+        return django_apps.get_app_config('edc_device').role
 
     @property
     def server(self):
