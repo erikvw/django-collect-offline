@@ -3,7 +3,7 @@
 </div>
 <div id='id-transfer-div' class="panel panel-info">
 	<div class="panel-heading">
- 		Transactions <div id="id-div-resource-alert"></div><span id="id-tx-spinner" class="fa fa-refresh pull-right"></span>
+ 		Transfer to the server. <div id="id-div-resource-alert"></div><span id="id-tx-spinner" class="fa fa-refresh pull-right"></span>
 	</div>
 	<div class="clearfix"></div>
 	<div class="panel-body">
@@ -34,6 +34,53 @@
 	  </table>
  </div>
  
+<div id='id-transfer-div' class="panel panel-info">
+	<div class="panel-heading">
+ 		Transfer to USB <div id="id-div-resource-alert"></div><span id="id-tx-spinner" class="fa fa-refresh pull-right"></span>
+	</div>
+	<div class="clearfix"></div>
+	<div class="panel-body">
+		<p>
+			<span id="">Pending Transactions</span>
+			<span id="id-pending-transactions-middleman" class="badge">0</span>
+			<button id="btn-sync-middleman" type="button" class="btn btn-warning pull-right">Send to USB</button>
+		</p>
+	</div>
+ </div>
+ 
+ {% if pending_files %}
+ <div id='id-in-progress-div-pending-files' class="panel panel-default">
+	<div class='alert alert-warning' id="progress-status-div-pending">
+ 		Pending files
+		<button id="btn-send-again" type="button" class="btn btn-warning pull-right">Send</button>
+	</div>
+	<table class="table table-bordered" id='id-file-table-pending'>
+	    <thead>
+	      <tr>
+	      	<th></th>
+	        <th>File</th>
+	        <th>Size</th>
+	        <th>Status</th>
+	      </tr>
+	    </thead>
+	    <tbody>
+	    	{% for file in pending_files %}
+	    	<tr><td><td>{{file.filename}}</td><td>{{file.filesize}}</td>
+	    		<td>
+    				{% if file.sent %}
+			        	<span class="glyphicon glyphicon-ok"></span> 
+			        {% else %}
+			        	<span class="glyphicon glyphicon-remove"></span>
+			        {% endif %}
+	    		</td>
+	    	</tr>
+	    	{% endfor %}
+	    </tbody>
+	  </table>
+ </div>
+{% endif %}
+
+ 
  {% if recent_sent_tx %}
   <div id='id-history' class="panel panel-success">
 	<div class='alert alert-success' id="progress-status-div-hist">
@@ -49,14 +96,22 @@
 	      </tr>
 	    </thead>
 	    <tbody>
-	    {% for history in recent_sent_tx %}
-	      <tr>
-	      	<th></th>
-	        <th>{{history.filename}}</th>
-	        <th>{{history.sent_datetime}}</th>
-	        <th></th>
-	      </tr>
-	       {% endfor %}
+		    {% for history in recent_sent_tx %}
+		    	{% if history.sent %}
+			      <tr>
+			      	<th></th>
+			        <th>{{history.filename}}</th>
+			        <th>{{history.sent_datetime}}</th>
+			        <th>
+				        {% if history.sent %}
+				        	<span class="glyphicon glyphicon-ok"></span> 
+				        {% else %}
+				        	<span class="glyphicon glyphicon-remove"></span>
+				        {% endif %}
+			        </th>
+			      </tr>
+			      {% endif %}
+		       {% endfor %}
 	    </tbody>
 	  </table>
  </div>

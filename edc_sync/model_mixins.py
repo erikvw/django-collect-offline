@@ -53,9 +53,13 @@ class TransactionMixin(models.Model):
         null=True,
         blank=True)
 
-    batch_seq = models.IntegerField(null=True, blank=True)
+    batch_seq = models.CharField(
+        max_length=100,
+        null=True, blank=True)
 
-    batch_id = models.IntegerField(null=True, blank=True)
+    batch_id = models.CharField(
+        max_length=100,
+        null=True, blank=True)
 
     def __repr__(self):
         return '<{}: {}>'.format(self.__class__.__name__, self.tx_name)

@@ -23,9 +23,21 @@ function edcSyncReady(server, userName, apiToken) {
         $( '#id-transfer-status-div' ).show();
     	$( '#id-transfer-status-div' ).text( 'Connecting to the server. Please wait!' );
     	$( '#id-transfer-status-div' ).removeClass( 'alert-danger' ).addClass( 'alert-warning' );
+    	$( '#id-in-progress-div-pending-files' ).hide();
         $(this).prop("disabled",true);
         dumpTransactionFile(server , userName);
     });
+    
+    $('#btn-send-again').click( function(e) {
+        e.preventDefault();
+        $( '#id-transfer-status-div' ).show();
+    	$( '#id-transfer-status-div' ).text( 'Connecting to the server. Please wait!' );
+    	$( '#id-transfer-status-div' ).removeClass( 'alert-danger' ).addClass( 'alert-warning' );
+    	$( '#id-transfer-div' ).hide();
+        $(this).prop("disabled",true);
+        processPendingFiles();
+    });
+
 
     $( '#btn-approve' ).click( function(e) {
     	saveApproval();
@@ -58,8 +70,7 @@ function dumpTransactionFile(server , userName) {
 			$( '#id-transfer-div' ).hide();
 			$( '#id-in-progress-div' ).show();
 			$( '#id-transfer-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-success' );
-			$( '#id-transfer-status-div' ).text('Connected to the server.')
-			
+			$( '#id-transfer-status-div' ).text('Connected to the server.');
 			//display files
 			$.each( data.transactionFiles, function(index,  file  ) {
 				index = index + 1;
@@ -77,12 +88,23 @@ function dumpTransactionFile(server , userName) {
 		} else {
 			$( '#btn-sync').prop( "disabled", false );
 			$( '#id-transfer-status-div' ).show();
-			$( '#id-transfer-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-danger' );
 			var error = "";
 			$.each( data.messages, function(index,  message  ) {
-				error = message.error.network
+				try {
+					error = message.error.network;
+					if( error !== void 0) {
+						$( '#id-transfer-status-div' ).text('Network Error, unable to connect to the server. Got '+error);
+					}
+				} catch(err) { }
+				
+				try {
+					error = message.error.permission;
+					if( error !== void 0) {
+						$( '#id-transfer-status-div' ).text('An error occurred. Got, '+error);
+					}
+				} catch(err) { }
 			});
-			$( '#id-transfer-status-div' ).text('Network Error, unable to connect to the server. Got '+error);
+			$( '#id-transfer-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-danger' );
 		}
 	});
 
@@ -205,9 +227,11 @@ function updateFromHost( host ) {
 	ajTransactionCount.done( function ( data ) {
 		if ( data != null ) {
 			$( '#id-pending-transactions').text(' ' + data.outgoingtransaction_count);
+			$( '#id-pending-transactions-middleman').text(' '+ data.outgoingtransaction_count);
 			if( data.outgoingtransaction_count == 0 ) {
 				$( '#btn-sync' ).removeClass( 'btn-warning' ).addClass( 'btn-default' );
-			}
+				$( '#btn-sync-middleman' ).removeClass( 'btn-warning' ).addClass( 'btn-default' );
+			} 
 		}
 	});
 }
@@ -253,3 +277,70 @@ function saveApproval() {
 		});
 	}
 }
+
+
+function processPendingFiles() {
+	var url = client + '/edc_sync/';
+	var ajPendingFiles = $.ajax({
+		url: url,
+		type: 'GET',
+		dataType: 'json ',
+		processData: true,
+		data: {'action': 'pending_files'},
+	});
+	
+	ajPendingFiles.done( function( data ) {
+		//display files
+		if(data.error == false) {
+			$( '#id-transfer-div' ).hide();
+			$( '#id-in-progress-div' ).show();
+			$( '#id-transfer-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-success' );
+			$( '#id-transfer-status-div' ).text('Connected to the server.');
+			$( '#id-in-progress-div-pending-files' ).hide();
+
+			$.each( data.pendingFiles, function(index,  file  ) {
+				index = index + 1;
+				var txFile = new File(file.filename, file.filesize, index);
+				fileObjs.push(txFile);
+				var spanFile = "<span class='glyphicon glyphicon-level-up'></span>";
+				$("<tr><td>" + index + "</td><td>" + spanFile +" "+ file.filename + "</td><td>" + file.filesize + "</td><td></td></tr>").appendTo("#id-file-table tbody");
+			});
+
+		} else {
+
+			$( '#btn-send-again').prop( "disabled", false );
+			$( '#id-transfer-status-div' ).show();
+			var error = "";
+			$.each( data.messages, function(index,  message  ) {
+				try {
+					error = message.error.network;
+					$( '#id-transfer-status-div' ).text('Network Error, unable to connect to the server. Got '+error);
+				} catch(err) { }
+				
+				try {
+					error = message.error.permission;
+					if( error !== void 0){
+						$( '#id-transfer-status-div' ).text('An error occurred. Got, '+error);
+					}
+				} catch(err) { }
+			});
+			$( '#id-transfer-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-danger' );
+		}
+		
+	});
+	
+	ajPendingFiles.then( function( data ) {
+		var firstFile = window.fileObjs[0];
+		//$( "tr:eq( " +firstFile.index+ " )" ).find('td:eq(3)').html("<span class='fa fa-spinner fa-spin'></span>");
+		sendTransactionFile(firstFile);
+	});
+	
+	ajPendingFiles.fail(function(jqXHR, textStatus, errorThrown) {
+
+		$( '#progress-status-div' ).text('An error occured. Got ' + error);
+		$( '#progress-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-danger' );
+	});
+	
+}
+
+

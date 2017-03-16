@@ -1,8 +1,6 @@
 import json
 import socket
-import requests
 import os
-
 
 from django.apps import apps as django_apps
 from django.conf import settings
@@ -25,16 +23,19 @@ from rest_framework.reverse import reverse
 from rest_framework.views import APIView
 
 from edc_base.view_mixins import EdcBaseViewMixin
+from edc_device.constants import SERVER
+from edc_sync_files.classes import DumpToUsb, TransactionLoadUsbFile
+from edc_sync_files.classes import TransactionDumps
+from edc_sync_files.classes import TransactionFileManager
+from edc_sync_files.classes import transaction_messages
+from edc_sync_files.models import History
+from edc_sync_files.models.upload_transaction_file import UploadTransactionFile
 
 from .admin import edc_sync_admin
 from .edc_sync_view_mixin import EdcSyncViewMixin
 from .models import OutgoingTransaction, IncomingTransaction
 from .serializers import OutgoingTransactionSerializer, IncomingTransactionSerializer
 from .site_sync_models import site_sync_models
-from edc_sync_files.classes import TransactionDumps
-from edc_sync_files.classes import TransactionFileManager
-from edc_sync_files.classes import transaction_messages
-from edc_sync_files.models import History
 
 
 @api_view(['GET'])
@@ -120,6 +121,48 @@ class RenderView(EdcBaseViewMixin, TemplateView):
         return context
 
 
+class DumpToUsbView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        response_data = {
+            'error': False,
+            'messages': transaction_messages.messages()}
+        if request.is_ajax():
+            if request.GET.get('action') == 'check_usb_connection':
+                if os.path.exists('/Volumes/BCPP'):
+                    response_data.update({'error': False})
+                else:
+                    response_data.update({
+                        'error': True,
+                        'error_message': 'USB not connected. Please connect BCPP USB.'})
+            elif request.GET.get('action') == 'dump_to_usb':
+                usb_dump = DumpToUsb()
+                if usb_dump.is_dumped_to_usb:
+                    response_data = {
+                        'error': False,
+                        'filename': usb_dump.filename,
+                        'messages': transaction_messages.messages()}
+                else:
+                    response_data = {
+                        'error': True,
+                        'messages': transaction_messages.messages()}
+            elif request.GET.get('action') == 'load_json_file':
+                usb_file = TransactionLoadUsbFile()
+                if usb_file.is_usb_transaction_file_loaded:
+                    response_data = {
+                        'error': False,
+                        'messages': transaction_messages.messages(),
+                        'usb_files': usb_file.usb_files}
+                else:
+                    response_data = {
+                        'error': False,
+                        'usb_files': usb_file.usb_files,
+                        'messages': transaction_messages.messages()}
+            return HttpResponse(json.dumps(response_data), content_type='application/json')
+        return self.render_to_response(context)
+
+
 class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
     template_name = 'edc_sync/home.html'
@@ -127,7 +170,17 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
     tx_file_manager = TransactionFileManager()
 
     def recent_sent_transactions(self):
-        return History.objects.all().order_by('created')[:20]
+        return History.objects.filter(
+            sent=True).order_by('-created')[:20]
+
+    def upload_transaction_files(self):
+        if django_apps.get_app_config('edc_sync_files').role == SERVER:
+            files = UploadTransactionFile.objects.filter(
+                not_consumed__gt=0, is_played=False)
+            return files
+        else:
+            return []
+        return []
 
     def __init__(self, *args, **kwargs):
         super(HomeView, self).__init__(*args, **kwargs)
@@ -150,7 +203,7 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
     @property
     def ip_address(self):
-        return django_apps.get_app_config('edc_sync').server
+        return django_apps.get_app_config('edc_sync').role
 
     @property
     def cors_origin_whitelist(self):
@@ -162,17 +215,26 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
+        context.update({
+            'pending_files': self.tx_file_manager.pending_files(),
+            'upload_transaction_files': self.upload_transaction_files()})
         response_data = {
             'error': False,
-            'messages': transaction_messages.messages()}
+            'messages': transaction_messages.messages(),
+        }
+        actions = [
+            'dump_transaction_file', 'transfer_transaction_file',
+            'get_file_transfer_progress', 'approve_files', 'pending_files']
         if request.is_ajax():
-            connected = self.tx_file_manager.is_server_available()
+            transaction_messages.clear()
+            action = request.GET.get('action') in actions
+            connected = self.tx_file_manager.is_server_available() if action else False
             if connected:
                 if request.GET.get('action') == 'dump_transaction_file':
                     # dump transactions to a file
                     source_folder = django_apps.get_app_config('edc_sync_files').source_folder
                     dump = TransactionDumps(source_folder)
-                    if dump.is_exported_to_json:
+                    if dump.is_exported_to_json[0]:
                         response_data.update({
                             'transactionFiles': self.tx_file_manager.file_transfer.files_dict,
                             'messages': transaction_messages.messages()
@@ -196,6 +258,11 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
                     if files:
                         files = files.split(',')
                         self.tx_file_manager.approve_transfer_files(files)
+                elif request.GET.get('action') == 'pending_files':
+                    response_data.update({
+                        'messages': transaction_messages.messages(),
+                        'pendingFiles': self.tx_file_manager.pending_files(),
+                        'error': False})
             else:
                 host = django_apps.get_app_config(
                     'edc_sync_files').host
@@ -204,7 +271,6 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
                     'host': host,
                     'messages': transaction_messages.messages(),
                 })
-            print(transaction_messages.messages())
             return HttpResponse(json.dumps(response_data), content_type='application/json')
         return self.render_to_response(context)
 

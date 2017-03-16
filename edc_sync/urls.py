@@ -18,6 +18,8 @@ urlpatterns = [
     url(r'^admin/', edc_sync_admin.urls),
     url(r'^api/transaction-count/$',
         views.TransactionCountView.as_view(), name='transaction-count'),
+    url(r'^dump-to-usb/$',
+        views.DumpToUsbView.as_view(), name='dump-to-usb'),
     url(r'^api/', include(router.urls)),
     # url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     # will reply given username and password
