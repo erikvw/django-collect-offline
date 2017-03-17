@@ -230,7 +230,8 @@ function updateFromHost( host ) {
 			$( '#id-pending-transactions-middleman').text(' '+ data.outgoingtransaction_count);
 			if( data.outgoingtransaction_count == 0 ) {
 				$( '#btn-sync' ).removeClass( 'btn-warning' ).addClass( 'btn-default' );
-			}
+				$( '#btn-sync-middleman' ).removeClass( 'btn-warning' ).addClass( 'btn-default' );
+			} 
 		}
 	});
 }

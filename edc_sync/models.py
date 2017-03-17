@@ -15,7 +15,8 @@ edc_device_app_config = django_apps.get_app_config('edc_device')
 
 class IncomingTransaction(TransactionMixin, BaseUuidModel):
 
-    """ Transactions received from a remote host. """
+    """ Transactions received from a remote host.
+    """
 
     check_hostname = None
 
@@ -109,7 +110,9 @@ class HostManager(models.Manager):
 
 class Client(HostModelMixin, BaseUuidModel):
 
-    """A model to capture the attributes of hosts (clients) to be contacted by the server."""
+    """A model to capture the attributes of hosts (clients) to be
+    contacted by the server.
+    """
 
     objects = HostManager()
 
@@ -121,7 +124,8 @@ class Client(HostModelMixin, BaseUuidModel):
 
 class Server(HostModelMixin, BaseUuidModel):
 
-    """A model to capture the attributes of the server."""
+    """A model to capture the attributes of the server.
+    """
 
     objects = HostManager()
 

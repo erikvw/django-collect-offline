@@ -8,7 +8,8 @@ from .choices import ACTIONS
 
 class TransactionMixin(models.Model):
 
-    """Abstract model class for Incoming and Outgoing transactions."""
+    """Abstract model class for Incoming and Outgoing transactions.
+    """
 
     tx = models.BinaryField()
 
@@ -94,7 +95,8 @@ class TransactionMixin(models.Model):
 
 class HostModelMixin(models.Model):
 
-    """Abstract class for hosts (either client or server)."""
+    """Abstract class for hosts (either client or server).
+    """
 
     hostname = models.CharField(
         max_length=200,

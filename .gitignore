@@ -9,6 +9,7 @@ etc
 db.sqlite3*
 example/db.sqlite3.server
 example/static/
+edc_sync/static/
 # C extensions
 *.so
 
