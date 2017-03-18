@@ -240,7 +240,7 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
                     # dump transactions to a file
                     source_folder = django_apps.get_app_config('edc_sync_files').source_folder
                     dump = TransactionDumps(source_folder)
-                    if dump.is_exported_to_json[0]:
+                    if dump.is_exported_to_json:
                         response_data.update({
                             'transactionFiles': self.tx_file_manager.file_transfer.files_dict,
                             'messages': transaction_messages.messages()
