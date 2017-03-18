@@ -125,6 +125,7 @@ class DumpToUsbView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
+        transaction_messages.clear()
         response_data = {
             'error': False,
             'messages': transaction_messages.messages()}
@@ -133,8 +134,12 @@ class DumpToUsbView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
                 if os.path.exists('/Volumes/BCPP'):
                     response_data.update({'error': False})
                 else:
+                    transaction_messages.add_message(
+                        'error', 'USB not connected. Please connect BCPP USB.',
+                        network=True)
                     response_data.update({
                         'error': True,
+                        'messages': transaction_messages.messages(),
                         'error_message': 'USB not connected. Please connect BCPP USB.'})
             elif request.GET.get('action') == 'dump_to_usb':
                 usb_dump = DumpToUsb()
@@ -230,6 +235,7 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
             action = request.GET.get('action') in actions
             connected = self.tx_file_manager.is_server_available() if action else False
             if connected:
+                action = False
                 if request.GET.get('action') == 'dump_transaction_file':
                     # dump transactions to a file
                     source_folder = django_apps.get_app_config('edc_sync_files').source_folder
