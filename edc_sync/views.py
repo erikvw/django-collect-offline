@@ -208,7 +208,7 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
     @property
     def ip_address(self):
-        return django_apps.get_app_config('edc_sync').role
+        return django_apps.get_app_config('edc_sync_files').host
 
     @property
     def cors_origin_whitelist(self):
