@@ -21,10 +21,7 @@ class SyncConfigError(Exception):
 class AppConfig(DjangoAppConfig):
     name = 'edc_sync'
     verbose_name = 'Data Synchronization'
-    edc_sync_files_using = False
     base_template_name = 'edc_base/base.html'
-    server_ip = None
-    role = None
 
     def ready(self):
         from .signals import create_auth_token, serialize_on_post_delete, serialize_m2m_on_save, serialize_on_save
@@ -46,16 +43,6 @@ class AppConfig(DjangoAppConfig):
         return django_apps.get_app_config('edc_device').role
 
     @property
-    def server(self):
-        if self.role == CLIENT:
-            if not self.server_ip:
-                raise SyncConfigError(
-                    'Provide server ip address, it is required '
-                    'for synchronization.')
-            else:
-                return self.server_ip
-
-    @property
     def device_id(self):
         """Return the ID of this device.
 
@@ -64,9 +51,6 @@ class AppConfig(DjangoAppConfig):
 
 
 class EdcSyncFilesAppConfig(BaseEdcSyncFilesAppConfig):
-    edc_sync_files_using = True
-    config_subfolder_name = 'bcpp'
-    role = CLIENT
     #
     user = 'django'
     host = '192.168.1.85'
