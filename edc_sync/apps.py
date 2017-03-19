@@ -1,15 +1,11 @@
 import sys
-import os
 
 from django.apps import AppConfig as DjangoAppConfig
 from django.apps import apps as django_apps
-from django.conf import settings
 from django.core.management.color import color_style
 
 from .site_sync_models import site_sync_models
 
-from edc_sync.constants import CLIENT
-from edc_sync_files.apps import AppConfig as BaseEdcSyncFilesAppConfig
 
 style = color_style()
 
@@ -24,7 +20,9 @@ class AppConfig(DjangoAppConfig):
     base_template_name = 'edc_base/base.html'
 
     def ready(self):
-        from .signals import create_auth_token, serialize_on_post_delete, serialize_m2m_on_save, serialize_on_save
+        from .signals import (
+            create_auth_token, serialize_on_post_delete,
+            serialize_m2m_on_save, serialize_on_save)
         sys.stdout.write('Loading {} ...\n'.format(self.verbose_name))
         if not self.role:
             sys.stdout.write(style.NOTICE(
@@ -48,16 +46,3 @@ class AppConfig(DjangoAppConfig):
 
         Device ID is configured through edc_device. Se edc_device.apps.AppConfig."""
         return django_apps.get_app_config('edc_device').device_id
-
-
-class EdcSyncFilesAppConfig(BaseEdcSyncFilesAppConfig):
-    #
-    user = 'django'
-    host = '192.168.1.85'
-    password = None
-    source_folder = os.path.join(
-        settings.MEDIA_ROOT, 'transactions', 'outgoing')
-    destination_folder = os.path.join(
-        settings.MEDIA_ROOT, 'transactions', 'incoming')
-    archive_folder = os.path.join(
-        settings.MEDIA_ROOT, 'transactions', 'archive')
