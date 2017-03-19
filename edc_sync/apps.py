@@ -1,15 +1,11 @@
 import sys
-import os
 
 from django.apps import AppConfig as DjangoAppConfig
 from django.apps import apps as django_apps
-from django.conf import settings
 from django.core.management.color import color_style
 
+from .constants import CLIENT
 from .site_sync_models import site_sync_models
-
-from edc_sync.constants import CLIENT
-from edc_sync_files.apps import AppConfig as BaseEdcSyncFilesAppConfig
 
 style = color_style()
 
@@ -21,10 +17,7 @@ class SyncConfigError(Exception):
 class AppConfig(DjangoAppConfig):
     name = 'edc_sync'
     verbose_name = 'Data Synchronization'
-    edc_sync_files_using = False
     base_template_name = 'edc_base/base.html'
-    server_ip = None
-    role = None
 
     def ready(self):
         from .signals import create_auth_token, serialize_on_post_delete, serialize_m2m_on_save, serialize_on_save
@@ -61,19 +54,3 @@ class AppConfig(DjangoAppConfig):
 
         Device ID is configured through edc_device. Se edc_device.apps.AppConfig."""
         return django_apps.get_app_config('edc_device').device_id
-
-
-class EdcSyncFilesAppConfig(BaseEdcSyncFilesAppConfig):
-    edc_sync_files_using = True
-    config_subfolder_name = 'bcpp'
-    role = CLIENT
-    #
-    user = 'django'
-    host = '192.168.1.85'
-    password = None
-    source_folder = os.path.join(
-        settings.MEDIA_ROOT, 'transactions', 'outgoing')
-    destination_folder = os.path.join(
-        settings.MEDIA_ROOT, 'transactions', 'incoming')
-    archive_folder = os.path.join(
-        settings.MEDIA_ROOT, 'transactions', 'archive')
