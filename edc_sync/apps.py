@@ -4,7 +4,6 @@ from django.apps import AppConfig as DjangoAppConfig
 from django.apps import apps as django_apps
 from django.core.management.color import color_style
 
-from .constants import CLIENT
 from .site_sync_models import site_sync_models
 
 style = color_style()
@@ -20,7 +19,9 @@ class AppConfig(DjangoAppConfig):
     base_template_name = 'edc_base/base.html'
 
     def ready(self):
-        from .signals import create_auth_token, serialize_on_post_delete, serialize_m2m_on_save, serialize_on_save
+        from .signals import (
+            create_auth_token, serialize_on_post_delete,
+            serialize_m2m_on_save, serialize_on_save)
         sys.stdout.write('Loading {} ...\n'.format(self.verbose_name))
         if not self.role:
             sys.stdout.write(style.NOTICE(
@@ -37,16 +38,6 @@ class AppConfig(DjangoAppConfig):
 
         Role is configured through edc_device. Se edc_device.apps.AppConfig."""
         return django_apps.get_app_config('edc_device').role
-
-    @property
-    def server(self):
-        if self.role == CLIENT:
-            if not self.server_ip:
-                raise SyncConfigError(
-                    'Provide server ip address, it is required '
-                    'for synchronization.')
-            else:
-                return self.server_ip
 
     @property
     def device_id(self):
