@@ -69,7 +69,9 @@ class IncomingTransaction(TransactionMixin, BaseUuidModel):
         return self._deserialize_insert_tx(deserialized_object)
 
     def _deserialize_delete_tx(self, deserialized_object, using=None):
-        pass
+        with transaction.atomic():
+            deserialized_object.object.delete()
+        return 1
 
     class Meta:
         app_label = 'edc_sync'
