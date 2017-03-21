@@ -58,6 +58,16 @@
     </div>
 
     <div id="div-home-middle" class="col-md-4">
+     	{% if edc_sync_role == 'Server' %}
+          <div class="panel panel-default">
+            <div class="panel-heading">Report</div>
+	            <ul id="nav-pill-admin">
+	            	<li>
+	            		<a href="{% url 'edc_sync:sync-report' %}"><i class="fa fa-bar-chart" aria-hidden="true"> Transaction Report</i></a>
+	            	</li>
+	            </ul>
+        	</div>
+        {% endif %}
         <div class="panel panel-default">
             <div class="panel-heading">Administration</div>
             <ul id="nav-pill-admin" class="nav nav-pills nav-stacked">
