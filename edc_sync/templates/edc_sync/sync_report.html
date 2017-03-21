@@ -1,0 +1,58 @@
+{% extends 'edc_base/base.html' %}
+
+{% load staticfiles %}
+
+{% block extra-scripts %}
+
+{{ block.super }}
+  
+{% endblock extra-scripts %}
+
+{% block main %}
+    <!-- Page Content -->
+    <div class="container">
+
+        <!-- Page Header -->
+        <div class="row">
+            <div class="col-lg-12">
+                <h4 class="page-header">Transactions Report
+                </h4>
+            </div>
+        </div>
+        <!-- /.row -->
+
+        <!-- Projects Row -->
+        {% for row_data in report_data %}
+		        <div class="row">
+		        	{% for data in row_data %}
+			            <div class="col-md-3 portfolio-item">
+			                <ul class="list-group">
+							  <li class="list-group-item">
+							    <span class="badge badge-error">{{data.total_unconsumed}}</span>
+							   Pending Transactions
+							  </li>
+							  <li class="list-group-item">
+							    <span class="badge badge-success">{{data.total_consumed}}</span>
+							   Total Consumed
+							  </li>
+							  <li class="list-group-item">
+							  	Last Synced:
+							    <span>{{data.upload_transaction_file.created}}</span>
+							  </li>
+							  <li class="list-group-item">
+				                <h4>
+				                    <a href="#">{{data.producer}}</a>
+				                </h4>
+							  </li>
+							 </ul>
+			            </div>
+		            {% endfor %}
+		        </div>
+	       {% endfor %}
+	       <div class="row">
+			    {% if not report_data %}
+		        	<div class="well well-sm alert alert-warning">Not data to generate report.</div>
+		        {% endif %}
+	         </div>
+        </div>
+{% endblock main %}

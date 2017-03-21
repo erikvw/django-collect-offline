@@ -16,8 +16,8 @@ class EdcSyncViewMixin:
 
     @property
     def role(self):
-        edc_sync_app = django_apps.get_app_config('edc_sync')
-        return edc_sync_app.role
+        edc_device_app = django_apps.get_app_config('edc_device')
+        return edc_device_app.role
 
     @property
     def host_model(self):
