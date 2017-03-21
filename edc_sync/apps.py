@@ -28,7 +28,8 @@ class AppConfig(DjangoAppConfig):
                 ' Warning: Project uses \'edc_sync\' but has not defined a role for this '
                 'app instance. See AppConfig.\n'))
         sys.stdout.write(
-            '  * device is a {} with ID {}\n'.format(self.device_id, self.role.lower()))
+            '  * device is a {} with ID {}\n'.format(
+                self.device_id, self.role.lower()))
         site_sync_models.autodiscover()
         sys.stdout.write(' Done loading {}.\n'.format(self.verbose_name))
 
