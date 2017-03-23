@@ -1,0 +1,85 @@
+{% extends 'edc_base/base.html' %}
+
+{% load staticfiles %}
+
+{% block extra-scripts %}
+
+{{ block.super }}
+    
+	<link rel="stylesheet" type="text/css" href="{% static "edc_sync/css/badge-with-color.css" %}">
+	<link rel="stylesheet" type="text/css" href="{% static "edc_sync/css/morris.css" %}">
+	<script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/morris.js" %}"></script>
+	<script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/morris.min.js" %}"></script>
+	<script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/raphael-min.js" %}"></script>
+    
+{% endblock extra-scripts %}
+
+{% block main %}
+    <!-- Page Content -->
+    <div class="container">
+        <!-- Page Header -->
+        <div class="row">
+            <div class="col-lg-12">
+                <h4 class="page-header">Transactions Report
+                </h4>
+            </div>
+        </div>
+        <!-- /.row -->
+	{% if transaction_files %}
+	<div class="row">
+		<div class="col-md-8">
+			<div class="panel-body">
+				<div id="transaction-bar-chart"></div>
+			</div>
+		</div>
+		<div class="col-md-4">
+			<div class="panel panel-default">
+            	<div class="panel-heading">
+            	  Recent Transactions Files
+                </div>
+                <div class="panel-body">
+					<div class="list-group">
+						{% for transaction_file in transaction_files %}
+	                       <a href="#" class="list-group-item">
+	                           <i class="fa fa-comment fa-fw"></i> {{transaction_file.files}}
+	                           <span class="pull-right text-muted small">
+	                           		<em>{{transaction_file.created}}</em>
+	                           </span>
+	                       </a>
+                       {% endfor %}
+                    </div>
+                </div>
+            </div>
+		</div>
+	</div>
+	% else %}
+		<div> No report.</div>
+	{% endif %}
+ </div>
+ <script>
+ $(document).ready(function() {
+	 var data = {}
+	 var producer = '';
+		var localhost = 'http://' + document.location.host	
+		var ajData = $.ajax({
+			url: localhost + '/sync-report-detail/',
+			type: 'GET',
+			dataType: 'json ',
+			processData: true,
+			data:{'producer': producer}
+		});
+	 ajData.done(function( data ){
+	 	window.data = data
+	 });
+		
+	new Morris.Bar({
+		  element: 'transaction-bar-chart',
+		  data: window.data,
+		  xkey: 'y',
+		  ykeys: ['total_consumed', 'total_not_consumed'],
+		  labels: ['Consumed ', 'Not Consumed']
+	});
+ });
+ 
+</script>
+{% endblock main %}

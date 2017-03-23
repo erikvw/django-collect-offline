@@ -7,7 +7,7 @@ from .models import OutgoingTransaction, IncomingTransaction
 class Consumer(object):
 
     def __init__(
-            self, transactions=[], using='default', model_name=None,
+            self, transactions=[], using=None, model_name=None,
             verbose=True, producer_name=None, check_hostname=None):
         self.model_name = model_name
         self.producer_name = producer_name

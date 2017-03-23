@@ -230,7 +230,7 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
                         'error': False})
             else:
                 host = django_apps.get_app_config(
-                    'edc_sync_files').host
+                    'edc_sync_files').remote_host
                 response_data.update({
                     'error': True,
                     'host': host,

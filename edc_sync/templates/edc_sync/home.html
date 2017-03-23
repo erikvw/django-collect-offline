@@ -7,7 +7,7 @@
 {{ block.super }}
    <script type="text/javascript" charset="utf8" src="{% static "django_js_reverse/js/reverse.js" %}"></script>	
   <!-- begin edc_sync extra-scripts -->
-  {% if edc_sync_role == 'Server' %}
+  {% if edc_sync_role == "NodeServer" %}
  	  <script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/middleman.js" %}"></script>
 	  <script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/edc_sync.js" %}"></script>
 	  <script type="text/javascript" charset="utf8" class="init">
@@ -47,7 +47,7 @@
                 <li><a href="#">{{ edc_sync_role|title }}: {{ hostname }} <span class="pull-right">{{ ip_address }}</span></a></li>
             </ul>
         </div>
-        {% if edc_sync_role == 'Server' %}
+        {% if edc_sync_role == "NodeServer" %}
             {% include 'edc_sync/server.html' %}
         {% elif edc_sync_role == 'Client' %}
         	{% include 'edc_sync/client.html' %}
@@ -58,7 +58,7 @@
     </div>
 
     <div id="div-home-middle" class="col-md-4">
-     	{% if edc_sync_role == 'Server' %}
+     	{% if edc_sync_role == "NodeServer" %}
           <div class="panel panel-default">
             <div class="panel-heading">Report</div>
 	            <ul id="nav-pill-admin">
@@ -72,7 +72,7 @@
             <div class="panel-heading">Administration</div>
             <ul id="nav-pill-admin" class="nav nav-pills nav-stacked">
                 <li><a href="{% url 'edc_sync:edc_sync_admin:index'%} ">{{ edc_sync_admin.index_title }}</a></li>
-                {% if edc_sync_role == 'Server' %}
+                {% if edc_sync_role == "NodeServer" %}
                     <li><a href="{% url 'edc_sync:edc_sync_admin:edc_sync_client_changelist'%} ">Clients</a></li>
                 {% elif edc_sync_role == 'Client' %}
                     <li><a href="{% url 'edc_sync:edc_sync_admin:edc_sync_server_changelist'%} ">Servers</a></li>
