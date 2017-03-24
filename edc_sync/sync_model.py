@@ -71,7 +71,6 @@ class SyncModel:
         """ Serialize the model instance to an AES encrypted json object
         and saves the json object to the OutgoingTransaction model."""
 
-        # TODO: i think using should always be default
         OutgoingTransaction = django_apps.get_model('edc_sync', 'OutgoingTransaction')
         created = True if created is None else created
         action = 'I' if created else 'U'

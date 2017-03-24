@@ -1,6 +1,5 @@
 import json
 import socket
-import os
 
 from django.apps import apps as django_apps
 from django.conf import settings
@@ -15,7 +14,8 @@ from django_crypto_fields.cryptor import Cryptor
 from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.decorators import (
+    api_view, authentication_classes, permission_classes)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
@@ -24,27 +24,29 @@ from rest_framework.views import APIView
 
 from edc_base.view_mixins import EdcBaseViewMixin
 from edc_device.constants import SERVER
-from edc_sync_files.classes import DumpToUsb, TransactionLoadUsbFile
 from edc_sync_files.classes import TransactionDumps
 from edc_sync_files.classes import TransactionFileManager
 from edc_sync_files.classes import transaction_messages
 from edc_sync_files.models import History
-from edc_sync_files.models.upload_transaction_file import UploadTransactionFile
+from edc_sync_files.models import UploadTransactionFile
 
-from .admin import edc_sync_admin
-from .edc_sync_view_mixin import EdcSyncViewMixin
-from .models import OutgoingTransaction, IncomingTransaction
-from .serializers import OutgoingTransactionSerializer, IncomingTransactionSerializer
-from .site_sync_models import site_sync_models
+from ..admin import edc_sync_admin
+from ..edc_sync_view_mixin import EdcSyncViewMixin
+from ..models import OutgoingTransaction, IncomingTransaction
+from ..serializers import (
+    OutgoingTransactionSerializer, IncomingTransactionSerializer)
+from ..site_sync_models import site_sync_models
 
 
 @api_view(['GET'])
-@authentication_classes((TokenAuthentication, ))
+@authentication_classes((TokenAuthentication,))
 @permission_classes((IsAuthenticated,))
 def api_root(request, format=None):
     return Response({
-        'outgoingtransaction': reverse('outgoingtransaction-list', request=request, format=format),
-        'incomingtransaction': reverse('outgoingtransaction-list', request=request, format=format),
+        'outgoingtransaction': reverse('outgoingtransaction-list',
+                                       request=request, format=format),
+        'incomingtransaction': reverse('outgoingtransaction-list',
+                                       request=request, format=format),
     })
 
 
@@ -72,9 +74,9 @@ class TransactionCountView(APIView):
     """
     A view that returns the count  of transactions.
     """
-    renderer_classes = (JSONRenderer, )
+    renderer_classes = (JSONRenderer,)
 
-    def get(self, request, format=None):
+    def get(self, request):
         outgoingtransaction_count = OutgoingTransaction.objects.filter(
             is_consumed_server=False).count()
         outgoingtransaction_middleman_count = OutgoingTransaction.objects.filter(
@@ -107,60 +109,20 @@ class RenderView(EdcBaseViewMixin, TemplateView):
     @property
     def json_tx(self):
         cryptor = Cryptor()
-        return json.loads(cryptor.aes_decrypt(self.queryset.first().tx, mode=LOCAL_MODE))
+        return json.loads(cryptor.aes_decrypt(
+            self.queryset.first().tx, mode=LOCAL_MODE))
 
     @property
     def json_obj(self):
         serializer = Serializer()
-        return json.loads(serializer.serialize(self.queryset, use_natural_primary_keys=False))
+        return json.loads(serializer.serialize(
+            self.queryset, use_natural_primary_keys=False))
 
     def get_context_data(self, **kwargs):
         context = super(RenderView, self).get_context_data(**kwargs)
         context.update(json_tx=self.json_tx[0])
         context.update(json_obj=self.json_obj[0])
         return context
-
-
-class DumpToUsbView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
-
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data(**kwargs)
-        response_data = {
-            'error': False,
-            'messages': transaction_messages.messages()}
-        if request.is_ajax():
-            if request.GET.get('action') == 'check_usb_connection':
-                if os.path.exists('/Volumes/BCPP'):
-                    response_data.update({'error': False})
-                else:
-                    response_data.update({
-                        'error': True,
-                        'error_message': 'USB not connected. Please connect BCPP USB.'})
-            elif request.GET.get('action') == 'dump_to_usb':
-                usb_dump = DumpToUsb()
-                if usb_dump.is_dumped_to_usb:
-                    response_data = {
-                        'error': False,
-                        'filename': usb_dump.filename,
-                        'messages': transaction_messages.messages()}
-                else:
-                    response_data = {
-                        'error': True,
-                        'messages': transaction_messages.messages()}
-            elif request.GET.get('action') == 'load_json_file':
-                usb_file = TransactionLoadUsbFile()
-                if usb_file.is_usb_transaction_file_loaded:
-                    response_data = {
-                        'error': False,
-                        'messages': transaction_messages.messages(),
-                        'usb_files': usb_file.usb_files}
-                else:
-                    response_data = {
-                        'error': False,
-                        'usb_files': usb_file.usb_files,
-                        'messages': transaction_messages.messages()}
-            return HttpResponse(json.dumps(response_data), content_type='application/json')
-        return self.render_to_response(context)
 
 
 class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
@@ -190,6 +152,7 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
         app_config = django_apps.get_app_config('edc_map')
         context.update(
             edc_sync_admin=edc_sync_admin,
+            edc_sync_role=settings.DEVICE_ROLE,
             project_name=context.get(
                 'project_name') + ': ' + self.role.title(),
             cors_origin_whitelist=self.cors_origin_whitelist,
@@ -197,13 +160,12 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
             ip_address=self.ip_address,
             recent_sent_tx=self.recent_sent_transactions(),
             site_models=site_sync_models.site_models,
-            base_template_name=app_config.base_template_name,
-        )
+            base_template_name=app_config.base_template_name)
         return context
 
     @property
     def ip_address(self):
-        return django_apps.get_app_config('edc_sync').role
+        return django_apps.get_app_config('edc_sync_files').remote_host
 
     @property
     def cors_origin_whitelist(self):
@@ -230,11 +192,13 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
             action = request.GET.get('action') in actions
             connected = self.tx_file_manager.is_server_available() if action else False
             if connected:
+                action = False
                 if request.GET.get('action') == 'dump_transaction_file':
                     # dump transactions to a file
-                    source_folder = django_apps.get_app_config('edc_sync_files').source_folder
+                    source_folder = django_apps.get_app_config(
+                        'edc_sync_files').source_folder
                     dump = TransactionDumps(source_folder)
-                    if dump.is_exported_to_json[0]:
+                    if dump.is_exported_to_json:
                         response_data.update({
                             'transactionFiles': self.tx_file_manager.file_transfer.files_dict,
                             'messages': transaction_messages.messages()
@@ -252,7 +216,8 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
                             'error': True})
                 elif request.GET.get('action') == 'get_file_transfer_progress':
                     response_data.update({
-                        'progress': self.tx_file_manager.file_transfer_progress})
+                        'progress': self.tx_file_manager.file_transfer_progress
+                    })
                 elif request.GET.get('action') == 'approve_files':
                     files = request.GET.get('files')
                     if files:
@@ -265,13 +230,14 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
                         'error': False})
             else:
                 host = django_apps.get_app_config(
-                    'edc_sync_files').host
+                    'edc_sync_files').remote_host
                 response_data.update({
                     'error': True,
                     'host': host,
                     'messages': transaction_messages.messages(),
                 })
-            return HttpResponse(json.dumps(response_data), content_type='application/json')
+            return HttpResponse(json.dumps(response_data),
+                                content_type='application/json')
         return self.render_to_response(context)
 
     @method_decorator(login_required)

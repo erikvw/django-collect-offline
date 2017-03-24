@@ -1,0 +1,66 @@
+{% extends 'edc_base/base.html' %}
+
+{% load staticfiles %}
+
+{% block extra-scripts %}
+
+{{ block.super }}
+    
+	<link rel="stylesheet" type="text/css" href="{% static "edc_sync/css/badge-with-color.css" %}">
+	<link rel="stylesheet" type="text/css" href="{% static "edc_sync/css/morris.css" %}">
+	<script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/morris.js" %}"></script>
+	<script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/morris.min.js" %}"></script>
+	<script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/raphael-min.js" %}"></script>
+    
+{% endblock extra-scripts %}
+
+{% block main %}
+    <!-- Page Content -->
+    <div class="container">
+        <!-- Page Header -->
+        <div class="row">
+            <div class="col-lg-12">
+                <h4 class="page-header"><span id='id-producer'>{{producer_name|upper }}</span> Report
+                </h4>
+            </div>
+        </div>
+        <!-- /.row -->
+	<div class="row">
+		<div class="col-md-8">
+			<div class="panel-body">
+				<div id="transaction-bar-chart"></div>
+			</div>
+		</div>
+		<div class="col-md-4">
+			<div class="panel panel-default">
+            	<div class="panel-heading">
+            	  Recent Transactions Files
+                </div>
+                <div class="panel-body">
+					<div class="list-group">
+						{% for transaction_file in transactions_files %}
+	                       <a href="#" class="list-group-item">
+	                           {{forloop.counter}} <i class="fa fa-file-o fa-fw"></i> {{transaction_file.file_name}} <em><b>Loaded:</b>{{transaction_file.created| time:"H:i"}}</em>
+	                       </a>
+                       {% endfor %}
+                    </div>
+                </div>
+            </div>
+		</div>
+	</div>
+ </div>
+ <script>
+ 
+ $(document).ready(function() {	
+	new Morris.Bar({
+		  element: 'transaction-bar-chart',
+		  data: {{report_data|safe}},
+		  xkey: 'label',
+		  ykeys: ['total_consumed', 'total_not_consumed'],
+		  labels: ['Played ', 'Not Played'],
+		  barColors:['green', 'red'],
+	}); 
+ });
+ 
+</script>
+{% endblock main %}

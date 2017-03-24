@@ -7,7 +7,7 @@ from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
 from requests.exceptions import RequestException
 from rest_framework.authtoken.models import Token
 
-from .constants import SERVER, CLIENT
+from .constants import SERVER, CLIENT, NODESERVER
 from .models import Client, Server
 from edc_device.constants import CENTRAL_SERVER
 
@@ -16,15 +16,15 @@ class EdcSyncViewMixin:
 
     @property
     def role(self):
-        edc_sync_app = django_apps.get_app_config('edc_sync')
-        return edc_sync_app.role
+        edc_device_app = django_apps.get_app_config('edc_device')
+        return edc_device_app.role
 
     @property
     def host_model(self):
         host_model = None
         if self.role in [SERVER, CENTRAL_SERVER]:
             host_model = Server
-        if self.role == SERVER:
+        elif self.role in [SERVER, NODESERVER]:
             host_model = Client
         elif self.role == CLIENT:
             host_model = Server
@@ -37,7 +37,7 @@ class EdcSyncViewMixin:
     @property
     def resource(self):
         resource = 'outgoingtransaction'
-        if self.role in [SERVER, CENTRAL_SERVER]:
+        if self.role in [SERVER, CENTRAL_SERVER, NODESERVER]:
             resource = 'outgoingtransaction'
         elif self.role == CLIENT:
             resource = 'incomingtransaction'
