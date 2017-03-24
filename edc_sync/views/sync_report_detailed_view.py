@@ -35,6 +35,5 @@ class SyncReportDetailedView(
         report = SyncReportDetail(
             producer=kwargs.get('producer_name'))
         context.update({
-            'report_data': report.report_data,
-            'transactions_files': report.transactions_files})
+            'transactions_files': report.report_data})
         return self.render_to_response(context)
