@@ -45,7 +45,7 @@
 						  </li>
 						  <li class="list-group-item">
 			                <h4>
-			                    <a href="#">{{data.upload_transaction_file.producer}}</a>
+			                    <a href="{% url 'edc_sync:sync-report-detail' data.upload_transaction_file.producer %}">{{data.upload_transaction_file.producer}}</a>
 			                </h4>
 						  </li>
 						 </ul>

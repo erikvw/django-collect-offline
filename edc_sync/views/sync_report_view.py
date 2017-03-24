@@ -29,9 +29,7 @@ class SyncReportView(
 
     def get(self, request, *args, **kwargs):
         report = SyncReport(all_machines=True)
-        print(" def get(self, request, *args, **kwargs): ", report.report_data)
         context = self.get_context_data(**kwargs)
         context.update({
-            'report_data': report.report_data
-            })
+            'report_data': report.report_data})
         return self.render_to_response(context)

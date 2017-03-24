@@ -20,12 +20,11 @@
         <!-- Page Header -->
         <div class="row">
             <div class="col-lg-12">
-                <h4 class="page-header">Transactions Report
+                <h4 class="page-header"><span id='id-producer'>{{producer_name|upper }}</span> Report
                 </h4>
             </div>
         </div>
         <!-- /.row -->
-	{% if transaction_files %}
 	<div class="row">
 		<div class="col-md-8">
 			<div class="panel-body">
@@ -39,12 +38,9 @@
                 </div>
                 <div class="panel-body">
 					<div class="list-group">
-						{% for transaction_file in transaction_files %}
+						{% for transaction_file in transactions_files %}
 	                       <a href="#" class="list-group-item">
-	                           <i class="fa fa-comment fa-fw"></i> {{transaction_file.files}}
-	                           <span class="pull-right text-muted small">
-	                           		<em>{{transaction_file.created}}</em>
-	                           </span>
+	                           {{forloop.counter}} <i class="fa fa-file-o fa-fw"></i> {{transaction_file.file_name}} <em><b>Loaded:</b>{{transaction_file.created| time:"H:i"}}</em>
 	                       </a>
                        {% endfor %}
                     </div>
@@ -52,33 +48,18 @@
             </div>
 		</div>
 	</div>
-	% else %}
-		<div> No report.</div>
-	{% endif %}
  </div>
  <script>
- $(document).ready(function() {
-	 var data = {}
-	 var producer = '';
-		var localhost = 'http://' + document.location.host	
-		var ajData = $.ajax({
-			url: localhost + '/sync-report-detail/',
-			type: 'GET',
-			dataType: 'json ',
-			processData: true,
-			data:{'producer': producer}
-		});
-	 ajData.done(function( data ){
-	 	window.data = data
-	 });
-		
+ 
+ $(document).ready(function() {	
 	new Morris.Bar({
 		  element: 'transaction-bar-chart',
-		  data: window.data,
-		  xkey: 'y',
+		  data: {{report_data|safe}},
+		  xkey: 'label',
 		  ykeys: ['total_consumed', 'total_not_consumed'],
-		  labels: ['Consumed ', 'Not Consumed']
-	});
+		  labels: ['Played ', 'Not Played'],
+		  barColors:['green', 'red'],
+	}); 
  });
  
 </script>

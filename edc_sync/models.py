@@ -26,15 +26,19 @@ class IncomingTransaction(TransactionMixin, BaseUuidModel):
     is_self = models.BooleanField(
         default=False)
 
-    def deserialize_transaction(self, check_hostname=None, commit=True, check_device=True):
+    def deserialize_transaction(self, check_hostname=None, commit=True,
+                                check_device=True):
         if check_device:
             if not edc_device_app_config.is_server:
-                raise SyncError('Objects may only be deserialized on a server. Got device={} {}.'.format(
-                    edc_device_app_config.device_id, edc_device_app_config.role))
+                raise SyncError(
+                    'Objects may only be deserialized on a server. '
+                    'Got device={} {}.'.format(edc_device_app_config.device_id,
+                                               edc_device_app_config.role))
         inserted, updated, deleted = 0, 0, 0
         check_hostname = True if check_hostname is None else check_hostname
         for deserialized_object in serializers.deserialize(
-                "json", self.aes_decrypt(self.tx), use_natural_foreign_keys=True, use_natural_primary_keys=True):
+                "json", self.aes_decrypt(self.tx),
+                use_natural_foreign_keys=True, use_natural_primary_keys=True):
             if deserialized_object.object.hostname_modified == socket.gethostname() and check_hostname:
                 raise SyncError(
                     'Incoming transactions exist that are from this host.')
@@ -49,7 +53,8 @@ class IncomingTransaction(TransactionMixin, BaseUuidModel):
                     updated += self._deserialize_update_tx(deserialized_object)
                 else:
                     raise SyncError(
-                        'Unexpected value for action. Got {}'.format(self.action))
+                        'Unexpected value for action. Got {}'.format(
+                            self.action))
                 if any([inserted, deleted, updated]):
                     self.is_ignored = False
                     self.is_consumed = True
@@ -80,7 +85,9 @@ class IncomingTransaction(TransactionMixin, BaseUuidModel):
 
 class OutgoingTransaction(TransactionMixin, BaseUuidModel):
 
-    """ Transactions produced locally to be consumed/sent to a queue or consumer. """
+    """ Transactions produced locally to be consumed/sent to a queue or
+        consumer.
+    """
 
     is_consumed_middleman = models.BooleanField(
         default=False)
@@ -94,7 +101,8 @@ class OutgoingTransaction(TransactionMixin, BaseUuidModel):
     def save(self, *args, **kwargs):
         if not self.using:
             raise ValueError(
-                'Value for \'{}.using\' cannot be None.'.format(self._meta.model_name))
+                'Value for \'{}.using\' cannot be None.'.format(
+                    self._meta.model_name))
         if self.is_consumed_server and not self.consumed_datetime:
             self.consumed_datetime = get_utcnow()
         super(OutgoingTransaction, self).save(*args, **kwargs)

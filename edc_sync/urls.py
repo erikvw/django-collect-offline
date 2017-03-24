@@ -26,7 +26,7 @@ urlpatterns = [
         DumpToUsbView.as_view(), name='dump-to-usb'),
     url(r'^sync-report/$',
         SyncReportView.as_view(), name='sync-report'),
-    url(r'^sync-report/(?P<producer>\w+)$',
+    url(r'^sync-report/(?P<producer_name>[\w-]+)/$',
         SyncReportDetailedView.as_view(), name='sync-report-detail'),
     url(r'^api/', include(router.urls)),
     # url(r'^api-auth/', include('rest_framework.urls',
