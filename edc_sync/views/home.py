@@ -24,11 +24,9 @@ from rest_framework.views import APIView
 
 from edc_base.view_mixins import EdcBaseViewMixin
 from edc_device.constants import SERVER
-from edc_sync_files.classes import TransactionDumps
-from edc_sync_files.classes import TransactionFileManager
-from edc_sync_files.classes import transaction_messages
-from edc_sync_files.models import History
-from edc_sync_files.models import UploadTransactionFile
+from edc_sync_files.admin_site import edc_sync_files_admin
+from edc_sync_files.classes import TransactionDumps, TransactionFileManager, transaction_messages
+from edc_sync_files.models import History, UploadTransactionFile
 
 from ..admin import edc_sync_admin
 from ..edc_sync_view_mixin import EdcSyncViewMixin
@@ -128,7 +126,6 @@ class RenderView(EdcBaseViewMixin, TemplateView):
 class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
     template_name = 'edc_sync/home.html'
-
     tx_file_manager = TransactionFileManager()
 
     def recent_sent_transactions(self):
@@ -136,7 +133,7 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
             sent=True).order_by('-created')[:20]
 
     def upload_transaction_files(self):
-        if django_apps.get_app_config('edc_sync_files').role == SERVER:
+        if self.role == SERVER:
             files = UploadTransactionFile.objects.filter(
                 not_consumed__gt=0, is_played=False)
             return files
@@ -149,12 +146,15 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        app_config = django_apps.get_app_config('edc_map')
+        app_config = django_apps.get_app_config('edc_sync')
         context.update(
             edc_sync_admin=edc_sync_admin,
-            edc_sync_role=settings.DEVICE_ROLE,
-            project_name=context.get(
-                'project_name') + ': ' + self.role.title(),
+            edc_sync_app_config=app_config,
+            edc_sync_files_app_config=django_apps.get_app_config(
+                'edc_sync_files'),
+            edc_sync_role=self.role,
+            #             project_name=context.get(
+            #                 'project_name') + ': ' + self.role.title(),
             cors_origin_whitelist=self.cors_origin_whitelist,
             hostname=socket.gethostname(),
             ip_address=self.ip_address,
@@ -190,7 +190,8 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
         if request.is_ajax():
             transaction_messages.clear()
             action = request.GET.get('action') in actions
-            connected = self.tx_file_manager.is_server_available() if action else False
+            connected = self.tx_file_manager.is_server_available(
+            ) if action else False
             if connected:
                 action = False
                 if request.GET.get('action') == 'dump_transaction_file':
