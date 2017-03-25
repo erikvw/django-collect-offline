@@ -153,8 +153,6 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
             edc_sync_files_app_config=django_apps.get_app_config(
                 'edc_sync_files'),
             edc_sync_role=self.role,
-            #             project_name=context.get(
-            #                 'project_name') + ': ' + self.role.title(),
             cors_origin_whitelist=self.cors_origin_whitelist,
             hostname=socket.gethostname(),
             ip_address=self.ip_address,
