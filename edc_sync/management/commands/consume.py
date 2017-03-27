@@ -41,7 +41,6 @@ class Command(BaseCommand):
             help=('Specify batch id to consume transactions.'))
 
     def handle(self, *args, **options):
-        print(args, ">>>>>>>>>>>>>>>.", options)
         if not args:
             args = [None]
         if options.get('model', None) and not options.get('producer', None):
@@ -65,13 +64,18 @@ class Command(BaseCommand):
                 raise CommandError('if using --consume<app_name> only, then only 1 argument is expected')
             self.consume()
         elif options.get('batch', None):
-            if len(args) != 2:
+            if len(args) != 1:
                 raise CommandError('if using --consume<app_name> --batch <batch>, then only 2 arguments are expected')
-            batch_id = args[1]
+            batch_id = args[0]
             transactions = IncomingTransaction.objects.filter(
                 batch_id=batch_id)
-            Consumer(transactions=transactions).consume()
-            self.stdout.write(self.style.SUCCESS('Completed playing of transactions.'))
+            transactions = [t.tx_pk for t in transactions]
+            self.stdout.write(self.style.SUCCESS('Start...'))
+            is_played = Consumer(transactions=transactions).consume()
+            if is_played:
+                self.stdout.write(self.style.SUCCESS('Done.'))
+            else:
+                self.stdout.write(self.style.SUCCESS('Completed. Not all played.'))
         else:
             self.stdout.write(self.style.ERROR('Unknown option, Try --help for a list of valid options.'))
 
