@@ -28,7 +28,7 @@ class SyncReportView(
         return context
 
     def get(self, request, *args, **kwargs):
-        report = SyncReport(all_machines=True)
+        report = SyncReport()
         context = self.get_context_data(**kwargs)
         context.update({
             'report_data': report.report_data})

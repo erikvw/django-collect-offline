@@ -7,8 +7,7 @@ from rest_framework.routers import DefaultRouter
 from edc_sync.views import (
     OutgoingTransactionViewSet, IncomingTransactionViewSet, DumpToUsbView,
     HomeView, RenderView, TransactionCountView, SyncReportView,
-    SyncReportDetailedView
-    )
+    SyncReportDetailedView)
 from edc_constants.constants import UUID_PATTERN
 from edc_sync.admin import edc_sync_admin
 

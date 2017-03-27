@@ -26,21 +26,26 @@
         </div>
         <!-- /.row -->
 	<div class="row">
-		<div class="col-md-8">
-			<div class="panel-body">
-				<div id="transaction-bar-chart"></div>
-			</div>
-		</div>
-		<div class="col-md-4">
+		<div class="col-md-12">
 			<div class="panel panel-default">
             	<div class="panel-heading">
             	  Recent Transactions Files
                 </div>
                 <div class="panel-body">
 					<div class="list-group">
-						{% for transaction_file in transactions_files %}
+						{% for data, transaction_file in transactions_files %}
 	                       <a href="#" class="list-group-item">
-	                           {{forloop.counter}} <i class="fa fa-file-o fa-fw"></i> {{transaction_file.file_name}} <em><b>Loaded:</b>{{transaction_file.created| time:"H:i"}}</em>
+	                           {{forloop.counter}} 
+	                           <i class="fa fa-file-o fa-fw"></i>
+	                           {{transaction_file.file_name}}
+	                           <em><b>Loaded:</b>{{transaction_file.created| time:"H:i"}}</em>
+	                           <b>Pending:</b> 
+	                           		{% if data.total_not_consumed > 0 %}
+	                           			<span style="color:red">{{data.total_not_consumed}}</span>
+	                           		{% else %}
+	                           			<span>{{data.total_not_consumed}}</span>
+	                           		{% endif %}
+	                           <b>Total:</b> {{data.total_consumed}}
 	                       </a>
                        {% endfor %}
                     </div>

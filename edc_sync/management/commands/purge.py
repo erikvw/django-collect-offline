@@ -27,6 +27,9 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+
+        raise TypeError('CommandNotInUsed')
+
         if not args:
             args = [None]
         if options['incoming']:
