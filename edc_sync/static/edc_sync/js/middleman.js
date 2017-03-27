@@ -142,6 +142,7 @@ function loadUsbTransactionFile(server , userName) {
 	ajloadFile.fail( function( jqXHR, textStatus, errorThrown ) {
 		$( '#id-transfer-status-div' ).removeClass( 'alert-success' ).addClass( 'alert-danger' );
 		$( '#id-sync-status' ).text( 'An error occurred. Got ' + errorThrown);
+		$( '#id-tx-spinner' ).removeClass( 'fa-spin' );
 	});
 	
 }
@@ -168,6 +169,9 @@ function displayErrorMessage( data ) {
 				$( '#id-transfer-status-div' ).text('An error occurred. Got, '+error);
 			}
 		} catch(err) { }
+		
 	});
+
+	$( '#id-tx-spinner' ).removeClass( 'fa-spin' );
 	$( '#id-transfer-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-danger' );
 }

@@ -79,6 +79,7 @@ if 'test' in sys.argv:
         "edc_visit_schedule": None,
         "edc_visit_tracking": None,
         "edc_lab": None,
+        "edc_sync_files": None,
         "ba_namotswe": None,
         'django_crypto_fields': None,
     }
