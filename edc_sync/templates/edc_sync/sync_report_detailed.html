@@ -6,12 +6,6 @@
 
 {{ block.super }}
     
-	<link rel="stylesheet" type="text/css" href="{% static "edc_sync/css/badge-with-color.css" %}">
-	<link rel="stylesheet" type="text/css" href="{% static "edc_sync/css/morris.css" %}">
-	<script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/morris.js" %}"></script>
-	<script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/morris.min.js" %}"></script>
-	<script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/raphael-min.js" %}"></script>
-    
 {% endblock extra-scripts %}
 
 {% block main %}
@@ -29,12 +23,12 @@
 		<div class="col-md-12">
 			<div class="panel panel-default">
             	<div class="panel-heading">
-            	  Recent Transactions Files
+            	  Recent Transactions Files <span id="batch-id"></span>
                 </div>
                 <div class="panel-body">
 					<div class="list-group">
 						{% for data, transaction_file in transactions_files %}
-	                       <a href="#" class="list-group-item">
+	                       <a href="#{{transaction_file.batch_id}}" class="list-group-item">
 	                           {{forloop.counter}} 
 	                           <i class="fa fa-file-o fa-fw"></i>
 	                           {{transaction_file.file_name}}
@@ -46,6 +40,7 @@
 	                           			<span>{{data.total_not_consumed}}</span>
 	                           		{% endif %}
 	                           <b>Total:</b> {{data.total_consumed}}
+	                           <b>  Batch:</b> {{transaction_file.batch_id}}
 	                       </a>
                        {% endfor %}
                     </div>
@@ -54,18 +49,4 @@
 		</div>
 	</div>
  </div>
- <script>
- 
- $(document).ready(function() {	
-	new Morris.Bar({
-		  element: 'transaction-bar-chart',
-		  data: {{report_data|safe}},
-		  xkey: 'label',
-		  ykeys: ['total_consumed', 'total_not_consumed'],
-		  labels: ['Played ', 'Not Played'],
-		  barColors:['green', 'red'],
-	}); 
- });
- 
-</script>
 {% endblock main %}
