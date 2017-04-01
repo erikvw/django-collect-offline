@@ -10,6 +10,8 @@ from edc_base.utils import get_utcnow
 
 from .exceptions import SyncError
 from .model_mixins import TransactionMixin, HostModelMixin
+from django.core.exceptions import PermissionDenied
+from django.db.models.deletion import ProtectedError
 
 edc_device_app_config = django_apps.get_app_config('edc_device')
 
@@ -74,10 +76,15 @@ class IncomingTransaction(TransactionMixin, BaseUuidModel):
                 play = 1
             except IntegrityError as e:
                 print("Failed to play transaction. Got {}.".format(str(e)))
+            except PermissionDenied as e:
+                print("Failed to play transaction. Got {}.".format(str(e)))
         return play
 
     def _deserialize_update_tx(self, deserialized_object):
-        return self._deserialize_insert_tx(deserialized_object)
+        try:
+            return self._deserialize_insert_tx(deserialized_object)
+        except ProtectedError as e:
+            print("Failed to delete transaction. Got {}.".format(str(e)))
 
     def _deserialize_delete_tx(self, deserialized_object, using=None):
         with transaction.atomic():
