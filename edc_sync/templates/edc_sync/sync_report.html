@@ -28,9 +28,14 @@
 		            <div class="col-md-3 portfolio-item">
 		                <ul class="list-group">
 						  <li class="list-group-item">
-						    <span class="badge badge-error">
-						    {{data.total_not_consumed}}</span>
-						   <b>Pending </b>
+						  	{% if data.total_not_consumed > 0 %}
+							    <span class="badge badge-error">
+							    {{data.total_not_consumed}}</span>
+						    {% else %}
+							    <span class="badge">
+							    {{data.total_not_consumed}}</span>
+						    {% endif %}
+						   <b>Pending</b>
 						  </li>
 						  <li class="list-group-item">
 						    <span class="badge badge-success">
@@ -52,9 +57,10 @@
 		            </div>
 		            {% endfor %}
 		        </div>
+		        <hr>
 	       {% endfor %}
        <div class="row">
-		    {% if not report_data %}
+		    {% if not report_data.0 %}
 	        	<div class="well well-sm alert alert-warning">
 	        	No data to generate report.</div>
 	        {% endif %}
