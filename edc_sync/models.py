@@ -12,6 +12,7 @@ from .exceptions import SyncError
 from .model_mixins import TransactionMixin, HostModelMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models.deletion import ProtectedError
+from django.core.serializers.base import DeserializationError
 
 edc_device_app_config = django_apps.get_app_config('edc_device')
 
@@ -39,33 +40,36 @@ class IncomingTransaction(TransactionMixin, BaseUuidModel):
                                                edc_device_app_config.role))
         inserted, updated, deleted = 0, 0, 0
         check_hostname = True if check_hostname is None else check_hostname
-        for deserialized_object in serializers.deserialize(
-                "json", self.aes_decrypt(self.tx),
-                use_natural_foreign_keys=True, use_natural_primary_keys=True):
-            if deserialized_object.object.hostname_modified == socket.gethostname() and check_hostname:
-                raise SyncError(
-                    'Incoming transactions exist that are from this host.')
-            elif commit:
-                if self.action == 'D':
-                    deleted += self._deserialize_delete_tx(
-                        deserialized_object) or 0
-                elif self.action == 'I':
-                    inserted += self._deserialize_insert_tx(
-                        deserialized_object)
-                elif self.action == 'U':
-                    updated += self._deserialize_update_tx(deserialized_object)
-                else:
+        try:
+            for deserialized_object in serializers.deserialize(
+                    "json", self.aes_decrypt(self.tx),
+                    use_natural_foreign_keys=True, use_natural_primary_keys=True):
+                if deserialized_object.object.hostname_modified == socket.gethostname() and check_hostname:
                     raise SyncError(
-                        'Unexpected value for action. Got {}'.format(
-                            self.action))
-                if any([inserted, deleted, updated]):
-                    self.is_ignored = False
-                    self.is_consumed = True
-                    self.consumed_datetime = get_utcnow()
-                    self.consumer = '{}'.format(socket.gethostname())
-                    self.save()
-            else:
-                return deserialized_object
+                        'Incoming transactions exist that are from this host.')
+                elif commit:
+                    if self.action == 'D':
+                        deleted += self._deserialize_delete_tx(
+                            deserialized_object) or 0
+                    elif self.action == 'I':
+                        inserted += self._deserialize_insert_tx(
+                            deserialized_object)
+                    elif self.action == 'U':
+                        updated += self._deserialize_update_tx(deserialized_object)
+                    else:
+                        raise SyncError(
+                            'Unexpected value for action. Got {}'.format(
+                                self.action))
+                    if any([inserted, deleted, updated]):
+                        self.is_ignored = False
+                        self.is_consumed = True
+                        self.consumed_datetime = get_utcnow()
+                        self.consumer = '{}'.format(socket.gethostname())
+                        self.save()
+                else:
+                    return deserialized_object
+        except DeserializationError as e:
+            print('Failed to deserialized the record. Got {}'.format(str(e)))
         return inserted, updated, deleted
 
     def _deserialize_insert_tx(self, deserialized_object):
