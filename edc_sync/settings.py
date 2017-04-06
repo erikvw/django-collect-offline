@@ -13,10 +13,8 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 import os
 import sys
 
-from unipath import Path
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = Path(os.path.dirname(os.path.realpath(__file__)))
+BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
@@ -42,7 +40,6 @@ INSTALLED_APPS = [
     'django_revision',
     'rest_framework',
     'rest_framework.authtoken',
-    # 'rest_framework_swagger',
     'django_crypto_fields.apps.AppConfig',
     'django_js_reverse',
     'simple_history',
@@ -128,7 +125,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     },
-    # required for tests when acting as a server but not attempting to deserialize
+    # required for tests when acting as a server but not attempting to
+    # deserialize
     'server': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
@@ -183,8 +181,8 @@ USE_L10N = True
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR.child('static')
-MEDIA_ROOT = BASE_DIR.child('media')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
 # List of finder classes that know how to find static files in
@@ -215,9 +213,9 @@ REST_FRAMEWORK = {
         # 'edc_sync.auth.EdcSyncSignatureAuthentication',
         'rest_framework.authentication.TokenAuthentication',
     ),
-#     'DEFAULT_PERMISSION_CLASSES': (
-#         'rest_framework.permissions.IsAuthenticated',
-#     )
+    #     'DEFAULT_PERMISSION_CLASSES': (
+    #         'rest_framework.permissions.IsAuthenticated',
+    #     )
 }
 
 
