@@ -32,7 +32,6 @@ urlpatterns = [
     # namespace='rest_framework')),
     # will reply given username and password
     url(r'^api-token-auth/', obtain_auth_token),
-    # url(r'^docs/', include('rest_framework_swagger.urls')),
     url(r'render/(?P<model_name>\w+)/(?P<pk>{})/'.format(UUID_PATTERN.pattern),
         RenderView.as_view(), name='render_url'),
     url(r'^jsreverse/$', urls_js, name='js_reverse'),

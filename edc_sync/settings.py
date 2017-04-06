@@ -40,7 +40,6 @@ INSTALLED_APPS = [
     'django_revision',
     'rest_framework',
     'rest_framework.authtoken',
-    # 'rest_framework_swagger',
     'django_crypto_fields.apps.AppConfig',
     'django_js_reverse',
     'simple_history',
