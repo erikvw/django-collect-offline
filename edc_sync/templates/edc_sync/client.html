@@ -98,7 +98,7 @@
 		    {% for history in recent_sent_tx %}
 		    	{% if history.sent %}
 			      <tr>
-			      	<th></th>
+			      	<th>{{forloop.counter}}</th>
 			        <th>{{history.filename}}</th>
 			        <th>{{history.sent_datetime}}</th>
 			        <th>

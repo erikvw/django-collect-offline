@@ -7,7 +7,7 @@ from rest_framework.routers import DefaultRouter
 from edc_sync.views import (
     OutgoingTransactionViewSet, IncomingTransactionViewSet, DumpToUsbView,
     HomeView, RenderView, TransactionCountView, SyncReportView,
-    SyncReportDetailedView)
+    SyncReportDetailedView, SyncReportClientView)
 from edc_constants.constants import UUID_PATTERN
 from edc_sync.admin import edc_sync_admin
 
@@ -25,6 +25,8 @@ urlpatterns = [
         DumpToUsbView.as_view(), name='dump-to-usb'),
     url(r'^sync-report/$',
         SyncReportView.as_view(), name='sync-report'),
+    url(r'^sync-report-client/$',
+        SyncReportClientView.as_view(), name='sync-report-client'),
     url(r'^sync-report/(?P<producer_name>[\w-]+)/$',
         SyncReportDetailedView.as_view(), name='sync-report-detail'),
     url(r'^api/', include(router.urls)),

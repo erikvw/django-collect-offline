@@ -115,6 +115,9 @@ function dumpTransactionFile(server , userName) {
 }
 
 function sendTransactionFile(file) {
+	/*
+		Send a file transaction to node server or central server.
+	*/
 	var url = client + '/edc_sync/';
 	var ajSendFile = $.ajax({
 		url: url,
@@ -146,7 +149,7 @@ function sendTransactionFile(file) {
 				}
 			});
 			if (tmpObj != null) {
-				sendTransactionFile(tmpObj);
+				sendTransactionFile(tmpObj); //recurse to send another file
 			} else {
 				$( "#btn-progress" ).click();
 				$( '#btn-sync').prop( "disabled", false );
@@ -165,6 +168,10 @@ function sendTransactionFile(file) {
 				});
 			}
 		} else {
+			/*
+				Display the error message.
+			*/
+
 			updateIcon(file.index, 'error');
 			var error = "";
 			$.each( data.messages, function(index,  message  ) {
@@ -203,21 +210,16 @@ function monitorFileSending( file ) {
 	});
 
 	ajTransferingFileProgress.done( function( data ) {
-		//currentRowElement.find( "td" ).eq( 3 ).text( data.progress );
-		//alert(data.progress);
-		//alert(data.progress);
+		//
 		$( "tr:eq( " +file.index+ " )" ).find('td:eq(3)').html("<span>100%. sent.</span>");
-		//console.log(data.progress);
 	});
 	ajTransferingFileProgress.fail(function(jqXHR, textStatus, errorThrown) {
-		//alert("Error");
-		//console.log(jqXHR.status, textStatus, errorThrown);
+		console.log(jqXHR.status, textStatus, errorThrown);
 	});
 }
 
 function updateFromHost( host ) {
 	var url = host + '/edc_sync/api/transaction-count/';
-	//Urls['edc-sync:transaction-count']();
 	ajTransactionCount = $.ajax({
 		url: url,
 		type: 'GET',
@@ -331,7 +333,7 @@ function processPendingFiles() {
 	
 	ajPendingFiles.then( function( data ) {
 		var firstFile = window.fileObjs[0];
-		//$( "tr:eq( " +firstFile.index+ " )" ).find('td:eq(3)').html("<span class='fa fa-spinner fa-spin'></span>");
+		$( "tr:eq( " +firstFile.index+ " )" ).find('td:eq(3)').html("<span class='fa fa-spinner fa-spin'></span>");
 		sendTransactionFile(firstFile);
 	});
 	
