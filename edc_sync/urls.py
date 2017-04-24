@@ -22,11 +22,6 @@ urlpatterns = [
         TransactionCountView.as_view(), name='transaction-count'),
     url(r'^dump-to-usb/$',
         DumpToUsbView.as_view(), name='dump-to-usb'),
-<<<<<<< HEAD
-    url(r'^sync-report/(?P<producer>[\-\.\w]+)/$',
-        SyncReportDetailedView.as_view(), name='sync-report-detail'),
-=======
->>>>>>> af60bff06b07bc182008e60ad4e3b5541b4ddf97
     url(r'^sync-report/$',
         SyncReportView.as_view(), name='sync-report'),
     url(r'^sync-report-client/$',
