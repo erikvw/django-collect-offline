@@ -13,7 +13,7 @@
 			        <table class="table table-condensed">
 				        <tr><th>Client</th><th>Pending</th></tr>
 		    		    {% for row in object_list %}
-		        			<tr><td>{{ row.producer }}</td><td>{{ row.pending }}</td></tr>
+		        			<tr><td>{{ row.producer }}</td><td>{{ row.pending }}</td><td>{% url 'edc_sync:sync-report-detail' producer=row.producer %}</td></tr>
 		        		{% endfor %}
 		        	</table>
 		        </div>
