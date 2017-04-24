@@ -4,6 +4,8 @@ from django.apps import apps as django_apps
 from django.db.models.aggregates import Count
 from django.views.generic import ListView
 
+from edc_sync_files.admin_site import edc_sync_files_admin
+
 from ..edc_sync_view_mixin import EdcSyncViewMixin
 from ..models import IncomingTransaction
 
@@ -20,5 +22,7 @@ class SyncReportView(EdcBaseViewMixin, EdcSyncViewMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         app_config = django_apps.get_app_config('edc_sync')
-        context.update(base_template_name=app_config.base_template_name)
+        context.update(
+            base_template_name=app_config.base_template_name,
+            edc_sync_files_admin=edc_sync_files_admin)
         return context
