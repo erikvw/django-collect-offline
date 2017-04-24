@@ -23,7 +23,7 @@ urlpatterns = [
         TransactionCountView.as_view(), name='transaction-count'),
     url(r'^dump-to-usb/$',
         DumpToUsbView.as_view(), name='dump-to-usb'),
-    url(r'^sync-report/(?P<producer)[\w-]+)/$',
+    url(r'^sync-report/(?P<producer>[\-\.\w]+)/$',
         SyncReportDetailedView.as_view(), name='sync-report-detail'),
     url(r'^sync-report/$',
         SyncReportView.as_view(), name='sync-report'),
