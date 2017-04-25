@@ -4,6 +4,7 @@ from django.apps import apps as django_apps
 from django.core import serializers
 from django.db import models, transaction
 from django.db.utils import IntegrityError
+from django.utils import timezone
 
 from edc_base.model_mixins import BaseUuidModel
 from edc_base.utils import get_utcnow
@@ -91,8 +92,11 @@ class IncomingTransaction(TransactionMixin, BaseUuidModel):
             print("Failed to delete transaction. Got {}.".format(str(e)))
 
     def _deserialize_delete_tx(self, deserialized_object, using=None):
-        with transaction.atomic():
-            deserialized_object.object.delete()
+        try:
+            with transaction.atomic():
+                deserialized_object.object.delete()
+        except ProtectedError as e:
+            print("Failed to delete transaction. Got {}.".format(str(e)))
         return 1
 
     class Meta:
@@ -160,6 +164,26 @@ class Server(HostModelMixin, BaseUuidModel):
         app_label = 'edc_sync'
         ordering = ['hostname', 'port']
         unique_together = (('hostname', 'port'), )
+
+
+class ReceiveDevice(BaseUuidModel):
+
+    hostname = models.CharField(
+        max_length=200)
+
+    received_by = models.CharField(
+        max_length=100)
+
+    sync_files = models.CharField(
+        max_length=240)
+
+    received_date = models.DateField(
+        default=timezone.now)
+
+    class Meta:
+        app_label = 'edc_sync'
+        ordering = ('-received_date', )
+        unique_together = (('hostname', 'received_date'),)
 
 
 class HistoryManager(models.Manager):

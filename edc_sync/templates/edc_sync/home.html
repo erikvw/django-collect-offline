@@ -63,8 +63,11 @@
             <div class="panel-heading">Report</div>
 	            <ul id="nav-pill-admin">
 	            	<li>
-	            		<a href="{% url 'edc_sync:sync-report' %}"><i class="fa fa-bar-chart" aria-hidden="true"></i> Transaction Report</a>
+	            		<a href="{% url 'edc_sync:sync-report' %}"><i class="fa fa-bar-chart" aria-hidden="true"></i>        Server Report</a>
 	            	</li>
+                    <li>
+                        <a href="{% url 'edc_sync:sync-report-client' %}"><i class="fa fa-bar-chart" aria-hidden="true"></i>        Client Report</a>
+                    </li>
 	            </ul>
         	</div>
         {% endif %}

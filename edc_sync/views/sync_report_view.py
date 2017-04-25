@@ -1,35 +1,28 @@
 from edc_base.view_mixins import EdcBaseViewMixin
 
-from django.views.generic.base import TemplateView
 from django.apps import apps as django_apps
+from django.db.models.aggregates import Count
+from django.views.generic import ListView
 
-from edc_sync_files.classes import SyncReport
+from edc_sync_files.admin_site import edc_sync_files_admin
 
 from ..edc_sync_view_mixin import EdcSyncViewMixin
-from ..admin import edc_sync_admin
+from ..models import IncomingTransaction
 
 
-class SyncReportView(
-        EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
+class SyncReportView(EdcBaseViewMixin, EdcSyncViewMixin, ListView):
 
     template_name = 'edc_sync/sync_report.html'
 
-    def __init__(self, *args, **kwargs):
-        super(SyncReportView, self).__init__(*args, **kwargs)
+    def get_queryset(self):
+        return IncomingTransaction.objects.values('producer').filter(
+            is_consumed=False).annotate(
+                pending=Count('is_consumed')).order_by('producer')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        app_config = django_apps.get_app_config('edc_map')
+        app_config = django_apps.get_app_config('edc_sync')
         context.update(
-            edc_sync_admin=edc_sync_admin,
-            project_name=context.get(
-                'project_name') + ': ' + self.role.title(),
-            base_template_name=app_config.base_template_name)
+            base_template_name=app_config.base_template_name,
+            edc_sync_files_admin=edc_sync_files_admin)
         return context
-
-    def get(self, request, *args, **kwargs):
-        report = SyncReport()
-        context = self.get_context_data(**kwargs)
-        context.update({
-            'report_data': report.report_data})
-        return self.render_to_response(context)

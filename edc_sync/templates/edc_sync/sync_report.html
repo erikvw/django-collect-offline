@@ -1,69 +1,23 @@
-{% extends 'edc_base/base.html' %}
+{% extends base_template_name %}
 
 {% load staticfiles %}
 
-{% block extra-scripts %}
-
-{{ block.super }}
-  	<link rel="stylesheet" type="text/css" href="{% static "edc_sync/css/badge-with-color.css" %}">
-{% endblock extra-scripts %}
-
 {% block main %}
-    <!-- Page Content -->
     <div class="container">
-
-        <!-- Page Header -->
-        <div class="row">
-            <div class="col-lg-12">
-                <h4 class="page-header">Operational Transactions Reports
-                </h4>
-            </div>
-        </div>
-        <!-- /.row -->
-
-        <!-- Projects Row -->
-        {% for row_data in report_data %}
-		        <div class="row">
-		        	{% for data in row_data %}
-		            <div class="col-md-3 portfolio-item">
-		                <ul class="list-group">
-						  <li class="list-group-item">
-						  	{% if data.total_not_consumed > 0 %}
-							    <span class="badge badge-error">
-							    {{data.total_not_consumed}}</span>
-						    {% else %}
-							    <span class="badge">
-							    {{data.total_not_consumed}}</span>
-						    {% endif %}
-						   <b>Pending</b>
-						  </li>
-						  <li class="list-group-item">
-						    <span class="badge badge-success">
-						    {{data.total_consumed}}</span>
-						   <b>Total</b>
-						  </li>
-						  <li class="list-group-item">
-						  	<b>Last Synced:</b>
-						    <span>
-						    	{{data.upload_transaction_file.created |date:"D d M Y"  }}
-						    	</span>
-						  </li>
-						  <li class="list-group-item">
-			                <h4>
-			                    <a href="{% url 'edc_sync:sync-report-detail' data.upload_transaction_file.producer %}">{{data.upload_transaction_file.producer}}</a>
-			                </h4>
-						  </li>
-						 </ul>
-		            </div>
-		            {% endfor %}
+        <div class="col-md-12">
+	        <div class="panel panel-header">
+	                <h4 class="page-header">Pending Incoming Transactions</h4>
+	        </div>
+	        <div class="panel panel-body">
+		        <div class="table table-responsive">
+			        <table class="table table-condensed">
+				        <tr><th>Client</th><th>Pending</th></tr>
+		    		    {% for row in object_list %}
+		        			<tr><td><a href="{% url 'edc_sync_files_admin:edc_sync_files_uploadtransactionfile_change' %}?q={{ row.producer }}">{{ row.producer }}</a></td><td>{{ row.pending }}</td></tr>
+		        		{% endfor %}
+		        	</table>
 		        </div>
-		        <hr>
-	       {% endfor %}
-       <div class="row">
-		    {% if not report_data.0 %}
-	        	<div class="well well-sm alert alert-warning">
-	        	No data to generate report.</div>
-	        {% endif %}
-         </div>
-        </div>
+		     </div>
+		 </div>
+	</div>
 {% endblock main %}

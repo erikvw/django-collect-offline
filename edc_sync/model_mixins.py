@@ -53,7 +53,7 @@ class TransactionMixin(models.Model):
         null=True,
         blank=True)
 
-    batch_seq = models.CharField(
+    prev_batch_id = models.CharField(
         max_length=100,
         null=True, blank=True)
 
