@@ -1,7 +1,5 @@
 import socket
 
-from datetime import datetime
-
 from django.apps import apps as django_apps
 from django.core import serializers
 from django.db import models, transaction
@@ -94,8 +92,11 @@ class IncomingTransaction(TransactionMixin, BaseUuidModel):
             print("Failed to delete transaction. Got {}.".format(str(e)))
 
     def _deserialize_delete_tx(self, deserialized_object, using=None):
-        with transaction.atomic():
-            deserialized_object.object.delete()
+        try:
+            with transaction.atomic():
+                deserialized_object.object.delete()
+        except ProtectedError as e:
+            print("Failed to delete transaction. Got {}.".format(str(e)))
         return 1
 
     class Meta:
