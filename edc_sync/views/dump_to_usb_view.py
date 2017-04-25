@@ -5,8 +5,8 @@ from django.http.response import HttpResponse
 from django.views.generic.base import TemplateView
 from edc_base.view_mixins import EdcBaseViewMixin
 
-from edc_sync_files.classes import DumpToUsb, TransactionLoadUsbFile
-from edc_sync_files.classes import transaction_messages
+from edc_sync_files.transaction import (
+    DumpToUsb, TransactionLoadUsbFile, transaction_messages)
 
 from ..edc_sync_view_mixin import EdcSyncViewMixin
 
