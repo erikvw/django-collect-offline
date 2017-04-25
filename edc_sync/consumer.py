@@ -1,4 +1,4 @@
-from edc_sync_files.classes.transaction_messages import transaction_messages
+from edc_sync_files.transaction import transaction_messages
 
 from .models import IncomingTransaction
 
