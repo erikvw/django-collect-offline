@@ -141,9 +141,6 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
             return []
         return []
 
-    def __init__(self, *args, **kwargs):
-        super(HomeView, self).__init__(*args, **kwargs)
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         app_config = django_apps.get_app_config('edc_sync')
