@@ -13,7 +13,7 @@
 			        <table class="table table-condensed">
 				        <tr><th>Client</th><th>Pending</th></tr>
 		    		    {% for row in object_list %}
-		        			<tr><td><a href="{% url 'edc_sync_files_admin:edc_sync_files_uploadtransactionfile_change' %}?q={{ row.producer }}">{{ row.producer }}</a></td><td>{{ row.pending }}</td></tr>
+		        			<tr><td><a href="{% url 'edc_sync_files_admin:edc_sync_files_uploadtransactionfile_changelist' %}?q={{ row.producer }}">{{ row.producer }}</a></td><td>{{ row.pending }}</td></tr>
 		        		{% endfor %}
 		        	</table>
 		        </div>

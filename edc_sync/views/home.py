@@ -24,8 +24,10 @@ from rest_framework.views import APIView
 
 from edc_base.view_mixins import EdcBaseViewMixin
 from edc_device.constants import SERVER
-from edc_sync_files.admin_site import edc_sync_files_admin
-from edc_sync_files.classes import TransactionDumps, TransactionFileManager, transaction_messages
+from edc_sync_files.transaction import (
+    TransactionDumps, transaction_messages)
+from edc_sync_files.file_transfer import TransactionFileManager
+
 from edc_sync_files.models import History, UploadTransactionFile
 
 from ..admin import edc_sync_admin
