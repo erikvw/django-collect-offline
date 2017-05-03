@@ -1,6 +1,6 @@
 from django.apps import apps as django_apps
 from django.core.exceptions import MultipleObjectsReturned
-from django.test.testcases import TestCase
+from django.test import TestCase, tag
 from django.test.utils import override_settings
 
 from edc_sync.exceptions import SyncModelError
@@ -13,6 +13,7 @@ Crypt = django_apps.get_app_config('django_crypto_fields').model
 edc_device_app_config = django_apps.get_app_config('edc_device')
 
 
+@tag('erik')
 class TestSync(TestCase):
 
     multi_db = True
@@ -40,7 +41,7 @@ class TestSync(TestCase):
                 try:
                     OutgoingTransaction.objects.using('client').get(
                         tx_pk=test_model.pk,
-                        tx_name='edc_example.testmodel',
+                        tx_name='edc_sync.testmodel',
                         action='I')
                 except OutgoingTransaction.DoesNotExist:
                     pass
@@ -52,7 +53,7 @@ class TestSync(TestCase):
                 try:
                     OutgoingTransaction.objects.using('client').get(
                         tx_pk=history_obj.history_id,
-                        tx_name='edc_example.historicaltestmodel',
+                        tx_name='edc_sync.historicaltestmodel',
                         action='I')
                 except OutgoingTransaction.DoesNotExist:
                     pass
@@ -75,11 +76,11 @@ class TestSync(TestCase):
                 try:
                     OutgoingTransaction.objects.using('client').get(
                         tx_pk=test_model.pk,
-                        tx_name='edc_example.testmodel',
+                        tx_name='edc_sync.testmodel',
                         action='I')
                     OutgoingTransaction.objects.using('client').get(
                         tx_pk=test_model.pk,
-                        tx_name='edc_example.testmodel',
+                        tx_name='edc_sync.testmodel',
                         action='U')
                 except OutgoingTransaction.DoesNotExist:
                     pass
@@ -87,7 +88,7 @@ class TestSync(TestCase):
                     raise OutgoingTransaction.DoesNotExist()
             self.assertEqual(
                 2, OutgoingTransaction.objects.using('client').filter(
-                    tx_name='edc_example.historicaltestmodel',
+                    tx_name='edc_sync.historicaltestmodel',
                     action='I').count())
 
     def test_timestamp_is_default_order(self):
@@ -96,7 +97,7 @@ class TestSync(TestCase):
             test_model.save(using='client')
             last = 0
             for obj in OutgoingTransaction.objects.using('client').all():
-                self.assertGreater(int(obj.timestamp), last)
+                self.assertGreaterEqual(int(obj.timestamp), last)
                 last = int(obj.timestamp)
 
     def test_created_obj_serializes_to_correct_db(self):
@@ -109,13 +110,13 @@ class TestSync(TestCase):
         result.sort()
         self.assertListEqual(
             result,
-            ['edc_example.historicaltestmodel', 'edc_example.testmodel'])
+            ['edc_sync.historicaltestmodel', 'edc_sync.testmodel'])
         self.assertListEqual(
             [obj.tx_name for obj in OutgoingTransaction.objects.using('server').all()], [])
         self.assertRaises(
             OutgoingTransaction.DoesNotExist,
             OutgoingTransaction.objects.using('server').get,
-            tx_name='edc_example.testmodel')
+            tx_name='edc_sync.testmodel')
         self.assertRaises(
             MultipleObjectsReturned,
             OutgoingTransaction.objects.using('client').get,
@@ -130,10 +131,8 @@ class TestSync(TestCase):
             'client').filter(action='I')]
         result.sort()
         self.assertListEqual(
-            [obj.tx_name for obj in OutgoingTransaction.objects.using(
-                'client').filter(action='I')],
-            ['edc_example.historicaltestmodel',
-             'edc_example.testmodel'])
+            result, ['edc_sync.historicaltestmodel',
+                     'edc_sync.testmodel'])
         self.assertListEqual(
             [obj.tx_name for obj in OutgoingTransaction.objects.using(
                 'client').filter(action='U')],
@@ -142,15 +141,15 @@ class TestSync(TestCase):
         self.assertListEqual(
             [obj.tx_name for obj in OutgoingTransaction.objects.using(
                 'client').filter(action='U')],
-            [u'edc_example.testmodel'])
+            [u'edc_sync.testmodel'])
         result = [obj.tx_name for obj in OutgoingTransaction.objects.using(
             'client').filter(action='I')]
         result.sort()
         self.assertListEqual(
             result,
-            ['edc_example.historicaltestmodel',
-             'edc_example.historicaltestmodel',
-             'edc_example.testmodel'])
+            ['edc_sync.historicaltestmodel',
+             'edc_sync.historicaltestmodel',
+             'edc_sync.testmodel'])
 
     def test_m2m(self):
         for name in ['m2m_name' + str(x) for x in range(0, 10)]:
