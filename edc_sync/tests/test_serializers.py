@@ -1,5 +1,3 @@
-import json
-
 from django.test.testcases import TestCase
 from django.utils.six import BytesIO
 from django_crypto_fields.constants import LOCAL_MODE
@@ -8,11 +6,9 @@ from django_crypto_fields.cryptor import Cryptor
 from rest_framework.parsers import JSONParser
 from rest_framework.renderers import JSONRenderer
 
-from edc_sync.models import OutgoingTransaction, IncomingTransaction
-from edc_sync.serializers import OutgoingTransactionSerializer
-
-from edc_example.models import (
-    TestModel, ComplexTestModel, Fk, M2m, TestEncryptedModel, BadTestModel, AnotherBadTestModel)
+from ..models import OutgoingTransaction
+from ..serializers import OutgoingTransactionSerializer
+from .models import TestModel
 
 
 class TestSerializers(TestCase):
@@ -63,8 +59,11 @@ class TestSerializers(TestCase):
         serializer = OutgoingTransactionSerializer(data=data)
         serializer.is_valid()
         cryptor = Cryptor()
-        self.assertTrue(cryptor.aes_decrypt(serializer.validated_data['tx'], LOCAL_MODE))
-        value = cryptor.aes_decrypt(serializer.validated_data['tx'], LOCAL_MODE).encode()
+        self.assertTrue(cryptor.aes_decrypt(
+            serializer.validated_data['tx'], LOCAL_MODE))
+        value = cryptor.aes_decrypt(
+            serializer.validated_data['tx'], LOCAL_MODE).encode()
         stream = BytesIO(value)
         json_data = JSONParser().parse(stream)
-        self.assertTrue(json_data[0]['fields']['f1'], 'give any one species too much rope ...')
+        self.assertTrue(json_data[0]['fields']['f1'],
+                        'give any one species too much rope ...')

@@ -17,7 +17,7 @@ class M:
         self.verbose_name = self.model._meta.verbose_name
 
     def __repr__(self):
-        return 'M({}.{}, sync={})'.format(self.app_label, self.model_name, self.sync)
+        return f'M({self.app_label}.{self.model_name}, sync={self.sync})'
 
     def __str__(self):
         return self.verbose_name
@@ -25,14 +25,16 @@ class M:
 
 class SiteSyncModels:
 
-    """ Main controller of :class:`sync_models` objects."""
+    """ Main controller of :class:`sync_models` objects.
+    """
 
     def __init__(self):
         self.registry = {}
         self.loaded = False
 
     def register(self, models, DefaultSyncModel):
-        """Registers with app_label.modelname, SyncModel."""
+        """Registers with app_label.modelname, SyncModel.
+        """
         self.loaded = True
         for model in models:
             try:
@@ -46,7 +48,7 @@ class SiteSyncModels:
                     {'.historical'.join(name.split('.')): SyncModel})
             else:
                 raise AlreadyRegistered(
-                    'Model is already registered for synchronization. Got {}.'.format(name))
+                    f'Model is already registered for synchronization. Got {name}.')
 
     def get_as_sync_model(self, instance):
         """Returns a model instance wrapped with Sync methods."""
@@ -60,7 +62,9 @@ class SiteSyncModels:
         return sync_model
 
     def site_models(self, app_name=None, sync=None):
-        """Returns a dictionary of registered models indicating if they are sync models or not."""
+        """Returns a dictionary of registered models indicating if
+        they are sync models or not.
+        """
         sync = None if sync is None else sync
         site_models = {}
         for app_config in django_apps.get_app_configs():
@@ -68,7 +72,8 @@ class SiteSyncModels:
             for model in app_config.get_models():
                 app_label, model_name = model._meta.label_lower.split('.')
                 model_list.append(
-                    M(app_label, model_name, True if model._meta.label_lower in site_sync_models.registry else False))
+                    M(app_label, model_name,
+                      True if model._meta.label_lower in site_sync_models.registry else False))
             if model_list:
                 model_list.sort(key=lambda x: x.verbose_name)
                 site_models.update({app_label: model_list})
@@ -83,7 +88,9 @@ class SiteSyncModels:
             return site_models.get(app_name) if app_name else site_models
 
     def autodiscover(self, module_name=None):
-        """Autodiscovers classes in the sync_models.py file of any INSTALLED_APP."""
+        """Autodiscovers classes in the sync_models.py file of
+        any INSTALLED_APP.
+        """
         module_name = module_name or 'sync_models'
         sys.stdout.write(' * checking for models to register ...\n')
         for app in django_apps.app_configs:
@@ -94,7 +101,7 @@ class SiteSyncModels:
                         site_sync_models.registry)
                     import_module('{}.{}'.format(app, module_name))
                     sys.stdout.write(
-                        ' * registered models from \'{}\'.\n'.format(app))
+                        f' * registered models from \'{app}\'.\n')
                 except Exception as e:
                     if 'No module named \'{}.{}\''.format(app, module_name) not in str(e):
                         raise Exception(e)
@@ -103,5 +110,6 @@ class SiteSyncModels:
                         raise
             except ImportError:
                 pass
+
 
 site_sync_models = SiteSyncModels()

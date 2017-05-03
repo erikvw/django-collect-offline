@@ -15,6 +15,8 @@ import sys
 
 from pathlib import PurePath
 
+APP_LABEL = 'edc_sync'
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -39,23 +41,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_revision',
+    'django_revision.apps.AppConfig',
     'rest_framework',
     'rest_framework.authtoken',
     'django_crypto_fields.apps.AppConfig',
     'django_js_reverse',
     'simple_history',
-    'edc_appointment.apps.AppConfig',
     'edc_base.apps.AppConfig',
     'edc_device.apps.AppConfig',
-    'edc_identifier.apps.AppConfig',
     'edc_sync_files.apps.AppConfig',
-    # 'edc_lab.apps.AppConfig',
-    'edc_protocol.apps.AppConfig',
-    'edc_offstudy.apps.AppConfig',
-    'edc_visit_schedule.apps.AppConfig',
-    'edc_visit_tracking.apps.AppConfig',
-    'edc_example.apps.AppConfig',
     'edc_sync.apps.AppConfig',
 ]
 
@@ -196,6 +190,7 @@ STATICFILES_FINDERS = (
 )
 
 
+GIT_DIR = str(PurePath(BASE_DIR).parent)
 KEY_PATH = os.path.join(str(PurePath(BASE_DIR).parent), 'crypto_fields')
 EDC_CRYPTO_FIELDS_CLIENT_USING = 'client'
 SHOW_CRYPTO_FORM_DATA = True
@@ -218,6 +213,3 @@ REST_FRAMEWORK = {
     #         'rest_framework.permissions.IsAuthenticated',
     #     )
 }
-
-
-APP_LABEL = 'edc_sync'

@@ -5,21 +5,22 @@ from .models import IncomingTransaction
 
 class Consumer(object):
 
-    def __init__(
-            self, transactions=[], using=None, model_name=None,
-            verbose=True, producer_name=None, check_hostname=None):
+    def __init__(self, transactions=None, using=None, model_name=None,
+                 verbose=None, producer_name=None, check_hostname=None,
+                 check_device=None):
         self.model_name = model_name
         self.producer_name = producer_name
         self.using = using or 'default'
-        self.verbose = verbose
-        self.transactions = transactions
-        self.check_hostname = True if check_hostname is None else check_hostname
+        self.verbose = True if verbose is None else verbose
+        self.transactions = transactions or []
+        self.check_hostname = check_hostname
+        self.check_device = check_device
 
     def consume(self, model_name=None, producer_name=None, **kwargs):
         """Consumes ALL incoming transactions on \'using\' in
            order by ('producer', 'timestamp').
         """
-        is_played = False
+        consumed = 0
         if model_name and not producer_name:
             incoming_transactions = IncomingTransaction.objects.using(
                 self.using).filter(
@@ -57,13 +58,14 @@ class Consumer(object):
                 action = 'failed'
             try:
                 if incoming_transaction.deserialize_transaction(
-                        check_hostname=False):
+                        check_hostname=self.check_hostname,
+                        check_device=self.check_device):
                     action = 'saved'
-                    is_played = True
+                    consumed += 1
             except ValueError as e:
-                is_played = False
                 action = 'failed'
-                message = 'Failed to play transactions. Got {}'.format(str(e))
+                message = 'Failed to play transaction. Got {}'.format(str(e))
                 transaction_messages.add_message('error', message)
-            print('    {0}'.format(action))
-        return is_played
+            if self.verbose:
+                print('    {0}'.format(action))
+        return consumed

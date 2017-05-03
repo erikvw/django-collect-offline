@@ -1,14 +1,15 @@
 from django.conf.urls import url, include
 from django_js_reverse.views import urls_js
-
 from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.routers import DefaultRouter
 
-from edc_sync.views import (
-    OutgoingTransactionViewSet, IncomingTransactionViewSet, DumpToUsbView,
-    HomeView, RenderView, TransactionCountView, SyncReportView, SyncReportClientView)
 from edc_constants.constants import UUID_PATTERN
-from edc_sync.admin import edc_sync_admin
+
+from .admin import edc_sync_admin
+from .views import (
+    OutgoingTransactionViewSet, IncomingTransactionViewSet, DumpToUsbView,
+    HomeView, RenderView, TransactionCountView, SyncReportView,
+    SyncReportClientView)
 
 router = DefaultRouter()
 router.register(r'outgoingtransaction', OutgoingTransactionViewSet)

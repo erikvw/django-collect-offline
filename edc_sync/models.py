@@ -2,7 +2,10 @@ import socket
 
 from django.apps import apps as django_apps
 from django.core import serializers
+from django.core.exceptions import PermissionDenied
+from django.core.serializers.base import DeserializationError
 from django.db import models, transaction
+from django.db.models.deletion import ProtectedError
 from django.db.utils import IntegrityError
 from django.utils import timezone
 
@@ -11,9 +14,6 @@ from edc_base.utils import get_utcnow
 
 from .exceptions import SyncError
 from .model_mixins import TransactionMixin, HostModelMixin
-from django.core.exceptions import PermissionDenied
-from django.db.models.deletion import ProtectedError
-from django.core.serializers.base import DeserializationError
 
 edc_device_app_config = django_apps.get_app_config('edc_device')
 
@@ -31,8 +31,11 @@ class IncomingTransaction(TransactionMixin, BaseUuidModel):
     is_self = models.BooleanField(
         default=False)
 
-    def deserialize_transaction(self, check_hostname=None, commit=True,
-                                check_device=True):
+    def deserialize_transaction(self, check_hostname=None, commit=None,
+                                check_device=None):
+        commit = True if commit is None else commit
+        check_device = True if check_device is None else check_device
+        check_hostname = True if check_hostname is None else check_hostname
         if check_device:
             if not edc_device_app_config.is_server:
                 raise SyncError(
@@ -40,7 +43,6 @@ class IncomingTransaction(TransactionMixin, BaseUuidModel):
                     'Got device={} {}.'.format(edc_device_app_config.device_id,
                                                edc_device_app_config.role))
         inserted, updated, deleted = 0, 0, 0
-        check_hostname = True if check_hostname is None else check_hostname
         try:
             for deserialized_object in serializers.deserialize(
                     "json", self.aes_decrypt(self.tx),
@@ -56,7 +58,8 @@ class IncomingTransaction(TransactionMixin, BaseUuidModel):
                         inserted += self._deserialize_insert_tx(
                             deserialized_object)
                     elif self.action == 'U':
-                        updated += self._deserialize_update_tx(deserialized_object)
+                        updated += self._deserialize_update_tx(
+                            deserialized_object)
                     else:
                         raise SyncError(
                             'Unexpected value for action. Got {}'.format(
@@ -113,7 +116,6 @@ class OutgoingTransaction(TransactionMixin, BaseUuidModel):
     is_consumed_middleman = models.BooleanField(
         default=False)
 
-    # not required, remove
     is_consumed_server = models.BooleanField(
         default=False)
 

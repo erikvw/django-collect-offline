@@ -25,10 +25,9 @@ from rest_framework.views import APIView
 from edc_base.view_mixins import EdcBaseViewMixin
 from edc_device.constants import SERVER
 from edc_sync_files.transaction import (
-    TransactionDumps, transaction_messages)
-from edc_sync_files.file_transfer import TransactionFileManager
+    TransactionExporter, transaction_messages)
 
-from edc_sync_files.models import History, UploadTransactionFile
+from edc_sync_files.models import History, ImportedTransactionFileHistory
 
 from ..admin import edc_sync_admin
 from ..edc_sync_view_mixin import EdcSyncViewMixin
@@ -128,15 +127,20 @@ class RenderView(EdcBaseViewMixin, TemplateView):
 class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
     template_name = 'edc_sync/home.html'
-    tx_file_manager = TransactionFileManager()
+    # send_transaction_file = SendTransactionFile()
+
+    @method_decorator(login_required)
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
 
     def recent_sent_transactions(self):
         return History.objects.filter(
             sent=True).order_by('-created')[:20]
 
     def upload_transaction_files(self):
+        # TODO: what does this do??
         if self.role == SERVER:
-            files = UploadTransactionFile.objects.filter(
+            files = ImportedTransactionFileHistory.objects.filter(
                 not_consumed__gt=0, is_played=False)
             return files
         else:
@@ -195,8 +199,8 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
                     # dump transactions to a file
                     source_folder = django_apps.get_app_config(
                         'edc_sync_files').source_folder
-                    dump = TransactionDumps(source_folder)
-                    if dump.is_exported_to_json:
+                    tx_exporter = TransactionExporter(source_folder)
+                    if tx_exporter.exported:
                         response_data.update({
                             'transactionFiles': self.tx_file_manager.file_transfer.files_dict,
                             'messages': transaction_messages.messages()
@@ -237,7 +241,3 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
             return HttpResponse(json.dumps(response_data),
                                 content_type='application/json')
         return self.render_to_response(context)
-
-    @method_decorator(login_required)
-    def dispatch(self, *args, **kwargs):
-        return super(HomeView, self).dispatch(*args, **kwargs)

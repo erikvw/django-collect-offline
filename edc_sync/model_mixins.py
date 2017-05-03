@@ -55,18 +55,16 @@ class TransactionMixin(models.Model):
 
     prev_batch_id = models.CharField(
         max_length=100,
-        null=True, blank=True)
+        null=True,
+        blank=True)
 
     batch_id = models.CharField(
         max_length=100,
-        null=True, blank=True)
-
-    def __repr__(self):
-        return '<{}: {}>'.format(self.__class__.__name__, self.tx_name)
+        null=True,
+        blank=True)
 
     def __str__(self):
-        return '</{}.{}/{}/{}/{}/>'.format(
-            self._meta.app_label, self._meta.model_name, self.id, self.tx_name, self.action)
+        return f'{self._meta.model_name}.{self.tx_name}.{self.id}.{self.action}'
 
     def aes_decrypt(self, cipher):
         cryptor = Cryptor()

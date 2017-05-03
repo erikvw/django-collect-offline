@@ -15,7 +15,9 @@ from .exceptions import SyncModelError
 
 class SyncModel:
 
-    """A wrapper for instances to add methods called in edc_sync.signals for synchronization."""
+    """A wrapper for instances to add methods called in
+    edc_sync.signals for synchronization.
+    """
 
     def __init__(self, instance):
         try:
@@ -26,17 +28,21 @@ class SyncModel:
         try:
             self.instance.natural_key
         except AttributeError:
-            raise SyncModelError('Model \'{}.{}\' is missing method natural_key '.format(
-                self.instance._meta.app_label, self.instance._meta.model_name))
+            raise SyncModelError(
+                f'Model \'{self.instance._meta.app_label}.{self.instance._meta.model_name}\' '
+                'is missing method natural_key ')
         try:
             self.instance.__class__.objects.get_by_natural_key
         except AttributeError:
-            raise SyncModelError('Model \'{}.{}\' is missing manager method get_by_natural_key '.format(
-                self.instance._meta.app_label, self.instance._meta.model_name))
+            raise SyncModelError(
+                f'Model \'{self.instance._meta.app_label}.{self.instance._meta.model_name}\' '
+                'is missing manager method get_by_natural_key ')
         try:
-            # if using history manager, historical model history_id (primary_key) must be UUIDField.
+            # if using history manager, historical model history_id
+            # (primary_key) must be UUIDField.
             historical_model = self.instance.__class__.history.model
-            field = [field for field in historical_model._meta.fields if field.name == 'history_id'][0]
+            field = [
+                field for field in historical_model._meta.fields if field.name == 'history_id'][0]
             if not isinstance(field, UUIDField):
                 raise SyncModelError(
                     'Field \'history_id\' of historical model \'{}.{}\' must be an UUIDfield. '
@@ -60,18 +66,21 @@ class SyncModel:
     def primary_key_field(self):
         """Return the primary key field.
 
-        Is `id` in most cases. Is `history_id` for Historical models."""
+        Is `id` in most cases. Is `history_id` for Historical models.
+        """
         try:
-            field = [field for field in self.instance._meta.fields if field.primary_key][0]
+            field = [
+                field for field in self.instance._meta.fields if field.primary_key][0]
         except IndexError:
             field = None
         return field
 
     def to_outgoing_transaction(self, using, created=None, deleted=None):
         """ Serialize the model instance to an AES encrypted json object
-        and saves the json object to the OutgoingTransaction model."""
-
-        OutgoingTransaction = django_apps.get_model('edc_sync', 'OutgoingTransaction')
+        and saves the json object to the OutgoingTransaction model.
+        """
+        OutgoingTransaction = django_apps.get_model(
+            'edc_sync', 'OutgoingTransaction')
         created = True if created is None else created
         action = 'I' if created else 'U'
         timestamp_datetime = self.instance.created if created else self.instance.modified
@@ -93,21 +102,26 @@ class SyncModel:
         return outgoing_transaction
 
     def encrypted_json(self):
-        """Returns an encrypted json serialized from self."""
+        """Returns an encrypted json serialized from self.
+        """
         json = serializers.serialize(
-            "json", [self.instance, ], ensure_ascii=True, use_natural_foreign_keys=True)
+            "json", [self.instance, ], ensure_ascii=True,
+            use_natural_foreign_keys=True)
         encrypted_json = Cryptor().aes_encrypt(json, LOCAL_MODE)
         return encrypted_json
 
     def skip_saving_criteria(self):
         """Returns True to skip saving, False to save (default).
 
-        Users may override to avoid saving/persisting instances of a particular model that fit a certain
-           criteria as defined in the subclass's overriding method.
+        Users may override to avoid saving/persisting instances of a
+        particular model that fit a certain criteria as defined in
+        the subclass's overriding method.
 
-        If there you want a certain model to not be persisted for what ever reason,
-        (Usually to deal with temporary data cleaning issues) then define the method skip_saving_criteria()
-        in your model which return True/False based on the criteria to be used for skipping.
+        If there you want a certain model to not be persisted for
+        what ever reason, (Usually to deal with temporary data
+        cleaning issues) then define the method skip_saving_criteria()
+        in your model which return True/False based on the criteria
+        to be used for skipping.
         """
         False
 
@@ -125,6 +139,8 @@ class SyncModel:
 
     def deserialize_get_missing_fk(self, attrname):
         """Override to return a foreignkey object for 'attrname',
-        if possible, using criteria in self, otherwise return None"""
-        raise ImproperlyConfigured('Method deserialize_get_missing_fk() must '
-                                   'be overridden on model class {0}'.format(self._meta.object_name))
+        if possible, using criteria in self, otherwise return None.
+        """
+        raise ImproperlyConfigured(
+            f'Method deserialize_get_missing_fk() must '
+            f'be overridden on model class {self._meta.object_name}')

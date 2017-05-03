@@ -10,7 +10,7 @@ from django.views.generic.base import TemplateView
 from requests.exceptions import ConnectionError, HTTPError
 
 from edc_base.view_mixins import EdcBaseViewMixin
-from edc_sync_files.models import UploadTransactionFile
+from edc_sync_files.models import ImportedTransactionFileHistory
 
 from ..admin import edc_sync_admin
 from ..edc_sync_view_mixin import EdcSyncViewMixin
@@ -93,6 +93,6 @@ class Report:
 
     def synced_files(self, hostname):
         producer = '{}-default'.format(hostname)
-        return [p for p in UploadTransactionFile.objects.filter(
+        return [p for p in ImportedTransactionFileHistory.objects.filter(
             producer=producer,
             created__date=datetime.today().date()).order_by('-created')]

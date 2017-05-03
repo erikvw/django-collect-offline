@@ -2,10 +2,11 @@ import socket
 
 from datetime import datetime, timedelta
 
-# from django.apps import apps as django_apps
-
 
 class TransactionUpload(object):
+
+    """Not used.
+    """
 
     def compile_upload_stats(self, args, upload_file_model):
         sucess_list = args[0].split(',')
@@ -45,47 +46,6 @@ class TransactionUpload(object):
         body += missing_files
         print("sending email to {}".format(recipient_list))
         return (subject, body, recipient_list)
-
-#     def get_missing_files(self):
-#         from ..models import Producer
-#         message = ""
-#         for producer in Producer.objects.filter(is_active=True):
-#             producer_identifier = producer.name.split('.')[0]
-#             UploadTransactionFile = django_apps.get_model('import', 'UploadTransactionFile')
-#             UploadSkipDays = django_apps.get_model('import', 'UploadSkipDays')
-#             latest_upload_file_date = UploadTransactionFile.objects.filter(
-#                 identifier__iexact=producer_identifier).order_by('-file_date')
-#             if latest_upload_file_date.exists():
-#                 # For any host we have synced before, i am guaranteed
-#                 # to always have UploadTransactionFile record(s).
-#                 latest_upload_file_date = latest_upload_file_date[0].file_date
-#             else:
-#                 # If i cannot find a UploadTransactionFile, then
-#                 # we must have never synced this host before.
-#                 # We skip all remaining work.
-#                 continue
-#             latest_skip_date = UploadSkipDays.objects.filter(
-#                 identifier__iexact=producer_identifier).order_by('-skip_date')
-#             if latest_skip_date.exists() and latest_skip_date[0].skip_until_date:
-#                 latest_skip_date = latest_skip_date[0].skip_until_date
-#             elif latest_skip_date.exists() and not latest_skip_date[0].skip_until_date:
-#                 latest_skip_date = latest_skip_date[0].skip_date
-#             elif not latest_upload_file_date:
-#                 continue
-#             if not latest_skip_date:
-#                 # If no skip date exists for a host, then default back to latest file upload date.
-#                 chosen = latest_upload_file_date
-#             else:
-#                 # If you found a skip date for a host, then choose the
-#                 # latest between it and te file upload date.
-#                 chosen = latest_upload_file_date if latest_upload_file_date > latest_skip_date else latest_skip_date
-#             missing_dates = self.return_friendly_date(
-#                 self.date_range_generator(chosen + timedelta(days=1), date.today()))
-#             if not missing_dates:
-#                 continue
-#             message += "\nMissing Files from {} for the following date(s) {}".format(
-#                 producer.name.upper(), missing_dates)
-#         return message
 
     def return_friendly_date(self, date_list):
         date_string = ""
