@@ -1,4 +1,4 @@
-from django.test.testcases import TestCase
+from django.test import TestCase, tag
 from django.utils.six import BytesIO
 from django_crypto_fields.constants import LOCAL_MODE
 from django_crypto_fields.cryptor import Cryptor
@@ -11,6 +11,7 @@ from ..serializers import OutgoingTransactionSerializer
 from .models import TestModel
 
 
+@tag('erik')
 class TestSerializers(TestCase):
 
     multi_db = True

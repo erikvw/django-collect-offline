@@ -13,7 +13,6 @@ Crypt = django_apps.get_app_config('django_crypto_fields').model
 edc_device_app_config = django_apps.get_app_config('edc_device')
 
 
-@tag('erik')
 class TestSync(TestCase):
 
     multi_db = True
