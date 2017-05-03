@@ -11,7 +11,6 @@ from ..serializers import OutgoingTransactionSerializer
 from .models import TestModel
 
 
-@tag('erik')
 class TestSerializers(TestCase):
 
     multi_db = True
