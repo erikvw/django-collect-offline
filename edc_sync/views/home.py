@@ -199,16 +199,16 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
                     source_folder = django_apps.get_app_config(
                         'edc_sync_files').source_folder
                     tx_exporter = TransactionExporter(source_folder)
-                    print("self.send_transaction_file.pending_files(): ", self.send_transaction_file.pending_files())
                     if tx_exporter.exported:
                         response_data.update({
+                            'transactionFiles': self.send_transaction_file.pending_files()
                         })
                     else:
                         response_data.update({
                             'error': True})
                 elif request.GET.get('action') == 'transfer_transaction_file':
-                    self.tx_file_manager.filename = request.GET.get('filename')
-                    sent, archived = self.tx_file_manager.send_files()
+                    self.send_transaction_file.filename = request.GET.get('filename')
+                    sent, archived = self.send_transaction_file.send_files()
                     if not (sent or archived):
                         response_data.update({
                             'error': True})
@@ -223,7 +223,7 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
                         self.send_transaction_file.approve_transfer_files(files)
                 elif request.GET.get('action') == 'pending_files':
                     response_data.update({
-                        'pendingFiles': self.tx_file_manager.pending_files(),
+                        'pendingFiles': self.send_transaction_file.pending_files(),
                         'error': False})
             else:
                 host = django_apps.get_app_config(
