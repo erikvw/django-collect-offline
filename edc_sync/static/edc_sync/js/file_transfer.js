@@ -24,7 +24,7 @@ function edcSyncReady(server, userName, apiToken) {
     	$( '#id-transfer-status-div' ).text( 'Connecting to the server. Please wait!' );
     	$( '#id-transfer-status-div' ).removeClass( 'alert-danger' ).addClass( 'alert-warning' );
     	$( '#id-in-progress-div-pending-files' ).hide();
-        $(this).prop("disabled",true);
+        $(this).prop("disabled", true);
         dumpTransactionFile(server , userName);
     });
     
@@ -194,8 +194,6 @@ function sendTransactionFile(file) {
 		updateIcon(file.index, 'error');
 		$( '#progress-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-danger' );
 		$( '#progress-status-div' ).text('An error occurred. Got ' + errorThrown + '. Status '+ jqXHR.status);
-//		$( '#id-sync-status' ).removeClass( 'alert-success' ).addClass( 'alert-danger' );
-//		$( '#id-sync-status' ).text( 'An error occurred. Got ' + errorThrown);
 	});
 }
 
@@ -312,20 +310,9 @@ function processPendingFiles() {
 
 			$( '#btn-send-again').prop( "disabled", false );
 			$( '#id-transfer-status-div' ).show();
-			var error = "";
-			$.each( data.messages, function(index,  message  ) {
-				try {
-					error = message.error.network;
-					$( '#id-transfer-status-div' ).text('Network Error, unable to connect to the server. Got '+error);
-				} catch(err) { }
-				
-				try {
-					error = message.error.permission;
-					if( error !== void 0){
-						$( '#id-transfer-status-div' ).text('An error occurred. Got, '+error);
-					}
-				} catch(err) { }
-			});
+			try {
+				$( '#id-transfer-status-div' ).text(data.messages);
+			} catch(err) { }
 			$( '#id-transfer-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-danger' );
 		}
 		
