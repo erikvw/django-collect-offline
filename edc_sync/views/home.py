@@ -26,6 +26,7 @@ from edc_base.view_mixins import EdcBaseViewMixin
 from edc_device.constants import SERVER
 from edc_sync_files.transaction import (
     TransactionExporter, transaction_messages)
+from edc_sync_files.file_transfer import SendTransactionFile
 
 from edc_sync_files.models import History, ImportedTransactionFileHistory
 
@@ -127,7 +128,7 @@ class RenderView(EdcBaseViewMixin, TemplateView):
 class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
     template_name = 'edc_sync/home.html'
-    # send_transaction_file = SendTransactionFile()
+    send_transaction_file = SendTransactionFile()
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
@@ -179,7 +180,7 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
         context.update({
-            'pending_files': self.tx_file_manager.pending_files(),
+            'pending_files': self.send_transaction_file.pending_files(),
             'upload_transaction_files': self.upload_transaction_files()})
         response_data = {
             'error': False,
@@ -191,7 +192,7 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
         if request.is_ajax():
             transaction_messages.clear()
             action = request.GET.get('action') in actions
-            connected = self.tx_file_manager.is_server_available(
+            connected = self.send_transaction_file.is_server_available(
             ) if action else False
             if connected:
                 action = False
@@ -202,7 +203,7 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
                     tx_exporter = TransactionExporter(source_folder)
                     if tx_exporter.exported:
                         response_data.update({
-                            'transactionFiles': self.tx_file_manager.file_transfer.files_dict,
+                            'transactionFiles': self.send_transaction_file.file_transfer.files_dict,
                             'messages': transaction_messages.messages()
                         })
                     else:
@@ -218,13 +219,13 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
                             'error': True})
                 elif request.GET.get('action') == 'get_file_transfer_progress':
                     response_data.update({
-                        'progress': self.tx_file_manager.file_transfer_progress
+                        'progress': self.send_transaction_file.file_transfer_progress
                     })
                 elif request.GET.get('action') == 'approve_files':
                     files = request.GET.get('files')
                     if files:
                         files = files.split(',')
-                        self.tx_file_manager.approve_transfer_files(files)
+                        self.send_transaction_file.approve_transfer_files(files)
                 elif request.GET.get('action') == 'pending_files':
                     response_data.update({
                         'messages': transaction_messages.messages(),
