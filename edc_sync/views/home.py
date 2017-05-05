@@ -199,21 +199,18 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
                     source_folder = django_apps.get_app_config(
                         'edc_sync_files').source_folder
                     tx_exporter = TransactionExporter(source_folder)
+                    print("self.send_transaction_file.pending_files(): ", self.send_transaction_file.pending_files())
                     if tx_exporter.exported:
                         response_data.update({
-                            'transactionFiles': self.send_transaction_file.pending_files(),
-#                             'messages': transaction_messages.messages()
                         })
                     else:
                         response_data.update({
-#                             'messages': transaction_messages.messages(),
                             'error': True})
                 elif request.GET.get('action') == 'transfer_transaction_file':
                     self.tx_file_manager.filename = request.GET.get('filename')
                     sent, archived = self.tx_file_manager.send_files()
                     if not (sent or archived):
                         response_data.update({
-#                             'messages': transaction_messages.messages(),
                             'error': True})
                 elif request.GET.get('action') == 'get_file_transfer_progress':
                     response_data.update({
@@ -226,7 +223,6 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
                         self.send_transaction_file.approve_transfer_files(files)
                 elif request.GET.get('action') == 'pending_files':
                     response_data.update({
-#                         'messages': transaction_messages.messages(),
                         'pendingFiles': self.tx_file_manager.pending_files(),
                         'error': False})
             else:
@@ -235,7 +231,6 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
                 response_data.update({
                     'error': True,
                     'host': host,
-#                     'messages': transaction_messages.messages(),
                 })
             return HttpResponse(json.dumps(response_data),
                                 content_type='application/json')
