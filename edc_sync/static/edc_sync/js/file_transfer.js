@@ -88,22 +88,7 @@ function dumpTransactionFile(server , userName) {
 		} else {
 			$( '#btn-sync').prop( "disabled", false );
 			$( '#id-transfer-status-div' ).show();
-			var error = "";
-			$.each( data.messages, function(index,  message  ) {
-				try {
-					error = message.error.network;
-					if( error !== void 0) {
-						$( '#id-transfer-status-div' ).text('Network Error, unable to connect to the server. Got '+error);
-					}
-				} catch(err) { }
-				
-				try {
-					error = message.error.permission;
-					if( error !== void 0) {
-						$( '#id-transfer-status-div' ).text('An error occurred. Got, '+error);
-					}
-				} catch(err) { }
-			});
+			$( '#id-transfer-status-div' ).text(data.messages);
 			$( '#id-transfer-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-danger' );
 		}
 	});
@@ -171,17 +156,8 @@ function sendTransactionFile(file) {
 			/*
 				Display the error message.
 			*/
-
 			updateIcon(file.index, 'error');
-			var error = "";
-			$.each( data.messages, function(index,  message  ) {
-				try {
-					error = message.error.permission;
-				} catch(err) {
-					
-				}
-			});
-			$( '#progress-status-div' ).text('An error occured. Got ' + error);
+			$( '#progress-status-div' ).text('An error occured. Got ' + data.messages);
 			$( '#progress-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-danger' );
 		}
 	});

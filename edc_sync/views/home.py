@@ -36,6 +36,9 @@ from ..serializers import (
     OutgoingTransactionSerializer, IncomingTransactionSerializer)
 from ..site_sync_models import site_sync_models
 
+from paramiko.ssh_exception import (
+    BadHostKeyException, AuthenticationException, SSHException)
+
 
 @api_view(['GET'])
 @authentication_classes((TokenAuthentication,))
@@ -190,48 +193,57 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
             'get_file_transfer_progress', 'approve_files', 'pending_files']
         if request.is_ajax():
             action = request.GET.get('action') in actions
-            connected = self.send_transaction_file.is_server_available(
-            ) if action else False
-            if connected:
-                action = False
-                if request.GET.get('action') == 'dump_transaction_file':
-                    # dump transactions to a file
-                    source_folder = django_apps.get_app_config(
-                        'edc_sync_files').source_folder
-                    tx_exporter = TransactionExporter(source_folder)
-                    if tx_exporter.exported:
-                        response_data.update({
-                            'transactionFiles': self.send_transaction_file.pending_files()
-                        })
-                    else:
-                        response_data.update({
-                            'error': True})
-                elif request.GET.get('action') == 'transfer_transaction_file':
-                    self.send_transaction_file.filename = request.GET.get('filename')
-                    sent, archived = self.send_transaction_file.send_files()
-                    if not (sent or archived):
-                        response_data.update({
-                            'error': True})
-                elif request.GET.get('action') == 'get_file_transfer_progress':
-                    response_data.update({
-                        'progress': self.send_transaction_file.file_transfer_progress
-                    })
-                elif request.GET.get('action') == 'approve_files':
-                    files = request.GET.get('files')
-                    if files:
-                        files = files.split(',')
-                        self.send_transaction_file.approve_transfer_files(files)
-                elif request.GET.get('action') == 'pending_files':
-                    response_data.update({
-                        'pendingFiles': self.send_transaction_file.pending_files(),
-                        'error': False})
-            else:
-                host = django_apps.get_app_config(
-                    'edc_sync_files').remote_host
+            try:
+                is_server_available = self.send_transaction_file.is_server_available(
+                ) if action else False
+            except (ConnectionRefusedError, AuthenticationException,
+                    BadHostKeyException, ConnectionResetError, SSHException,
+                    OSError)as e:
                 response_data.update({
                     'error': True,
-                    'host': host,
+                    'messages': 'An error occurred. Got {}'.format(str(e))
                 })
+            else:
+                if is_server_available:
+                    if request.GET.get('action') == 'dump_transaction_file':
+                        # dump transactions to a file
+                        source_folder = django_apps.get_app_config(
+                            'edc_sync_files').source_folder
+                        tx_exporter = TransactionExporter(source_folder)
+                        if tx_exporter.exported:
+                            response_data.update({
+                                'transactionFiles': self.send_transaction_file.pending_files()
+                            })
+                        else:
+                            response_data.update({
+                                'error': True})
+                    elif request.GET.get('action') == 'transfer_transaction_file':
+                        self.send_transaction_file.filename = request.GET.get('filename')
+                        try:
+                            self.send_transaction_file.send_files()
+                        except IOError as e:
+                            response_data.update({
+                                'error': True,
+                                'messages': 'An error occurred Got {}'.format(str(e))
+                            })
+                        else:
+                            response_data.update({
+                                'error': False,
+                                'messages': 'File sent'})
+                    elif request.GET.get('action') == 'get_file_transfer_progress':
+                        response_data.update({
+                            'progress': self.send_transaction_file.file_transfer_progress
+                        })
+                    elif request.GET.get('action') == 'approve_files':
+                        files = request.GET.get('files')
+                        if files:
+                            files = files.split(',')
+                            self.send_transaction_file.approve_transfer_files(files)
+                    elif request.GET.get('action') == 'pending_files':
+                        response_data.update({
+                            'pendingFiles': self.send_transaction_file.pending_files(),
+                            'error': False})
+
             return HttpResponse(json.dumps(response_data),
                                 content_type='application/json')
         return self.render_to_response(context)
