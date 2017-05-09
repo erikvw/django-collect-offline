@@ -27,7 +27,8 @@ from edc_device.constants import SERVER
 from edc_sync_files.transaction import TransactionExporter
 from edc_sync_files.file_transfer import SendTransactionFile
 
-from edc_sync_files.models import History, ImportedTransactionFileHistory
+from edc_sync_files.models import (
+    ExportedTransactionFileHistory, ImportedTransactionFileHistory)
 
 from ..admin import edc_sync_admin
 from ..edc_sync_view_mixin import EdcSyncViewMixin
@@ -137,7 +138,7 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
         return super().dispatch(*args, **kwargs)
 
     def recent_sent_transactions(self):
-        return History.objects.filter(
+        return ExportedTransactionFileHistory.objects.filter(
             sent=True).order_by('-created')[:20]
 
     def upload_transaction_files(self):
@@ -210,12 +211,17 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
                         source_folder = django_apps.get_app_config(
                             'edc_sync_files').source_folder
                         tx_exporter = TransactionExporter(source_folder)
-                        if tx_exporter.exported:
+                        if tx_exporter.export_batch():
                             response_data.update({
                                 'transactionFiles': self.send_transaction_file.pending_files()
                             })
                         else:
+                            message = 'No pending data.'
+                            if ExportedTransactionFileHistory.objects.filter(
+                                    sent=False).exists():
+                                message = 'Pending files found. Transfer pending files.'
                             response_data.update({
+                                'messages': message,
                                 'error': True})
                     elif request.GET.get('action') == 'transfer_transaction_file':
                         self.send_transaction_file.filename = request.GET.get('filename')
