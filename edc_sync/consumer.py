@@ -1,5 +1,3 @@
-from edc_sync_files.transaction import transaction_messages
-
 from .models import IncomingTransaction
 
 
@@ -64,8 +62,6 @@ class Consumer(object):
                     consumed += 1
             except ValueError as e:
                 action = 'failed'
-                message = 'Failed to play transaction. Got {}'.format(str(e))
-                transaction_messages.add_message('error', message)
             if self.verbose:
                 print('    {0}'.format(action))
         return consumed

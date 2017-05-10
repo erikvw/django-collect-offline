@@ -1,8 +1,10 @@
 import json
+import os
 import socket
 
 from django.apps import apps as django_apps
 from django.conf import settings
+
 from django.contrib.auth.decorators import login_required
 from django.core.serializers.json import Serializer
 from django.http.response import HttpResponse
@@ -10,6 +12,8 @@ from django.utils.decorators import method_decorator
 from django.views.generic.base import TemplateView
 from django_crypto_fields.constants import LOCAL_MODE
 from django_crypto_fields.cryptor import Cryptor
+
+from hurry.filesize import size
 
 from rest_framework import status
 from rest_framework import viewsets
@@ -25,7 +29,6 @@ from rest_framework.views import APIView
 from edc_base.view_mixins import EdcBaseViewMixin
 from edc_device.constants import SERVER
 from edc_sync_files.transaction import TransactionExporter
-from edc_sync_files.file_transfer import SendTransactionFile
 
 from edc_sync_files.models import (
     ExportedTransactionFileHistory, ImportedTransactionFileHistory)
@@ -39,6 +42,7 @@ from ..site_sync_models import site_sync_models
 
 from paramiko.ssh_exception import (
     BadHostKeyException, AuthenticationException, SSHException)
+from edc_sync_files.file_transfer.send_transaction_file import TransactionFileSender
 
 
 @api_view(['GET'])
@@ -131,7 +135,24 @@ class RenderView(EdcBaseViewMixin, TemplateView):
 class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
     template_name = 'edc_sync/home.html'
-    send_transaction_file = SendTransactionFile()
+    transaction_file_sender = TransactionFileSender()
+
+    @property
+    def pending_files(self):
+        """ Returns a dictionary of unsent files.
+        """
+        file_attrs = []
+        for history in self.history_model.objects.filter(
+                filename__in=self.files, sent=False).order_by('created'):
+            source_filename = os.path.join(
+                self.source_folder, history.filename)
+            file_attr = os.stat(source_filename)
+            data = dict({
+                'filename': history.filename,
+                'filesize': size(file_attr.st_size),
+            })
+            file_attrs.append(data)
+        return file_attrs
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
@@ -140,16 +161,6 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
     def recent_sent_transactions(self):
         return ExportedTransactionFileHistory.objects.filter(
             sent=True).order_by('-created')[:20]
-
-    def upload_transaction_files(self):
-        # TODO: what does this do??
-        if self.role == SERVER:
-            files = ImportedTransactionFileHistory.objects.filter(
-                not_consumed__gt=0, is_played=False)
-            return files
-        else:
-            return []
-        return []
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -182,74 +193,79 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
-        context.update({
-            'pending_files': self.send_transaction_file.pending_files(),
-            'upload_transaction_files': self.upload_transaction_files()})
-        response_data = {
-            'error': False,
-            'messages': 'Connected',
-        }
-        actions = [
-            'dump_transaction_file', 'transfer_transaction_file',
-            'get_file_transfer_progress', 'approve_files', 'pending_files']
         if request.is_ajax():
-            action = request.GET.get('action') in actions
+            response_data = {}
             try:
-                is_server_available = self.send_transaction_file.is_server_available(
-                ) if action else False
+                self.transaction_file_sender.file_connector.connected()
             except (ConnectionRefusedError, AuthenticationException,
                     BadHostKeyException, ConnectionResetError, SSHException,
                     OSError)as e:
                 response_data.update({
-                    'error': True,
-                    'messages': 'An error occurred. Got {}'.format(str(e))
-                })
+                    'error': True, 'messages': f'An error occurred. Got {e}'})
             else:
-                if is_server_available:
-                    if request.GET.get('action') == 'dump_transaction_file':
-                        # dump transactions to a file
-                        source_folder = django_apps.get_app_config(
-                            'edc_sync_files').source_folder
-                        tx_exporter = TransactionExporter(source_folder)
-                        if tx_exporter.export_batch():
-                            response_data.update({
-                                'transactionFiles': self.send_transaction_file.pending_files()
-                            })
-                        else:
-                            message = 'No pending data.'
-                            if ExportedTransactionFileHistory.objects.filter(
-                                    sent=False).exists():
-                                message = 'Pending files found. Transfer pending files.'
-                            response_data.update({
-                                'messages': message,
-                                'error': True})
-                    elif request.GET.get('action') == 'transfer_transaction_file':
-                        self.send_transaction_file.filename = request.GET.get('filename')
-                        try:
-                            self.send_transaction_file.send_files()
-                        except IOError as e:
-                            response_data.update({
-                                'error': True,
-                                'messages': 'An error occurred Got {}'.format(str(e))
-                            })
-                        else:
-                            response_data.update({
-                                'error': False,
-                                'messages': 'File sent'})
-                    elif request.GET.get('action') == 'get_file_transfer_progress':
-                        response_data.update({
-                            'progress': self.send_transaction_file.file_transfer_progress
-                        })
-                    elif request.GET.get('action') == 'approve_files':
-                        files = request.GET.get('files')
-                        if files:
-                            files = files.split(',')
-                            self.send_transaction_file.approve_transfer_files(files)
-                    elif request.GET.get('action') == 'pending_files':
-                        response_data.update({
-                            'pendingFiles': self.send_transaction_file.pending_files(),
-                            'error': False})
+                if request.GET.get('action') == 'export_file':
+                    response_data = self.export_transactions(
+                        response_data=response_data)
+                elif request.GET.get('action') == 'send_file':
+                    response_data = self.send_file(
+                        filename=request.GET.get('filename'))
+                elif request.GET.get('action') == 'progress':
+                    response_data = {
+                        'progress': self.transaction_file_sender.progress}
+                elif request.GET.get('action') == 'confirm':
+                    files = request.GET.get('files')
+                    if files:
+                        files = files.split(',')
+                        self.confirm(files)
+                elif request.GET.get('action') == 'pending_files':
+                    response_data.update({
+                        'pendingFiles': self.pending_files(),
+                        'error': False})
 
             return HttpResponse(json.dumps(response_data),
                                 content_type='application/json')
         return self.render_to_response(context)
+
+    def export_transactions(self):
+        """Returns response data after exporting transactions.
+        """
+        source_folder = django_apps.get_app_config(
+            'edc_sync_files').source_folder
+        tx_exporter = TransactionExporter(source_folder)
+        if tx_exporter.export_batch():
+            response_data = dict(
+                error=False,
+                transactionFiles=self.send_transaction_file.pending_files())
+        else:
+            message = 'No pending data.'
+            if tx_exporter.history_model.objects.filter(
+                    sent=False).exists():
+                message = 'Pending files found. Transfer pending files.'
+            response_data = dict(messages=message, error=True)
+        return response_data
+
+    def send_file(self, filename=None):
+        """Returns response data after sending the file.
+        """
+        self.transaction_file_sender(filename=filename)
+        try:
+            self.transaction_file_sender.send()
+        except IOError as e:
+            response_data = {
+                'error': True,
+                'messages': f'Unable to send file. Got {e}'}
+        else:
+            response_data = {
+                'error': False,
+                'messages': 'File sent.'}
+        return response_data
+
+    def confirm(self, filename):
+        """ Update history record after all files sent to the server.
+        """
+        device_id = django_apps.get_app_config('edc_device').device_id
+        self.confirmation_code = (
+            f'{device_id}{str(get_utcnow().strftime("%Y%m%d%H%M"))}')
+        obj = self.history_model.objects.get(filename=filename)
+        obj.confirmation_code = self.confirmation_code
+        obj.save()

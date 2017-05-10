@@ -62,7 +62,7 @@ function dumpTransactionFile(server , userName) {
 		type: 'GET',
 		dataType: 'json ',
 		processData: true,
-		data: {'action': 'dump_transaction_file'},
+		data: {'action': 'export_file'},
 	});
 	
 	ajDumpFile.done( function ( data ) {
@@ -110,7 +110,7 @@ function sendTransactionFile(file) {
 		dataType: 'json ',
 		processData: true,
 		data: {
-			'action': 'transfer_transaction_file',
+			'action': 'send_file',
 			'filename': file.filename,
 		}
 	});
@@ -180,7 +180,7 @@ function monitorFileSending( file ) {
 		type: 'GET',
 		dataType: 'json ',
 		processData: true,
-		data: { 'action': 'get_file_transfer_progress' },
+		data: { 'action': 'progress' },
 	});
 
 	ajTransferingFileProgress.done( function( data ) {
