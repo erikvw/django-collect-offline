@@ -27,11 +27,9 @@ from rest_framework.reverse import reverse
 from rest_framework.views import APIView
 
 from edc_base.view_mixins import EdcBaseViewMixin
-from edc_device.constants import SERVER
 from edc_sync_files.transaction import TransactionExporter
 
-from edc_sync_files.models import (
-    ExportedTransactionFileHistory, ImportedTransactionFileHistory)
+from edc_sync_files.models import ExportedTransactionFileHistory
 
 from ..admin import edc_sync_admin
 from ..edc_sync_view_mixin import EdcSyncViewMixin
@@ -141,16 +139,17 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
     def pending_files(self):
         """ Returns a dictionary of unsent files.
         """
+        source_folder = django_apps.get_app_config(
+            'edc_sync_files').source_folder
         file_attrs = []
-        for history in self.history_model.objects.filter(
-                filename__in=self.files, sent=False).order_by('created'):
+        for history in ExportedTransactionFileHistory.objects.filter(
+                sent=False).order_by('created'):
             source_filename = os.path.join(
-                self.source_folder, history.filename)
+                source_folder, history.filename)
             file_attr = os.stat(source_filename)
             data = dict({
                 'filename': history.filename,
-                'filesize': size(file_attr.st_size),
-            })
+                'filesize': size(file_attr.st_size)})
             file_attrs.append(data)
         return file_attrs
 
@@ -193,6 +192,8 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
+        context.update({
+            'pending_files': self.pending_files})
         if request.is_ajax():
             response_data = {}
             try:
@@ -200,27 +201,27 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
             except (ConnectionRefusedError, AuthenticationException,
                     BadHostKeyException, ConnectionResetError, SSHException,
                     OSError)as e:
-                response_data.update({
-                    'error': True, 'messages': f'An error occurred. Got {e}'})
+                response_data = dict(
+                    error=True, messages=f'An error occurred. Got {e}')
             else:
                 if request.GET.get('action') == 'export_file':
-                    response_data = self.export_transactions(
-                        response_data=response_data)
+                    response_data = self.export_transactions()
                 elif request.GET.get('action') == 'send_file':
                     response_data = self.send_file(
                         filename=request.GET.get('filename'))
                 elif request.GET.get('action') == 'progress':
-                    response_data = {
-                        'progress': self.transaction_file_sender.progress}
+                    response_data = dict(
+                        error=False,
+                        progress=self.transaction_file_sender.progress)
                 elif request.GET.get('action') == 'confirm':
                     files = request.GET.get('files')
                     if files:
-                        files = files.split(',')
-                        self.confirm(files)
+                        for filename in files.split(','):
+                            self.confirm(filename)
                 elif request.GET.get('action') == 'pending_files':
-                    response_data.update({
-                        'pendingFiles': self.pending_files(),
-                        'error': False})
+                    response_data = dict(
+                        pendingFiles=self.pending_files,
+                        error=False)
 
             return HttpResponse(json.dumps(response_data),
                                 content_type='application/json')
@@ -235,7 +236,7 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
         if tx_exporter.export_batch():
             response_data = dict(
                 error=False,
-                transactionFiles=self.send_transaction_file.pending_files())
+                transactionFiles=self.pending_files)
         else:
             message = 'No pending data.'
             if tx_exporter.history_model.objects.filter(
@@ -247,17 +248,15 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
     def send_file(self, filename=None):
         """Returns response data after sending the file.
         """
-        self.transaction_file_sender(filename=filename)
+        transaction_file_sender = TransactionFileSender(filename=filename)
         try:
-            self.transaction_file_sender.send()
+            transaction_file_sender.send()
         except IOError as e:
-            response_data = {
-                'error': True,
-                'messages': f'Unable to send file. Got {e}'}
+            response_data = dict(
+                error=True,
+                messages=f'Unable to send file. Got {e}')
         else:
-            response_data = {
-                'error': False,
-                'messages': 'File sent.'}
+            response_data = dict(error=False, messages='File sent.')
         return response_data
 
     def confirm(self, filename):

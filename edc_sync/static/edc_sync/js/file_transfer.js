@@ -25,7 +25,7 @@ function edcSyncReady(server, userName, apiToken) {
     	$( '#id-transfer-status-div' ).removeClass( 'alert-danger' ).addClass( 'alert-warning' );
     	$( '#id-in-progress-div-pending-files' ).hide();
         $(this).prop("disabled", true);
-        dumpTransactionFile(server , userName);
+        dumpTransactionFile(server, userName);
     });
     
     $('#btn-send-again').click( function(e) {
