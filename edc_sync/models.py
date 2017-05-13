@@ -113,8 +113,8 @@ class SyncConfirmation(BaseUuidModel):
 
     class Meta:
         app_label = 'edc_sync'
-        ordering = ('-received_date',)
-        unique_together = (('hostname', 'received_date'),)
+        ordering = ('-confirmed_date',)
+        unique_together = (('hostname', 'confirmed_date'),)
 
 
 class HistoryManager(models.Manager):

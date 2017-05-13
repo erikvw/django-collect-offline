@@ -117,7 +117,7 @@ class TestDeserializer2(TestCase):
         tx_deserializer.deserialize_transactions(
             transactions=batch.saved_transactions)
         for transaction in batch.saved_transactions:
-            self.assertTrue(transaction.consumed)
+            self.assertTrue(transaction.is_consumed)
 
     def test_deleted_from_client(self):
         """Asserts "default" instance is deleted when "client" instance
