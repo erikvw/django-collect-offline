@@ -152,7 +152,7 @@ class Client(HostModelMixin, BaseUuidModel):
     class Meta:
         app_label = 'edc_sync'
         ordering = ['hostname', 'port']
-        unique_together = (('hostname', 'port'), )
+        unique_together = (('hostname', 'port'),)
 
 
 class Server(HostModelMixin, BaseUuidModel):
@@ -165,18 +165,28 @@ class Server(HostModelMixin, BaseUuidModel):
     class Meta:
         app_label = 'edc_sync'
         ordering = ['hostname', 'port']
-        unique_together = (('hostname', 'port'), )
+        unique_together = (('hostname', 'port'),)
 
 
-class ReceiveDevice(BaseUuidModel):
+class SyncConfirmation(BaseUuidModel):
+
+    code = models.CharField(
+        max_length=200)
+
+    confirm_code = models.CharField(
+        max_length=200,
+        null=True,
+        blank=True)
 
     hostname = models.CharField(
         max_length=200)
 
-    received_by = models.CharField(
-        max_length=100)
+    confirmed_by = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True)
 
-    sync_files = models.CharField(
+    sync_file = models.CharField(
         max_length=240)
 
     received_date = models.DateField(
@@ -184,7 +194,7 @@ class ReceiveDevice(BaseUuidModel):
 
     class Meta:
         app_label = 'edc_sync'
-        ordering = ('-received_date', )
+        ordering = ('-received_date',)
         unique_together = (('hostname', 'received_date'),)
 
 
@@ -231,7 +241,7 @@ class History(BaseUuidModel):
 
     class Meta:
         app_label = 'edc_sync'
-        ordering = ('-sent_datetime', )
+        ordering = ('-sent_datetime',)
         verbose_name = 'Sent History'
         verbose_name_plural = 'Sent History'
         unique_together = (('filename', 'hostname'),)

@@ -33,9 +33,11 @@ from edc_sync_files.models import ExportedTransactionFileHistory
 
 from ..admin import edc_sync_admin
 from ..edc_sync_view_mixin import EdcSyncViewMixin
-from ..models import OutgoingTransaction, IncomingTransaction
+from ..models import (
+    OutgoingTransaction, IncomingTransaction, SyncConfirmation)
 from ..serializers import (
-    OutgoingTransactionSerializer, IncomingTransactionSerializer)
+    OutgoingTransactionSerializer, IncomingTransactionSerializer,
+    SyncConfirmationSerializer)
 from ..site_sync_models import site_sync_models
 
 from paramiko.ssh_exception import (
@@ -53,6 +55,20 @@ def api_root(request, format=None):
         'incomingtransaction': reverse('outgoingtransaction-list',
                                        request=request, format=format),
     })
+
+
+class SyncConfirmationViewSet(viewsets.ModelViewSet):
+    queryset = SyncConfirmation.objects.all()
+    serializer_class = SyncConfirmationSerializer
+
+#     def perform_update(self, serializer):
+#         user_instance = serializer.instance
+#         request = self.request
+#         serializer.save(**modified_attrs)
+#         return Response(status=status.HTTP_200_OK)
+
+    def create(self, request, *args, **kwargs):
+        return viewsets.ModelViewSet.create(self, request, *args, **kwargs)
 
 
 class OutgoingTransactionViewSet(viewsets.ModelViewSet):
