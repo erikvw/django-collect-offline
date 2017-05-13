@@ -186,11 +186,11 @@ class SyncConfirmation(BaseUuidModel):
         blank=True,
         null=True)
 
+    confirmed_date = models.DateField(
+        default=timezone.now)
+
     sync_file = models.CharField(
         max_length=240)
-
-    received_date = models.DateField(
-        default=timezone.now)
 
     class Meta:
         app_label = 'edc_sync'
