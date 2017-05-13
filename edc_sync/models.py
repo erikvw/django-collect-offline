@@ -1,18 +1,10 @@
-import socket
-
 from django.apps import apps as django_apps
-from django.core import serializers
-from django.core.exceptions import PermissionDenied
-from django.core.serializers.base import DeserializationError
-from django.db import models, transaction
-from django.db.models.deletion import ProtectedError
-from django.db.utils import IntegrityError
+from django.db import models
 from django.utils import timezone
 
 from edc_base.model_mixins import BaseUuidModel
 from edc_base.utils import get_utcnow
 
-from .exceptions import SyncError
 from .model_mixins import TransactionMixin, HostModelMixin
 
 edc_device_app_config = django_apps.get_app_config('edc_device')
@@ -23,84 +15,11 @@ class IncomingTransaction(TransactionMixin, BaseUuidModel):
     """ Transactions received from a remote host.
     """
 
-    check_hostname = None
-
     is_consumed = models.BooleanField(
         default=False)
 
     is_self = models.BooleanField(
         default=False)
-
-    def deserialize_transaction(self, check_hostname=None, commit=None,
-                                check_device=None):
-        commit = True if commit is None else commit
-        check_device = True if check_device is None else check_device
-        check_hostname = True if check_hostname is None else check_hostname
-        if check_device:
-            if not edc_device_app_config.is_server:
-                raise SyncError(
-                    'Objects may only be deserialized on a server. '
-                    'Got device={} {}.'.format(edc_device_app_config.device_id,
-                                               edc_device_app_config.role))
-        inserted, updated, deleted = 0, 0, 0
-        try:
-            for deserialized_object in serializers.deserialize(
-                    "json", self.aes_decrypt(self.tx),
-                    use_natural_foreign_keys=True, use_natural_primary_keys=True):
-                if deserialized_object.object.hostname_modified == socket.gethostname() and check_hostname:
-                    raise SyncError(
-                        'Incoming transactions exist that are from this host.')
-                elif commit:
-                    if self.action == 'D':
-                        deleted += self._deserialize_delete_tx(
-                            deserialized_object) or 0
-                    elif self.action == 'I':
-                        inserted += self._deserialize_insert_tx(
-                            deserialized_object)
-                    elif self.action == 'U':
-                        updated += self._deserialize_update_tx(
-                            deserialized_object)
-                    else:
-                        raise SyncError(
-                            'Unexpected value for action. Got {}'.format(
-                                self.action))
-                    if any([inserted, deleted, updated]):
-                        self.is_ignored = False
-                        self.is_consumed = True
-                        self.consumed_datetime = get_utcnow()
-                        self.consumer = '{}'.format(socket.gethostname())
-                        self.save()
-                else:
-                    return deserialized_object
-        except DeserializationError as e:
-            print('Failed to deserialized the record. Got {}'.format(str(e)))
-        return inserted, updated, deleted
-
-    def _deserialize_insert_tx(self, deserialized_object):
-        play = 0
-        with transaction.atomic():
-            try:
-                deserialized_object.object.save_base(raw=True)
-                play = 1
-            except IntegrityError as e:
-                print("Failed to play transaction. Got {}.".format(str(e)))
-            except PermissionDenied as e:
-                print("Failed to play transaction. Got {}.".format(str(e)))
-        return play
-
-    def _deserialize_update_tx(self, deserialized_object):
-        try:
-            return self._deserialize_insert_tx(deserialized_object)
-        except ProtectedError as e:
-            print("Failed to delete transaction. Got {}.".format(str(e)))
-
-    def _deserialize_delete_tx(self, deserialized_object, using=None):
-        try:
-            with transaction.atomic():
-                deserialized_object.object.delete()
-        except ProtectedError as e:
-            print("Failed to delete transaction. Got {}.".format(str(e)))
-        return 1
 
     class Meta:
         app_label = 'edc_sync'

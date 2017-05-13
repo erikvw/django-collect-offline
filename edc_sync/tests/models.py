@@ -5,6 +5,7 @@ from django.db import models
 from edc_base.model_managers import HistoricalRecords
 from edc_base.model_mixins import BaseUuidModel
 from edc_base.model_mixins.list_model_mixin import ListModelMixin
+from django.db.models.deletion import PROTECT
 
 
 class TestModelManager(models.Manager):
@@ -51,4 +52,33 @@ class AnotherBadTestModel(BaseUuidModel):
 
 
 class M2m(ListModelMixin, BaseUuidModel):
+
     pass
+
+
+class TestModelWithFkProtected(BaseUuidModel):
+
+    f1 = models.CharField(max_length=10, unique=True)
+
+    test_model = models.ForeignKey(TestModel, on_delete=PROTECT)
+
+    objects = TestModelManager()
+
+    history = HistoricalRecords()
+
+    def natural_key(self):
+        return (self.f1, )
+
+
+class TestModelWithM2m(BaseUuidModel):
+
+    f1 = models.CharField(max_length=10, unique=True)
+
+    m2m = models.ManyToManyField(M2m)
+
+    objects = TestModelManager()
+
+    history = HistoricalRecords()
+
+    def natural_key(self):
+        return (self.f1, )

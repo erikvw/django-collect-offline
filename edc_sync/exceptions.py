@@ -16,6 +16,10 @@ class SyncError(Exception):
     pass
 
 
+class SyncDeserializationError(Exception):
+    pass
+
+
 class SyncModelError(Exception):
     pass
 

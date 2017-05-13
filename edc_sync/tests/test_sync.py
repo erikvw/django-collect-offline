@@ -6,7 +6,8 @@ from django.test.utils import override_settings
 from edc_sync.exceptions import SyncModelError
 from edc_sync.models import OutgoingTransaction
 
-from .models import TestModel, M2m, BadTestModel, AnotherBadTestModel
+from ..constants import INSERT, UPDATE
+from .models import TestModel, BadTestModel, AnotherBadTestModel
 
 Crypt = django_apps.get_app_config('django_crypto_fields').model
 
@@ -41,7 +42,7 @@ class TestSync(TestCase):
                     OutgoingTransaction.objects.using('client').get(
                         tx_pk=test_model.pk,
                         tx_name='edc_sync.testmodel',
-                        action='I')
+                        action=INSERT)
                 except OutgoingTransaction.DoesNotExist:
                     pass
                 else:
@@ -53,7 +54,7 @@ class TestSync(TestCase):
                     OutgoingTransaction.objects.using('client').get(
                         tx_pk=history_obj.history_id,
                         tx_name='edc_sync.historicaltestmodel',
-                        action='I')
+                        action=INSERT)
                 except OutgoingTransaction.DoesNotExist:
                     pass
                 else:
@@ -76,11 +77,11 @@ class TestSync(TestCase):
                     OutgoingTransaction.objects.using('client').get(
                         tx_pk=test_model.pk,
                         tx_name='edc_sync.testmodel',
-                        action='I')
+                        action=INSERT)
                     OutgoingTransaction.objects.using('client').get(
                         tx_pk=test_model.pk,
                         tx_name='edc_sync.testmodel',
-                        action='U')
+                        action=UPDATE)
                 except OutgoingTransaction.DoesNotExist:
                     pass
                 else:
@@ -88,7 +89,7 @@ class TestSync(TestCase):
             self.assertEqual(
                 2, OutgoingTransaction.objects.using('client').filter(
                     tx_name='edc_sync.historicaltestmodel',
-                    action='I').count())
+                    action=INSERT).count())
 
     def test_timestamp_is_default_order(self):
         with override_settings(DEVICE_ID='10'):
@@ -127,29 +128,25 @@ class TestSync(TestCase):
         """
         test_model = TestModel.objects.using('client').create(f1='erik')
         result = [obj.tx_name for obj in OutgoingTransaction.objects.using(
-            'client').filter(action='I')]
+            'client').filter(action=INSERT)]
         result.sort()
         self.assertListEqual(
             result, ['edc_sync.historicaltestmodel',
                      'edc_sync.testmodel'])
         self.assertListEqual(
             [obj.tx_name for obj in OutgoingTransaction.objects.using(
-                'client').filter(action='U')],
+                'client').filter(action=UPDATE)],
             [])
         test_model.save(using='client')
         self.assertListEqual(
             [obj.tx_name for obj in OutgoingTransaction.objects.using(
-                'client').filter(action='U')],
+                'client').filter(action=UPDATE)],
             [u'edc_sync.testmodel'])
         result = [obj.tx_name for obj in OutgoingTransaction.objects.using(
-            'client').filter(action='I')]
+            'client').filter(action=INSERT)]
         result.sort()
         self.assertListEqual(
             result,
             ['edc_sync.historicaltestmodel',
              'edc_sync.historicaltestmodel',
              'edc_sync.testmodel'])
-
-    def test_m2m(self):
-        for name in ['m2m_name' + str(x) for x in range(0, 10)]:
-            M2m.objects.using('client').create(name=name)
