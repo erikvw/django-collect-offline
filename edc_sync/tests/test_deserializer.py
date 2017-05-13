@@ -103,6 +103,22 @@ class TestDeserializer2(TestCase):
         except TestModel.DoesNotExist:
             self.fail('TestModel unexpectedly does not exists')
 
+    def test_flagged_as_deserialized(self):
+        """Asserts "default" instance is created when "client" instance
+        is created.
+        """
+        TestModel.objects.using('client').create(f1='model1')
+        tx_exporter = TransactionExporter(using='client')
+        history = tx_exporter.export_batch()
+        tx_importer = TransactionImporter(filename=history.filename)
+        batch = tx_importer.import_batch()
+        tx_deserializer = TransactionDeserializer(
+            allow_any_role=True, allow_self=True)
+        tx_deserializer.deserialize_transactions(
+            transactions=batch.saved_transactions)
+        for transaction in batch.saved_transactions:
+            self.assertTrue(transaction.consumed)
+
     def test_deleted_from_client(self):
         """Asserts "default" instance is deleted when "client" instance
         is deleted.

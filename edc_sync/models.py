@@ -132,21 +132,22 @@ class History(BaseUuidModel):
         unique=True)
 
     hostname = models.CharField(
-        max_length=100
-    )
+        max_length=100)
 
     sent_datetime = models.DateTimeField(default=get_utcnow)
 
+    # FIXME: used?? if not, remove this field
     acknowledged = models.BooleanField(
         default=False,
-        blank=True,
-    )
+        blank=True)
 
+    # FIXME: used?? if not, remove this field
     ack_datetime = models.DateTimeField(
         default=get_utcnow,
         null=True,
         blank=True)
 
+    # FIXME: used?? if not, remove this field
     ack_user = models.CharField(
         max_length=50,
         null=True,
