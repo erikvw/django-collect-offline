@@ -10,6 +10,7 @@ from django_crypto_fields.cryptor import Cryptor
 
 from edc_base.utils import get_utcnow
 
+from .constants import INSERT, UPDATE, DELETE
 from .exceptions import SyncModelError
 
 
@@ -82,12 +83,12 @@ class SyncModel:
         OutgoingTransaction = django_apps.get_model(
             'edc_sync', 'OutgoingTransaction')
         created = True if created is None else created
-        action = 'I' if created else 'U'
+        action = INSERT if created else UPDATE
         timestamp_datetime = self.instance.created if created else self.instance.modified
         if not timestamp_datetime:
             timestamp_datetime = get_utcnow()
         if deleted:
-            action = 'D'
+            action = DELETE
         outgoing_transaction = None
         if self.is_serialized:
             hostname = socket.gethostname()

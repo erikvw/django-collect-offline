@@ -29,7 +29,8 @@ def serialize_m2m_on_save(sender, action, instance, using, **kwargs):
 
 @receiver(post_save, weak=False, dispatch_uid='serialize_on_save')
 def serialize_on_save(sender, instance, raw, created, using, **kwargs):
-    """ Serialize the model instance as an OutgoingTransaction."""
+    """ Serialize the model instance as an OutgoingTransaction.
+    """
     try:
         sync_model = site_sync_models.get_as_sync_model(instance)
         sync_model.to_outgoing_transaction(using, created=created)
@@ -40,7 +41,9 @@ def serialize_on_save(sender, instance, raw, created, using, **kwargs):
 
 @receiver(post_delete, weak=False, dispatch_uid="serialize_on_post_delete")
 def serialize_on_post_delete(sender, instance, using, **kwargs):
-    """Creates a serialized OutgoingTransaction when a model instance is deleted."""
+    """Creates a serialized OutgoingTransaction when
+    a model instance is deleted.
+    """
     try:
         sync_model = site_sync_models.get_as_sync_model(instance)
         sync_model.to_outgoing_transaction(using, created=False, deleted=True)
