@@ -65,7 +65,7 @@ class Report:
             try:
                 SyncConfirmation.objects.get(
                     hostname=client.hostname,
-                    received_date=datetime.today().date())
+                    confirmed_date=datetime.today().date())
                 received = True
             except SyncConfirmation.DoesNotExist:
                 received = False
@@ -83,12 +83,14 @@ class Report:
                 connected = True
             else:
                 pending = data.get('outgoingtransaction_count')
+                pending_files_no = data.get('pending_files_no')
             data = {'device': client.hostname,
                     'sync_times': self.synced_files(client.hostname),
                     'pending': pending,
                     'connected': connected,
                     'received': received,
-                    'comment': client.comment}  # FIXME include number of pending files.
+                    'pending_files_no': pending_files_no,
+                    'comment': client.comment}
             self.report_data.append(data)
 
     def synced_files(self, hostname):
