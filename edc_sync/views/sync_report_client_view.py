@@ -14,7 +14,7 @@ from edc_sync_files.models import ImportedTransactionFileHistory
 
 from ..admin import edc_sync_admin
 from ..edc_sync_view_mixin import EdcSyncViewMixin
-from ..models import ReceiveDevice, Client
+from ..models import SyncConfirmation, Client
 
 
 class SyncReportClientView(
@@ -43,7 +43,7 @@ class SyncReportClientView(
             action = request.GET.get('action')
             response_data = {}
             if action == 'receive':
-                ReceiveDevice.objects.create(
+                SyncConfirmation.objects.create(
                     hostname=request.GET.get('hostname'),
                     received_by=request.user,
                     sync_files=json.dumps(report.synced_files(
@@ -63,11 +63,11 @@ class Report:
 
         for client in Client.objects.all():
             try:
-                ReceiveDevice.objects.get(
+                SyncConfirmation.objects.get(
                     hostname=client.hostname,
                     received_date=datetime.today().date())
                 received = True
-            except ReceiveDevice.DoesNotExist:
+            except SyncConfirmation.DoesNotExist:
                 received = False
             try:
                 url = 'http://' + client.hostname + reverse(
@@ -88,7 +88,7 @@ class Report:
                     'pending': pending,
                     'connected': connected,
                     'received': received,
-                    'comment': client.comment}
+                    'comment': client.comment}  # FIXME include number of pending files.
             self.report_data.append(data)
 
     def synced_files(self, hostname):
