@@ -61,15 +61,6 @@ class SyncConfirmationViewSet(viewsets.ModelViewSet):
     queryset = SyncConfirmation.objects.all()
     serializer_class = SyncConfirmationSerializer
 
-#     def perform_update(self, serializer):
-#         user_instance = serializer.instance
-#         request = self.request
-#         serializer.save(**modified_attrs)
-#         return Response(status=status.HTTP_200_OK)
-
-    def create(self, request, *args, **kwargs):
-        return viewsets.ModelViewSet.create(self, request, *args, **kwargs)
-
 
 class OutgoingTransactionViewSet(viewsets.ModelViewSet):
 

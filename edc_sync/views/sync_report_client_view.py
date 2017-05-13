@@ -43,11 +43,13 @@ class SyncReportClientView(
             action = request.GET.get('action')
             response_data = {}
             if action == 'receive':
-                SyncConfirmation.objects.create(
-                    hostname=request.GET.get('hostname'),
-                    received_by=request.user,
-                    sync_files=json.dumps(report.synced_files(
-                        request.GET.get('hostname'))))
+                sync_confirm = SyncConfirmation.objects.get(
+                    code=request.GET.get('confirm_code'))
+                sync_confirm.confirm_code = request.GET.get('confirm_code')
+                sync_confirm.confirmed_by = request.user
+                sync_confirm.save()
+                response_data = dict(
+                    confirm=True, hostname=sync_confirm.confirm_code)
                 return HttpResponse(
                     json.dumps(response_data), content_type='application/json')
         return self.render_to_response(context)

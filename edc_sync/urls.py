@@ -7,9 +7,9 @@ from edc_constants.constants import UUID_PATTERN
 
 from .admin import edc_sync_admin
 from .views import (
-    OutgoingTransactionViewSet, IncomingTransactionViewSet, DumpToUsbView,
-    HomeView, RenderView, TransactionCountView, SyncReportView,
-    SyncReportClientView)
+    OutgoingTransactionViewSet, IncomingTransactionViewSet,
+    DumpToUsbView, SyncConfirmationViewSet, HomeView, RenderView,
+    TransactionCountView, SyncReportView, SyncReportClientView)
 
 router = DefaultRouter()
 router.register(r'outgoingtransaction', OutgoingTransactionViewSet)
@@ -21,6 +21,8 @@ urlpatterns = [
     url(r'^admin/', edc_sync_admin.urls),
     url(r'^api/transaction-count/$',
         TransactionCountView.as_view(), name='transaction-count'),
+    url(r'^confirmation-record/$', SyncConfirmationViewSet.as_view(),
+        name='create-sync-confirmation'),
     url(r'^dump-to-usb/$',
         DumpToUsbView.as_view(), name='dump-to-usb'),
     url(r'^sync-report/$',
