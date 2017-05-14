@@ -4,7 +4,7 @@ from edc_rest.binary_field import BinaryField
 from edc_rest.serializers import BaseModelSerializerMixin
 
 from .choices import ACTIONS
-from .models import IncomingTransaction, OutgoingTransaction, SyncConfirmation
+from .models import IncomingTransaction, OutgoingTransaction
 
 
 class BaseTransactionSerializer(BaseModelSerializerMixin, serializers.Serializer):
@@ -66,7 +66,7 @@ class OutgoingTransactionSerializer(BaseTransactionSerializer):
         default=False)
 
 
-class SyncConfirmationSerializer(
-        BaseModelSerializerMixin, serializers.Serializer):
-
-    model_class = SyncConfirmation
+# class SyncConfirmationSerializer(
+#         BaseModelSerializerMixin, serializers.Serializer):
+#
+#     model_class = SyncConfirmation

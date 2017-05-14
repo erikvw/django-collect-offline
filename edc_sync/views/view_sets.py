@@ -7,10 +7,10 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
 from ..models import (
-    OutgoingTransaction, IncomingTransaction, SyncConfirmation)
+    OutgoingTransaction, IncomingTransaction)
 from ..serializers import (
-    OutgoingTransactionSerializer, IncomingTransactionSerializer,
-    SyncConfirmationSerializer)
+    OutgoingTransactionSerializer, IncomingTransactionSerializer)
+# SyncConfirmationSerializer)
 
 
 @api_view(['GET'])
@@ -25,9 +25,9 @@ def api_root(request, format=None):
     })
 
 
-class SyncConfirmationViewSet(viewsets.ModelViewSet):
-    queryset = SyncConfirmation.objects.all()
-    serializer_class = SyncConfirmationSerializer
+# class SyncConfirmationViewSet(viewsets.ModelViewSet):
+#     queryset = SyncConfirmation.objects.all()
+#     serializer_class = SyncConfirmationSerializer
 
 
 class OutgoingTransactionViewSet(viewsets.ModelViewSet):

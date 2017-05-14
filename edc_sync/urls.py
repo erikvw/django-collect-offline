@@ -8,7 +8,7 @@ from edc_constants.constants import UUID_PATTERN
 from .admin import edc_sync_admin
 from .views import (
     OutgoingTransactionViewSet, IncomingTransactionViewSet,
-    DumpToUsbView, SyncConfirmationViewSet, HomeView, RenderView,
+    DumpToUsbView, HomeView, RenderView,
     TransactionCountView, SyncReportView, SyncReportClientView)
 
 router = DefaultRouter()
