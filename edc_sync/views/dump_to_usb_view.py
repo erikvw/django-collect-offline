@@ -1,12 +1,6 @@
-import json
-import os
-
-from django.http.response import HttpResponse
 from django.views.generic.base import TemplateView
-from edc_base.view_mixins import EdcBaseViewMixin
 
-# from edc_sync_files.transaction import (
-#     DumpToUsb, TransactionLoadUsbFile, transaction_messages)
+from edc_base.view_mixins import EdcBaseViewMixin
 
 from ..edc_sync_view_mixin import EdcSyncViewMixin
 

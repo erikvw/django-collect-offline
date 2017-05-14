@@ -1,11 +1,11 @@
-import json
+# import json
 import requests
 
 from datetime import datetime
 
 from django.urls import reverse
 from django.apps import apps as django_apps
-from django.http.response import HttpResponse
+# from django.http.response import HttpResponse
 from django.views.generic.base import TemplateView
 from requests.exceptions import ConnectionError, HTTPError
 
@@ -14,7 +14,8 @@ from edc_sync_files.models import ImportedTransactionFileHistory
 
 from ..admin import edc_sync_admin
 from ..edc_sync_view_mixin import EdcSyncViewMixin
-from ..models import SyncConfirmation, Client
+from ..models import Client
+from edc_sync_files.view_mixins import TransactionExporterViewMixin
 
 
 class SyncReportClientView(
@@ -41,35 +42,32 @@ class SyncReportClientView(
         context.update({'report_data': report.report_data})
         if request.is_ajax():
             action = request.GET.get('action')
-            response_data = {}
+            # response_data = {}
             if action == 'receive':
-                sync_confirm = SyncConfirmation.objects.get(
-                    code=request.GET.get('confirm_code'))
-                sync_confirm.confirm_code = request.GET.get('confirm_code')
-                sync_confirm.confirmed_by = request.user
-                sync_confirm.save()
-                response_data = dict(
-                    confirm=True, hostname=sync_confirm.confirm_code)
-                return HttpResponse(
-                    json.dumps(response_data), content_type='application/json')
+                # TODO: see TransactionExporterViewMixin
+                raise TypeError()
+#                 response_data = dict(
+#                     confirm=True, hostname=sync_confirm.confirm_code)
+#                 return HttpResponse(
+# json.dumps(response_data), content_type='application/')
         return self.render_to_response(context)
 
 
-class Report:
+class Report(TransactionExporterViewMixin):
     """ Displays number of pending transactions in the client and number of
-        times the machine have synced.
+    times the machine have synced.
     """
+    imported_history_model = ImportedTransactionFileHistory
 
     def __init__(self):
         self.report_data = []
-
         for client in Client.objects.all():
             try:
-                SyncConfirmation.objects.get(
+                self.history_model.objects.get(
                     hostname=client.hostname,
-                    confirmed_date=datetime.today().date())
+                    confirmed_date=datetime.today().date())  # ????
                 received = True
-            except SyncConfirmation.DoesNotExist:
+            except self.history_model.DoesNotExist:
                 received = False
             try:
                 url = 'http://' + client.hostname + reverse(
@@ -97,6 +95,6 @@ class Report:
 
     def synced_files(self, hostname):
         producer = '{}-default'.format(hostname)
-        return [p for p in ImportedTransactionFileHistory.objects.filter(
+        return [p for p in self.imported_history_model.objects.filter(
             producer=producer,
             created__date=datetime.today().date()).order_by('-created')]

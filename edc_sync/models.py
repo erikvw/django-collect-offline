@@ -87,42 +87,13 @@ class Server(HostModelMixin, BaseUuidModel):
         unique_together = (('hostname', 'port'),)
 
 
-class SyncConfirmation(BaseUuidModel):
-
-    code = models.CharField(
-        max_length=200)
-
-    confirm_code = models.CharField(
-        max_length=200,
-        null=True,
-        blank=True)
-
-    hostname = models.CharField(
-        max_length=200)
-
-    confirmed_by = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True)
-
-    confirmed_date = models.DateField(
-        default=timezone.now)
-
-    sync_file = models.CharField(
-        max_length=240)
-
-    class Meta:
-        app_label = 'edc_sync'
-        ordering = ('-confirmed_date',)
-        unique_together = (('hostname', 'confirmed_date'),)
-
-
 class HistoryManager(models.Manager):
 
     def get_by_natural_key(self, filename, sent_datetime):
         return self.get(filename=filename, sent_datetime=sent_datetime)
 
 
+# FIXME: is this model used?
 class History(BaseUuidModel):
 
     objects = HistoryManager()
@@ -135,23 +106,6 @@ class History(BaseUuidModel):
         max_length=100)
 
     sent_datetime = models.DateTimeField(default=get_utcnow)
-
-    # FIXME: used?? if not, remove this field
-    acknowledged = models.BooleanField(
-        default=False,
-        blank=True)
-
-    # FIXME: used?? if not, remove this field
-    ack_datetime = models.DateTimeField(
-        default=get_utcnow,
-        null=True,
-        blank=True)
-
-    # FIXME: used?? if not, remove this field
-    ack_user = models.CharField(
-        max_length=50,
-        null=True,
-        blank=True)
 
     def natural_key(self):
         return (self.filename, self.hostname)
