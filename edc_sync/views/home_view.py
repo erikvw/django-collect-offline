@@ -45,7 +45,7 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TransactionExporterViewMixin,
             ip_address=django_apps.get_app_config(
                 'edc_sync_files').remote_host,
             pending_files=view_actions.pending_filenames,
-            recently_sent_files=view_actions.recently_sent_files,
+            recently_sent_files=view_actions.recently_sent_filenames,
             site_models=site_sync_models.site_models)
         return context
 
