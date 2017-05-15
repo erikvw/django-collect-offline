@@ -11,21 +11,19 @@ from django.views.generic.base import TemplateView
 
 
 from edc_base.view_mixins import EdcBaseViewMixin
-from edc_sync_files.file_transfer import TransactionFileSender
-from edc_sync_files.view_mixins import TransactionExporterViewMixin
+from edc_sync_files.constants import CONFIRM_BATCH, PENDING_FILES
+from edc_sync_files.view_mixins import TransactionExporterViewMixin, TransactionFileSenderViewMixin
+from edc_sync_files.view_actions import ViewActions
 
 from ..admin import edc_sync_admin
 from ..edc_sync_view_mixin import EdcSyncViewMixin
 from ..site_sync_models import site_sync_models
 
-from paramiko.ssh_exception import (
-    BadHostKeyException, AuthenticationException, SSHException)
 
-
-class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TransactionExporterViewMixin, TemplateView):
+class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TransactionExporterViewMixin,
+               TransactionFileSenderViewMixin, TemplateView):
 
     template_name = 'edc_sync/home.html'
-    transaction_file_sender = TransactionFileSender
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
@@ -34,71 +32,37 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TransactionExporterViewMixin,
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         app_config = django_apps.get_app_config('edc_sync')
+        view_actions = ViewActions()
         context.update(
+            base_template_name=app_config.base_template_name,
+            cors_origin_whitelist=self.cors_origin_whitelist,
             edc_sync_admin=edc_sync_admin,
             edc_sync_app_config=app_config,
             edc_sync_files_app_config=django_apps.get_app_config(
                 'edc_sync_files'),
             edc_sync_role=self.role,
-            cors_origin_whitelist=self.cors_origin_whitelist,
             hostname=socket.gethostname(),
             ip_address=django_apps.get_app_config(
                 'edc_sync_files').remote_host,
-            recent_sent_tx=self.tx_exporter.history_model.objects.filter(
-                sent=True).order_by('-created')[:20],
-            site_models=site_sync_models.site_models,
-            base_template_name=app_config.base_template_name)
+            pending_files=view_actions.pending_filenames,
+            recently_sent_files=view_actions.recently_sent_files,
+            site_models=site_sync_models.site_models)
         return context
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
-        context.update({
-            'pending_files': self.pending_files})
         if request.is_ajax():
-            response_data = {}
-            try:
-                self.transaction_file_sender().file_connector.connected()
-            except (ConnectionRefusedError, AuthenticationException,
-                    BadHostKeyException, ConnectionResetError, SSHException,
-                    OSError)as e:
-                response_data = dict(
-                    error=True, messages=f'An error occurred. Got {e}')
-            else:
-                if request.GET.get('action') == 'export_file':
-                    response_data = self.export_batch()
-                elif request.GET.get('action') == 'send_file':
-                    response_data = self.send_file(
-                        filename=request.GET.get('filename'))
-                elif request.GET.get('action') == 'progress':
-                    response_data = dict(
-                        error=False,
-                        progress=self.tx_file_sender.progress)
-                elif request.GET.get('action') == 'confirm':
-                    files = request.GET.get('files')
-                    for filename in (files or []).split(','):
-                        self.confirm_batch(filename=filename)
-                elif request.GET.get('action') == 'pending_files':
-                    response_data = dict(
-                        pendingFiles=self.pending_files,
-                        error=False)
-
-            return HttpResponse(json.dumps(response_data),
-                                content_type='application/json')
+            action = request.GET.get('action')
+            view_actions = ViewActions()
+            if action in [view_actions.actions]:
+                response_data = view_actions.action(name=action)
+            elif action == CONFIRM_BATCH:
+                files = request.GET.get('files')
+                for filename in (files or []).split(','):
+                    self.confirm_batch(filename=filename)
+            return HttpResponse(
+                json.dumps(response_data), content_type='application/json')
         return self.render_to_response(context)
-
-    def send_file(self, filename=None):
-        """Returns response data after sending the file.
-        """
-        tx_file_sender = TransactionFileSender(filename=filename)
-        try:
-            tx_file_sender.send()
-        except IOError as e:
-            response_data = dict(
-                error=True,
-                messages=f'Unable to send file. Got {e}')
-        else:
-            response_data = dict(error=False, messages='File sent.')
-        return response_data
 
     @property
     def cors_origin_whitelist(self):
