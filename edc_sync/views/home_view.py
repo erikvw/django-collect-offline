@@ -11,19 +11,17 @@ from django.views.generic.base import TemplateView
 
 
 from edc_base.view_mixins import EdcBaseViewMixin
-from edc_sync_files.constants import CONFIRM_BATCH, PENDING_FILES
-from edc_sync_files.view_mixins import TransactionExporterViewMixin, TransactionFileSenderViewMixin
-from edc_sync_files.view_actions import ViewActions
+from edc_sync_files.action_handler import ActionHandler, ActionHandlerError
 
 from ..admin import edc_sync_admin
 from ..edc_sync_view_mixin import EdcSyncViewMixin
 from ..site_sync_models import site_sync_models
 
 
-class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TransactionExporterViewMixin,
-               TransactionFileSenderViewMixin, TemplateView):
+class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
     template_name = 'edc_sync/home.html'
+    action_handler = ActionHandler()
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
@@ -32,7 +30,6 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TransactionExporterViewMixin,
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         app_config = django_apps.get_app_config('edc_sync')
-        view_actions = ViewActions()
         context.update(
             base_template_name=app_config.base_template_name,
             cors_origin_whitelist=self.cors_origin_whitelist,
@@ -44,8 +41,8 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TransactionExporterViewMixin,
             hostname=socket.gethostname(),
             ip_address=django_apps.get_app_config(
                 'edc_sync_files').remote_host,
-            pending_files=view_actions.pending_filenames,
-            recently_sent_files=view_actions.recently_sent_filenames,
+            pending_files=self.action_handler.pending_filenames,
+            recently_sent_files=self.action_handler.recently_sent_filenames,
             site_models=site_sync_models.site_models)
         return context
 
@@ -53,13 +50,12 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TransactionExporterViewMixin,
         context = self.get_context_data(**kwargs)
         if request.is_ajax():
             action = request.GET.get('action')
-            view_actions = ViewActions()
-            if action in [view_actions.actions]:
-                response_data = view_actions.action(name=action)
-            elif action == CONFIRM_BATCH:
-                files = request.GET.get('files')
-                for filename in (files or []).split(','):
-                    self.confirm_batch(filename=filename)
+            try:
+                self.action_handler.action(name=action)
+            except ActionHandlerError as e:
+                response_data = dict(errmsg=str(e))
+            else:
+                response_data = self.action_handler.data
             return HttpResponse(
                 json.dumps(response_data), content_type='application/json')
         return self.render_to_response(context)
