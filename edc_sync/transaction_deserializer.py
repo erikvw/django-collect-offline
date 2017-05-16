@@ -43,7 +43,7 @@ def aes_decrypt(cipher_text):
 
 class TransactionDeserializer:
 
-    def __init__(self, using=None, allow_self=None, allow_any_role=None, raw=True):
+    def __init__(self, using=None, allow_self=None, allow_any_role=None, raw=None):
         edc_device_app_config = django_apps.get_app_config('edc_device')
         self.aes_decrypt = aes_decrypt
         self.deserialize = deserialize

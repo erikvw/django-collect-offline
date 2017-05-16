@@ -1,3 +1,4 @@
+from django.core.serializers.base import DeserializationError
 from django.test import TestCase, tag
 from faker import Faker
 
@@ -6,7 +7,6 @@ from edc_sync_files.transaction import TransactionImporter, TransactionExporter
 from ..transaction_deserializer import TransactionDeserializer, TransactionDeserializerError
 from ..models import OutgoingTransaction, IncomingTransaction
 from .models import TestModel, TestModelWithFkProtected, TestModelWithM2m, M2m
-from django.core.serializers.base import DeserializationError
 
 fake = Faker()
 
