@@ -22,8 +22,20 @@ app_config = django_apps.get_app_config('edc_sync_files')
 class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
     template_name = 'edc_sync/home.html'
-    action_handler = ActionHandler(
-        username=app_config.user, archive_path=app_config.archive_folder)
+    action_handler_cls = ActionHandler
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._action_handler = None
+
+    @property
+    def action_handler(self):
+        if not self._action_handler:
+            self._action_handler = self.action_handler_cls(
+                username=app_config.user,
+                src_path=app_config.source_folder,
+                archive_path=app_config.archive_folder)
+        return self._action_handler
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
