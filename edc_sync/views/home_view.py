@@ -3,7 +3,6 @@ import socket
 
 from django.apps import apps as django_apps
 from django.conf import settings
-
 from django.contrib.auth.decorators import login_required
 from django.http.response import HttpResponse
 from django.utils.decorators import method_decorator
