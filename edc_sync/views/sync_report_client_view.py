@@ -1,11 +1,9 @@
-# import json
 import requests
 
 from datetime import datetime
 
 from django.urls import reverse
 from django.apps import apps as django_apps
-# from django.http.response import HttpResponse
 from django.views.generic.base import TemplateView
 from requests.exceptions import ConnectionError, HTTPError
 
@@ -15,7 +13,6 @@ from edc_sync_files.models import ImportedTransactionFileHistory
 from ..admin import edc_sync_admin
 from ..edc_sync_view_mixin import EdcSyncViewMixin
 from ..models import Client
-from edc_sync_files.view_mixins import TransactionExporterViewMixin
 
 
 class SyncReportClientView(
@@ -53,7 +50,7 @@ class SyncReportClientView(
         return self.render_to_response(context)
 
 
-class Report(TransactionExporterViewMixin):
+class Report:
     """ Displays number of pending transactions in the client and number of
     times the machine have synced.
     """

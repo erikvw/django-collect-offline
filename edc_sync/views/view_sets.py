@@ -10,7 +10,6 @@ from ..models import (
     OutgoingTransaction, IncomingTransaction)
 from ..serializers import (
     OutgoingTransactionSerializer, IncomingTransactionSerializer)
-# SyncConfirmationSerializer)
 
 
 @api_view(['GET'])

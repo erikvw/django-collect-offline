@@ -9,7 +9,6 @@ from django.http.response import HttpResponse
 from django.utils.decorators import method_decorator
 from django.views.generic.base import TemplateView
 
-
 from edc_base.view_mixins import EdcBaseViewMixin
 from edc_sync_files.action_handler import ActionHandler, ActionHandlerError
 
@@ -17,11 +16,14 @@ from ..admin import edc_sync_admin
 from ..edc_sync_view_mixin import EdcSyncViewMixin
 from ..site_sync_models import site_sync_models
 
+app_config = django_apps.get_app_config('edc_sync_files')
+
 
 class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
     template_name = 'edc_sync/home.html'
-    action_handler = ActionHandler()
+    action_handler = ActionHandler(
+        username=app_config.user, archive_path=app_config.archive_folder)
 
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
