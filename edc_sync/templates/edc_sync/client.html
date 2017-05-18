@@ -9,7 +9,7 @@
 		<p>
 			<span id="">Pending Transactions</span>
 			<span id="id-pending-transactions" class="badge">0</span>
-			<button id="btn-sync" type="button" class="btn btn-warning pull-right"><i class="fa fa-exchange fa-fw"></i> Transfer to Server</button>
+			<button id="btn-sync" type="button" class="btn btn-default pull-right" disabled="disabled"><i class="fa fa-exchange fa-fw"></i> Transfer to Server</button>
 		</p>
 	</div>
  </div>
@@ -24,7 +24,6 @@
 	      <tr>
 	      	<th></th>
 	        <th>File</th>
-	        <th>Size</th>
 	        <th>Status</th>
 	      </tr>
 	    </thead>
@@ -58,19 +57,18 @@
 	      <tr>
 	      	<th></th>
 	        <th>File</th>
-	        <th>Size</th>
 	        <th>Status</th>
 	      </tr>
 	    </thead>
 	    <tbody>
-	    	{% for file in pending_files %}
-	    	<tr><td><td>{{file.filename}}</td><td>{{file.filesize}}</td>
+	    	{% for filename in pending_files %}
+	    	<tr>
+	    	<td>{{forloop.counter}}</td>
 	    		<td>
-    				{% if file.sent %}
-			        	<span class="glyphicon glyphicon-ok"></span> 
-			        {% else %}
-			        	<span class="glyphicon glyphicon-remove"></span>
-			        {% endif %}
+	    			{{filename}}
+	    		</td>
+	    		<td>
+			        <span class="glyphicon glyphicon-remove"></span>
 	    		</td>
 	    	</tr>
 	    	{% endfor %}
@@ -80,7 +78,7 @@
 {% endif %}
 
  
- {% if recent_sent_tx %}
+ {% if recently_sent_files %}
   <div id='id-history' class="panel panel-success">
 	<div class='alert alert-success' id="progress-status-div-hist">
  		Recent Transactions Sent to the Server. <div id="id-div-resource-alert-hist"></div>
@@ -90,26 +88,20 @@
 	      <tr>
 	      	<th></th>
 	        <th>File</th>
-	        <th>Sent Date Time</th>
+	        <th>Confirmation Code</th>
 	        <th>Status</th>
 	      </tr>
 	    </thead>
 	    <tbody>
-		    {% for history in recent_sent_tx %}
-		    	{% if history.sent %}
+		    {% for exported in recently_sent_files %}
 			      <tr>
 			      	<th>{{forloop.counter}}</th>
-			        <th>{{history.filename}}</th>
-			        <th>{{history.sent_datetime}}</th>
+			        <th>{{exported.filename}}</th>
+			        <th>{{exported.confirmation_code}}</th>
 			        <th>
-				        {% if history.sent %}
-				        	<span class="glyphicon glyphicon-ok"></span> 
-				        {% else %}
-				        	<span class="glyphicon glyphicon-remove"></span>
-				        {% endif %}
+				        <span class="glyphicon glyphicon-ok"></span> 
 			        </th>
 			      </tr>
-			      {% endif %}
 		       {% endfor %}
 	    </tbody>
 	  </table>

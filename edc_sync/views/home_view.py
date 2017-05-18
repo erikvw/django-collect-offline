@@ -55,7 +55,7 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
             ip_address=django_apps.get_app_config(
                 'edc_sync_files').remote_host,
             pending_files=self.action_handler.pending_filenames,
-            recently_sent_files=self.action_handler.recently_sent_filenames,
+            recently_sent_files=self.action_handler.sent_history[0:20],
             site_models=site_sync_models.site_models)
         return context
 
@@ -64,7 +64,7 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
         if request.is_ajax():
             action = request.GET.get('action')
             try:
-                self.action_handler.action(name=action)
+                self.action_handler.action(label=action)
             except ActionHandlerError as e:
                 response_data = dict(errmsg=str(e))
             else:
