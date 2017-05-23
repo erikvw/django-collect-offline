@@ -9,7 +9,7 @@ from .admin import edc_sync_admin
 from .views import (
     OutgoingTransactionViewSet, IncomingTransactionViewSet,
     DumpToUsbView, HomeView, RenderView,
-    TransactionCountView, SyncReportView, SyncReportClientView)
+    TransactionCountView, SyncReportView)
 
 router = DefaultRouter()
 router.register(r'outgoingtransaction', OutgoingTransactionViewSet)
@@ -21,14 +21,15 @@ urlpatterns = [
     url(r'^admin/', edc_sync_admin.urls),
     url(r'^api/transaction-count/$',
         TransactionCountView.as_view(), name='transaction-count'),
-    #     url(r'^confirmation-record/$', SyncConfirmationViewSet.as_view(),
-    #         name='create-sync-confirmation'),
+#     url(r'^confirmation-record/$', SyncConfirmationViewSet.as_view(
+#         {'get': 'list', 'post': 'create'}),
+#         name='sync-confirmation'),
     url(r'^dump-to-usb/$',
         DumpToUsbView.as_view(), name='dump-to-usb'),
     url(r'^sync-report/$',
         SyncReportView.as_view(), name='sync-report'),
-    url(r'^sync-report-client/$',
-        SyncReportClientView.as_view(), name='sync-report-client'),
+#     url(r'^sync-report-client/$',
+#         SyncReportClientView.as_view(), name='sync-report-client'),
     url(r'^api/', include(router.urls)),
     url(r'^api-token-auth/', obtain_auth_token),
     url(r'render/(?P<model_name>\w+)/(?P<pk>{})/'.format(UUID_PATTERN.pattern),

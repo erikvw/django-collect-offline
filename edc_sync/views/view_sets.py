@@ -20,13 +20,7 @@ def api_root(request, format=None):
         'outgoingtransaction': reverse('outgoingtransaction-list',
                                        request=request, format=format),
         'incomingtransaction': reverse('outgoingtransaction-list',
-                                       request=request, format=format),
-    })
-
-
-# class SyncConfirmationViewSet(viewsets.ModelViewSet):
-#     queryset = SyncConfirmation.objects.all()
-#     serializer_class = SyncConfirmationSerializer
+                                       request=request, format=format)})
 
 
 class OutgoingTransactionViewSet(viewsets.ModelViewSet):
