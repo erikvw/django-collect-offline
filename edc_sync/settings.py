@@ -15,6 +15,8 @@ import sys
 
 from pathlib import PurePath
 
+from .loggers import LOGGING
+
 APP_LABEL = 'edc_sync'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -213,3 +215,4 @@ REST_FRAMEWORK = {
     #         'rest_framework.permissions.IsAuthenticated',
     #     )
 }
+LOGGING = LOGGING

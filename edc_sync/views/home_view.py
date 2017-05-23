@@ -1,4 +1,5 @@
 import json
+import logging
 import socket
 
 from django.apps import apps as django_apps
@@ -16,6 +17,7 @@ from ..edc_sync_view_mixin import EdcSyncViewMixin
 from ..site_sync_models import site_sync_models
 
 app_config = django_apps.get_app_config('edc_sync_files')
+logger = logging.getLogger('edc_sync')
 
 
 class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
@@ -67,6 +69,8 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
             try:
                 self.action_handler.action(label=action)
             except ActionHandlerError as e:
+                logger.warn(e)
+                logger.exception(e)
                 response_data = dict(errmsg=str(e))
             else:
                 response_data = self.action_handler.data
