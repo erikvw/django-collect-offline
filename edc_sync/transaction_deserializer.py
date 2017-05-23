@@ -6,6 +6,8 @@ from django.db import transaction
 from django_crypto_fields.constants import LOCAL_MODE
 from django_crypto_fields.cryptor import Cryptor
 
+from edc_device.constants import NODE_SERVER, CENTRAL_SERVER
+
 from .constants import DELETE
 
 
@@ -43,7 +45,7 @@ def aes_decrypt(cipher_text):
 
 class TransactionDeserializer:
 
-    def __init__(self, using=None, allow_self=None, allow_any_role=None, raw=None):
+    def __init__(self, using=None, allow_self=None, override_role=None, raw=None):
         edc_device_app_config = django_apps.get_app_config('edc_device')
         self.aes_decrypt = aes_decrypt
         self.deserialize = deserialize
@@ -51,10 +53,11 @@ class TransactionDeserializer:
         self.raw = True if raw is None else raw
         self.allow_self = allow_self
         self.using = using
-        if not allow_any_role and not edc_device_app_config.is_server:
+        if ((not override_role and not edc_device_app_config.is_server)
+                or (override_role not in [NODE_SERVER, CENTRAL_SERVER])):
             raise TransactionDeserializerError(
                 f'Transactions may only be deserialized on a server. '
-                f'Got allow_any_role=False, device={edc_device_app_config.device_id}, '
+                f'Got override_role={override_role}, device={edc_device_app_config.device_id}, '
                 f'device_role={edc_device_app_config.role}.')
 
     def deserialize_transactions(self, transactions=None, deserialize_only=None):

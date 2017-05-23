@@ -33,7 +33,8 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
             self._action_handler = self.action_handler_cls(
                 username=app_config.user,
                 src_path=app_config.source_folder,
-                archive_path=app_config.archive_folder)
+                archive_path=app_config.archive_folder,
+                remote_host=app_config.remote_host)
         return self._action_handler
 
     @method_decorator(login_required)
