@@ -1,3 +1,5 @@
+import os
+
 from django.core.serializers.base import DeserializationError
 from django.test import TestCase, tag
 from faker import Faker
@@ -7,6 +9,8 @@ from edc_sync_files.transaction import TransactionImporter, TransactionExporter
 from ..transaction_deserializer import TransactionDeserializer, TransactionDeserializerError
 from ..models import OutgoingTransaction, IncomingTransaction
 from .models import TestModel, TestModelWithFkProtected, TestModelWithM2m, M2m
+import tempfile
+from edc_device.constants import NODE_SERVER
 
 fake = Faker()
 
@@ -16,6 +20,10 @@ class TestDeserializer1(TestCase):
     multi_db = True
 
     def setUp(self):
+        self.export_path = os.path.join(tempfile.gettempdir(), 'export')
+        if not os.path.exists(self.export_path):
+            os.mkdir(self.export_path)
+        self.import_path = self.export_path
         OutgoingTransaction.objects.using('client').all().delete()
         IncomingTransaction.objects.all().delete()
         TestModel.objects.all().delete()
@@ -25,18 +33,20 @@ class TestDeserializer1(TestCase):
         TestModel.objects.using('client').create(f1='model1')
         TestModel.objects.using('client').create(f1='model2')
 
-        tx_exporter = TransactionExporter(using='client')
-        history = tx_exporter.export_batch()
-        tx_importer = TransactionImporter(filename=history.filename)
-        self.batch = tx_importer.import_batch()
+        tx_exporter = TransactionExporter(
+            export_path=self.export_path,
+            using='client')
+        batch = tx_exporter.export_batch()
+        tx_importer = TransactionImporter(import_path=self.import_path)
+        self.batch = tx_importer.import_batch(filename=batch.filename)
 
     def test_deserilize(self):
-        tx_deserializer = TransactionDeserializer(allow_any_role=True)
+        tx_deserializer = TransactionDeserializer(override_role=NODE_SERVER)
         tx_deserializer.deserialize_transactions(
             transactions=self.batch.saved_transactions)
 
     def test_deserilized_object(self):
-        tx_deserializer = TransactionDeserializer(allow_any_role=True)
+        tx_deserializer = TransactionDeserializer(override_role=NODE_SERVER)
         tx_deserializer.deserialize_transactions(
             transactions=self.batch.saved_transactions)
 
@@ -44,7 +54,7 @@ class TestDeserializer1(TestCase):
         """Assert transaction object is saved to default db.
         """
         tx_deserializer = TransactionDeserializer(
-            allow_any_role=True,
+            override_role=NODE_SERVER,
             using='default')
         tx_deserializer.deserialize_transactions(
             transactions=self.batch.saved_transactions)
@@ -59,6 +69,10 @@ class TestDeserializer2(TestCase):
     multi_db = True
 
     def setUp(self):
+        self.export_path = os.path.join(tempfile.gettempdir(), 'export')
+        if not os.path.exists(self.export_path):
+            os.mkdir(self.export_path)
+        self.import_path = self.export_path
         M2m.objects.all().delete()
         M2m.objects.using('client').all().delete()
         OutgoingTransaction.objects.using('client').all().delete()
@@ -72,12 +86,12 @@ class TestDeserializer2(TestCase):
         """Asserts can save on self if allow_self=True.
         """
         TestModel.objects.create(f1='model1')
-        tx_exporter = TransactionExporter()
-        history = tx_exporter.export_batch()
-        tx_importer = TransactionImporter(filename=history.filename)
-        batch = tx_importer.import_batch()
+        tx_exporter = TransactionExporter(export_path=self.export_path)
+        batch = tx_exporter.export_batch()
+        tx_importer = TransactionImporter(import_path=self.import_path)
+        batch = tx_importer.import_batch(filename=batch.filename)
         tx_deserializer = TransactionDeserializer(
-            allow_any_role=True, allow_self=True)
+            override_role=NODE_SERVER, allow_self=True)
         tx_deserializer.deserialize_transactions(
             transactions=batch.saved_transactions)
         try:
@@ -90,12 +104,13 @@ class TestDeserializer2(TestCase):
         is created.
         """
         TestModel.objects.using('client').create(f1='model1')
-        tx_exporter = TransactionExporter(using='client')
-        history = tx_exporter.export_batch()
-        tx_importer = TransactionImporter(filename=history.filename)
-        batch = tx_importer.import_batch()
+        tx_exporter = TransactionExporter(
+            export_path=self.export_path, using='client')
+        batch = tx_exporter.export_batch()
+        tx_importer = TransactionImporter(import_path=self.import_path)
+        batch = tx_importer.import_batch(filename=batch.filename)
         tx_deserializer = TransactionDeserializer(
-            allow_any_role=True, allow_self=True)
+            override_role=NODE_SERVER, allow_self=True)
         tx_deserializer.deserialize_transactions(
             transactions=batch.saved_transactions)
         try:
@@ -108,12 +123,13 @@ class TestDeserializer2(TestCase):
         is created.
         """
         TestModel.objects.using('client').create(f1='model1')
-        tx_exporter = TransactionExporter(using='client')
-        history = tx_exporter.export_batch()
-        tx_importer = TransactionImporter(filename=history.filename)
-        batch = tx_importer.import_batch()
+        tx_exporter = TransactionExporter(
+            export_path=self.export_path, using='client')
+        batch = tx_exporter.export_batch()
+        tx_importer = TransactionImporter(import_path=self.import_path)
+        batch = tx_importer.import_batch(filename=batch.filename)
         tx_deserializer = TransactionDeserializer(
-            allow_any_role=True, allow_self=True)
+            override_role=NODE_SERVER, allow_self=True)
         tx_deserializer.deserialize_transactions(
             transactions=batch.saved_transactions)
         for transaction in batch.saved_transactions:
@@ -124,21 +140,23 @@ class TestDeserializer2(TestCase):
         is deleted.
         """
         test_model = TestModel.objects.using('client').create(f1='model1')
-        tx_exporter = TransactionExporter(using='client')
-        history = tx_exporter.export_batch()
-        tx_importer = TransactionImporter(filename=history.filename)
-        batch = tx_importer.import_batch()
+        tx_exporter = TransactionExporter(
+            export_path=self.export_path, using='client')
+        batch = tx_exporter.export_batch()
+        tx_importer = TransactionImporter(import_path=self.import_path)
+        batch = tx_importer.import_batch(filename=batch.filename)
         tx_deserializer = TransactionDeserializer(
-            allow_any_role=True, allow_self=True)
+            override_role=NODE_SERVER, allow_self=True)
         tx_deserializer.deserialize_transactions(
             transactions=batch.saved_transactions, deserialize_only=True)
         test_model.delete()
-        tx_exporter = TransactionExporter(using='client')
-        history = tx_exporter.export_batch()
-        tx_importer = TransactionImporter(filename=history.filename)
-        batch = tx_importer.import_batch()
+        tx_exporter = TransactionExporter(
+            export_path=self.export_path, using='client')
+        batch = tx_exporter.export_batch()
+        tx_importer = TransactionImporter(import_path=self.import_path)
+        batch = tx_importer.import_batch(filename=batch.filename)
         tx_deserializer = TransactionDeserializer(
-            allow_any_role=True, allow_self=True)
+            override_role=NODE_SERVER, allow_self=True)
         tx_deserializer.deserialize_transactions(
             transactions=batch.saved_transactions)
         try:
@@ -152,10 +170,10 @@ class TestDeserializer2(TestCase):
         """Asserts cannot save on self by default.
         """
         TestModel.objects.create(f1='model1')
-        tx_exporter = TransactionExporter()
-        history = tx_exporter.export_batch()
-        tx_importer = TransactionImporter(filename=history.filename)
-        tx_importer.import_batch()
+        tx_exporter = TransactionExporter(export_path=self.export_path)
+        batch = tx_exporter.export_batch()
+        tx_importer = TransactionImporter(import_path=self.import_path)
+        tx_importer.import_batch(filename=batch.filename)
         self.assertRaises(
             TransactionDeserializerError,
             TransactionDeserializer)
@@ -164,10 +182,10 @@ class TestDeserializer2(TestCase):
         """Asserts can save on self by default.
         """
         TestModel.objects.create(f1='model1')
-        tx_exporter = TransactionExporter()
-        history = tx_exporter.export_batch()
-        tx_importer = TransactionImporter(filename=history.filename)
-        tx_importer.import_batch()
+        tx_exporter = TransactionExporter(export_path=self.export_path)
+        batch = tx_exporter.export_batch()
+        tx_importer = TransactionImporter(import_path=self.import_path)
+        tx_importer.import_batch(filename=batch.filename)
         self.assertRaises(TransactionDeserializerError,
                           TransactionDeserializer, allow_self=True)
 
@@ -175,12 +193,12 @@ class TestDeserializer2(TestCase):
         """Asserts can save on self by default.
         """
         TestModel.objects.create(f1='model1')
-        tx_exporter = TransactionExporter()
-        history = tx_exporter.export_batch()
-        tx_importer = TransactionImporter(filename=history.filename)
-        tx_importer.import_batch()
+        tx_exporter = TransactionExporter(export_path=self.export_path)
+        batch = tx_exporter.export_batch()
+        tx_importer = TransactionImporter(import_path=self.import_path)
+        tx_importer.import_batch(filename=batch.filename)
         self.assertRaises(TransactionDeserializerError,
-                          TransactionDeserializer, allow_self=True, allow_any_role=False)
+                          TransactionDeserializer, allow_self=True)
 
     def test_deserialized_with_fk(self):
         """Asserts correctly deserialized model with FK.
@@ -188,12 +206,13 @@ class TestDeserializer2(TestCase):
         test_model = TestModel.objects.using('client').create(f1='model1')
         TestModelWithFkProtected.objects.using(
             'client').create(f1='f1', test_model=test_model)
-        tx_exporter = TransactionExporter(using='client')
-        history = tx_exporter.export_batch()
-        tx_importer = TransactionImporter(filename=history.filename)
-        batch = tx_importer.import_batch()
+        tx_exporter = TransactionExporter(
+            export_path=self.export_path, using='client')
+        batch = tx_exporter.export_batch()
+        tx_importer = TransactionImporter(import_path=self.import_path)
+        batch = tx_importer.import_batch(filename=batch.filename)
         tx_deserializer = TransactionDeserializer(
-            allow_self=True, allow_any_role=True)
+            allow_self=True, override_role=NODE_SERVER)
         tx_deserializer.deserialize_transactions(
             transactions=batch.saved_transactions)
         test_model = TestModel.objects.get(f1='model1')
@@ -207,12 +226,13 @@ class TestDeserializer2(TestCase):
         """Asserts correctly deserialized model with history.
         """
         TestModel.objects.using('client').create(f1='model1')
-        tx_exporter = TransactionExporter(using='client')
-        history = tx_exporter.export_batch()
-        tx_importer = TransactionImporter(filename=history.filename)
-        batch = tx_importer.import_batch()
+        tx_exporter = TransactionExporter(
+            export_path=self.export_path, using='client')
+        batch = tx_exporter.export_batch()
+        tx_importer = TransactionImporter(import_path=self.import_path)
+        batch = tx_importer.import_batch(filename=batch.filename)
         tx_deserializer = TransactionDeserializer(
-            allow_self=True, allow_any_role=True)
+            allow_self=True, override_role=NODE_SERVER)
         tx_deserializer.deserialize_transactions(
             transactions=batch.saved_transactions)
         try:
@@ -229,15 +249,16 @@ class TestDeserializer2(TestCase):
         m2m = M2m.objects.using('client').create(name='erik', short_name='bob')
         obj.m2m.add(m2m)
 
-        tx_exporter = TransactionExporter(using='client')
-        history = tx_exporter.export_batch()
-        tx_importer = TransactionImporter(filename=history.filename)
-        batch = tx_importer.import_batch()
+        tx_exporter = TransactionExporter(
+            export_path=self.export_path, using='client')
+        batch = tx_exporter.export_batch()
+        tx_importer = TransactionImporter(import_path=self.import_path)
+        batch = tx_importer.import_batch(filename=batch.filename)
 
         M2m.objects.create(name='erik', short_name='bob')
 
         tx_deserializer = TransactionDeserializer(
-            allow_self=True, allow_any_role=True)
+            allow_self=True, override_role=NODE_SERVER)
         tx_deserializer.deserialize_transactions(
             transactions=batch.saved_transactions, deserialize_only=False)
         obj = TestModelWithM2m.objects.get(f1='model1')
@@ -251,12 +272,13 @@ class TestDeserializer2(TestCase):
         obj = TestModelWithM2m.objects.using('client').create(f1='model1')
         m2m = M2m.objects.using('client').create(name='erik')
         obj.m2m.add(m2m)
-        tx_exporter = TransactionExporter(using='client')
-        history = tx_exporter.export_batch()
-        tx_importer = TransactionImporter(filename=history.filename)
-        batch = tx_importer.import_batch()
+        tx_exporter = TransactionExporter(
+            export_path=self.export_path, using='client')
+        batch = tx_exporter.export_batch()
+        tx_importer = TransactionImporter(import_path=self.import_path)
+        batch = tx_importer.import_batch(filename=batch.filename)
         tx_deserializer = TransactionDeserializer(
-            allow_self=True, allow_any_role=True)
+            allow_self=True, override_role=NODE_SERVER)
         self.assertRaises(
             DeserializationError,
             tx_deserializer.deserialize_transactions,
