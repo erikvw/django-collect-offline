@@ -1,6 +1,5 @@
 from django.apps import apps as django_apps
 from django.contrib import admin
-from django.contrib.admin.sites import AdminSite
 
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.admin import TokenAdmin
@@ -13,19 +12,11 @@ from .actions import (
     reset_outgoing_transaction_server_as_consumed,
     reset_outgoing_transaction_server_as_not_consumed, )
 
+from .admin_site import edc_sync_admin
 from .models import IncomingTransaction, OutgoingTransaction, Client, Server
 
 edc_sync_app_config = django_apps.get_app_config('edc_sync')
 
-
-class EdcSyncAdminSite(AdminSite):
-    site_header = 'Edc Sync'
-    site_title = 'Edc Sync'
-    index_title = 'Edc Sync Administration'
-    site_url = '/edc_sync/'
-
-
-edc_sync_admin = EdcSyncAdminSite(name='edc_sync_admin')
 
 admin.site.unregister(Token)  # TODO why is it unregistered
 
