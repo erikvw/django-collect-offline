@@ -2,7 +2,6 @@ import socket
 
 from django.apps import apps as django_apps
 from django.conf import settings
-from django.core import serializers
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models.fields import UUIDField
 from django_crypto_fields.constants import LOCAL_MODE
@@ -12,6 +11,7 @@ from edc_base.utils import get_utcnow
 
 from .constants import INSERT, UPDATE, DELETE
 from .exceptions import SyncModelError
+from .transaction import serialize
 
 
 class SyncModel:
@@ -105,9 +105,10 @@ class SyncModel:
     def encrypted_json(self):
         """Returns an encrypted json serialized from self.
         """
-        json = serializers.serialize(
-            "json", [self.instance, ], ensure_ascii=True,
-            use_natural_foreign_keys=True)
+        json = serialize(objects=[self.instance])
+#         json = serializers.serialize(
+#             "json", [self.instance, ], ensure_ascii=True,
+#             use_natural_foreign_keys=True)
         encrypted_json = Cryptor().aes_encrypt(json, LOCAL_MODE)
         return encrypted_json
 

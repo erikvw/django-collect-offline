@@ -2,7 +2,9 @@ from django.core import serializers
 
 
 def deserialize(json_text=None):
-    """Wraps django deserialize with defaults for JSON
+    """Returns a generator of deserialized objects.
+
+    Wraps django deserialize with defaults for JSON
     and natural keys.
     """
     return serializers.deserialize(

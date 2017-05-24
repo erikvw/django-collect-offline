@@ -1,6 +1,5 @@
 from django.apps import apps as django_apps
 from django.db import models
-from django.utils import timezone
 
 from edc_base.model_mixins import BaseUuidModel
 from edc_base.utils import get_utcnow
@@ -47,7 +46,7 @@ class OutgoingTransaction(TransactionMixin, BaseUuidModel):
                     self._meta.model_name))
         if self.is_consumed_server and not self.consumed_datetime:
             self.consumed_datetime = get_utcnow()
-        super(OutgoingTransaction, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     class Meta:
         app_label = 'edc_sync'
@@ -107,11 +106,11 @@ class History(BaseUuidModel):
 
     sent_datetime = models.DateTimeField(default=get_utcnow)
 
-    def natural_key(self):
-        return (self.filename, self.hostname)
-
     def __str__(self):
         return '</{}.{}>'.format(self.filename, self.hostname)
+
+    def natural_key(self):
+        return (self.filename, self.hostname)
 
     class Meta:
         app_label = 'edc_sync'

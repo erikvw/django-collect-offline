@@ -1,10 +1,10 @@
 import json
 
 from django.apps import apps as django_apps
-from django.core import serializers
 from django.core.exceptions import MultipleObjectsReturned
 
-from edc_sync.models import OutgoingTransaction
+from .models import OutgoingTransaction
+from .transaction import deserialize
 
 
 class SyncTestError(Exception):
@@ -48,7 +48,8 @@ class SyncTestSerializerMixin:
                         'get_by_natural_key query failed for \'{}\' with options {}.'.format(
                             obj._meta.label_lower, options))
                 except TypeError as e:
-                    raise SyncTestError('{} See {}. Got {}.'.format(str(e), obj._meta.label_lower, options))
+                    raise SyncTestError('{} See {}. Got {}.'.format(
+                        str(e), obj._meta.label_lower, options))
 
     def sync_test_natural_keys_by_schedule(self, visits=None, visit_attr=None, verbose=True, ):
         """A wrapper method for sync_test_natural_keys that uses the enrollment instance
@@ -76,11 +77,13 @@ class SyncTestSerializerMixin:
                     outgoing_transaction = OutgoingTransaction.objects.get(
                         tx_name=obj._meta.label_lower,
                         tx_pk=obj.pk)
-                    self.sync_test_deserialize(obj, outgoing_transaction, verbose=verbose)
+                    self.sync_test_deserialize(
+                        obj, outgoing_transaction, verbose=verbose)
                 except MultipleObjectsReturned:
                     for outgoing_transaction in OutgoingTransaction.objects.filter(
                             tx_name=obj._meta.label_lower, tx_pk=obj.pk):
-                        self.sync_test_deserialize(obj, outgoing_transaction, verbose=verbose)
+                        self.sync_test_deserialize(
+                            obj, outgoing_transaction, verbose=verbose)
                 except OutgoingTransaction.DoesNotExist:
                     self.fail(
                         'OutgoingTransaction.DoesNotExist unexpectedly '
@@ -88,10 +91,9 @@ class SyncTestSerializerMixin:
 
     def sync_test_deserialize(self, obj, outgoing_transaction, verbose=None):
         """Assert object matches its deserialized transaction."""
-        tx = outgoing_transaction.aes_decrypt(outgoing_transaction.tx)
-        for deserialised_obj in serializers.deserialize(
-                "json", tx, use_natural_foreign_keys=True, use_natural_primary_keys=True):
-            json_tx = json.loads(tx)[0]
+        json_text = outgoing_transaction.aes_decrypt(outgoing_transaction.tx)
+        for deserialised_obj in deserialize(json_text=json_text):
+            json_tx = json.loads(json_text)[0]
             self.assertEqual(json_tx.get('model'), obj._meta.label_lower)
             # TODO: verify natural key values?
             self.assertEqual(obj.pk, deserialised_obj.object.pk)
