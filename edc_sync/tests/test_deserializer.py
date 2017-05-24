@@ -1,16 +1,16 @@
+import tempfile
 import os
 
 from django.core.serializers.base import DeserializationError
 from django.test import TestCase, tag
 from faker import Faker
 
+from edc_device.constants import NODE_SERVER
 from edc_sync_files.transaction import TransactionImporter, TransactionExporter
 
-from ..transaction_deserializer import TransactionDeserializer, TransactionDeserializerError
+from ..transaction import TransactionDeserializer, TransactionDeserializerError
 from ..models import OutgoingTransaction, IncomingTransaction
 from .models import TestModel, TestModelWithFkProtected, TestModelWithM2m, M2m
-import tempfile
-from edc_device.constants import NODE_SERVER
 
 fake = Faker()
 
@@ -24,8 +24,8 @@ class TestDeserializer1(TestCase):
         if not os.path.exists(self.export_path):
             os.mkdir(self.export_path)
         self.import_path = self.export_path
-        OutgoingTransaction.objects.using('client').all().delete()
         IncomingTransaction.objects.all().delete()
+        OutgoingTransaction.objects.using('client').all().delete()
         TestModel.objects.all().delete()
         TestModel.objects.using('client').all().delete()
         TestModel.history.all().delete()

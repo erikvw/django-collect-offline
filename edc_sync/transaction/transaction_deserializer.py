@@ -1,29 +1,18 @@
 import socket
 
 from django.apps import apps as django_apps
-from django.core import serializers
 from django.db import transaction
 from django_crypto_fields.constants import LOCAL_MODE
 from django_crypto_fields.cryptor import Cryptor
 
 from edc_device.constants import NODE_SERVER, CENTRAL_SERVER
 
-from .constants import DELETE
+from ..constants import DELETE
+from .deserialize import deserialize
 
 
 class TransactionDeserializerError(Exception):
     pass
-
-
-def deserialize(json_text=None):
-    """Wraps django deserialize with defaults for JSON
-    and natural keys.
-    """
-    return serializers.deserialize(
-        "json", json_text,
-        ensure_ascii=True,
-        use_natural_foreign_keys=True,
-        use_natural_primary_keys=False)
 
 
 def save(obj=None, m2m_data=None, raw=None):
