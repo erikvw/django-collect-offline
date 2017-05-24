@@ -15,14 +15,14 @@ class TransactionDeserializerError(Exception):
     pass
 
 
-def save(obj=None, m2m_data=None, raw=None):
+def save(obj=None, m2m_data=None):
     """Saves a deserialized model object.
 
     Uses save_base to avoid running code in model.save() and
     to avoid triggering signals (if raw=True).
     """
     m2m_data = {} if m2m_data is None else m2m_data
-    obj.save_base(raw=raw)
+    obj.save_base(raw=True)
     for attr, values in m2m_data.items():
         for value in values:
             getattr(obj, attr).add(value)
@@ -34,20 +34,19 @@ def aes_decrypt(cipher_text):
 
 class TransactionDeserializer:
 
-    def __init__(self, using=None, allow_self=None, override_role=None, raw=None):
+    def __init__(self, using=None, allow_self=None, override_role=None, **kwargs):
         edc_device_app_config = django_apps.get_app_config('edc_device')
         self.aes_decrypt = aes_decrypt
         self.deserialize = deserialize
         self.save = save
-        self.raw = True if raw is None else raw
         self.allow_self = allow_self
         self.using = using
-        if ((not override_role and not edc_device_app_config.is_server)
-                or (override_role not in [NODE_SERVER, CENTRAL_SERVER])):
-            raise TransactionDeserializerError(
-                f'Transactions may only be deserialized on a server. '
-                f'Got override_role={override_role}, device={edc_device_app_config.device_id}, '
-                f'device_role={edc_device_app_config.role}.')
+        if not edc_device_app_config.is_server:
+            if override_role not in [NODE_SERVER, CENTRAL_SERVER]:
+                raise TransactionDeserializerError(
+                    f'Transactions may only be deserialized on a server. '
+                    f'Got override_role={override_role}, device={edc_device_app_config.device_id}, '
+                    f'device_role={edc_device_app_config.role}.')
 
     def deserialize_transactions(self, transactions=None, deserialize_only=None):
         """Deserializes the encrypted serialized model instances, tx, in a queryset
@@ -70,7 +69,6 @@ class TransactionDeserializer:
                 else:
                     self.save(
                         obj=deserialized.object,
-                        m2m_data=deserialized.m2m_data,
-                        raw=self.raw)
+                        m2m_data=deserialized.m2m_data)
                 transaction.is_consumed = True
                 transaction.save()
