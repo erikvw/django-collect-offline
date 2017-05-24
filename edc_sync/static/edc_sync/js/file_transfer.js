@@ -121,7 +121,7 @@ function sendTransactionFile(file) {
 	ajSendFile.done( function( data ) {
 		if( data.errmsg ) {
 			// Display error message
-			updateIcon(file.index, 'error');
+			updateIcon( file.index, 'error' );
 			$( '#progress-status-div' ).text( 'An error occured. Got ' + data.errmsg );
 			$( '#progress-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-danger' );
 		} else {
@@ -135,7 +135,7 @@ function sendTransactionFile(file) {
 					//display files
 					var spanFile = "<span class='glyphicon glyphicon-level-up'></span>";
 					var spanOK = "<span class='glyphicon glyphicon-ok'></span>";
-					$("<tr><td>" + index + "</td><td> " + spanFile + " "+fileObj.filename + "</td><td>"+spanOK+"</td></tr>").appendTo("#id-file-table-confirmation tbody");
+					$("<tr><td>" + index + "</td><td> " + spanFile + " "+ fileObj.filename + "</td><td>"+spanOK+"</td></tr>").appendTo("#id-file-table-confirmation tbody");
 			});
 		}
 	});
@@ -203,7 +203,7 @@ function updateFromHost( host ) {
 				$( '#btn-sync' ).removeAttr( 'disabled' );
 				$( '#btn-sync').removeClass( 'btn-default' ).addClass( 'btn-warning' );
 			} else {
-				$( '#btn-sync' ).removeClass( 'btn-wa' ).addClass( 'btn-default' );
+				$( '#btn-sync' ).removeClass( 'btn-warning' ).addClass( 'btn-default' );
 			}
 		} 
 	});
@@ -276,7 +276,7 @@ function processPendingFiles() {
 			$( '#id-transfer-div' ).hide();
 			$( '#id-in-progress-div' ).show();
 			$( '#id-transfer-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-success' );
-			$( '#id-transfer-status-div' ).text('Connected to the server.');
+			$( '#id-transfer-status-div' ).text('Ready to transfer files to server.');
 			$( '#id-in-progress-div-pending-files' ).hide();
 
 			$.each( data.pending_files, function(index,  filename  ) {
