@@ -35,7 +35,8 @@ class SyncTestSerializerMixin:
 
     def sync_test_natural_keys(self, complete_required_crfs, verbose=None):
         """Asserts tuple from natural_key when passed to get_by_natural_key
-        successfully gets the model instance."""
+        successfully gets the model instance.
+        """
         for objs in complete_required_crfs.values():
             for obj in objs:
                 if verbose:
@@ -48,8 +49,8 @@ class SyncTestSerializerMixin:
                         'get_by_natural_key query failed for \'{}\' with options {}.'.format(
                             obj._meta.label_lower, options))
                 except TypeError as e:
-                    raise SyncTestError('{} See {}. Got {}.'.format(
-                        str(e), obj._meta.label_lower, options))
+                    raise SyncTestError(
+                        f'{e} See {obj._meta.label_lower}. Got {options}.')
 
     def sync_test_natural_keys_by_schedule(self, visits=None, visit_attr=None, verbose=True, ):
         """A wrapper method for sync_test_natural_keys that uses the enrollment instance
