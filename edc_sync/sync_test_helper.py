@@ -5,16 +5,18 @@ from django.core.exceptions import MultipleObjectsReturned
 
 from .models import OutgoingTransaction
 from .transaction import deserialize
+from unittest.case import TestCase
 
 
-class SyncTestError(Exception):
+class SyncTestHelperError(Exception):
     pass
 
 
-class SyncTestSerializerMixin:
+class SyncTestHelper(TestCase):
 
     def sync_test_natural_key_attr(self, *app_labels):
-        """Asserts all models in given apps have a natural_key model method"""
+        """Asserts all models in given apps have a natural_key model method.
+        """
         for app_label in app_labels:
             models = django_apps.get_app_config(app_label).get_models()
             for model in models:
@@ -24,14 +26,16 @@ class SyncTestSerializerMixin:
                         model._meta.label_lower))
 
     def sync_test_get_by_natural_key_attr(self, *app_labels):
-        """Asserts all models in given apps have a get_by_natural_key manager method"""
+        """Asserts all models in given apps have a get_by_natural_key
+        manager method.
+        """
         for app_label in app_labels:
             models = django_apps.get_app_config(app_label).get_models()
             for model in models:
                 self.assertTrue(
                     'get_by_natural_key' in dir(model.objects),
-                    'Manager method \'get_by_natural_key\' missing. Got \'{}\'.'.format(
-                        model._meta.label_lower))
+                    f'Manager method \'get_by_natural_key\' missing. '
+                    f'Got \'{model._meta.label_lower}\'.')
 
     def sync_test_natural_keys(self, complete_required_crfs, verbose=None):
         """Asserts tuple from natural_key when passed to get_by_natural_key
@@ -45,16 +49,19 @@ class SyncTestSerializerMixin:
                 try:
                     obj.__class__.objects.get_by_natural_key(*options)
                 except obj.__class__.DoesNotExist:
-                    self.fail(
-                        'get_by_natural_key query failed for \'{}\' with options {}.'.format(
-                            obj._meta.label_lower, options))
+                    self.fail(f'get_by_natural_key query failed for '
+                              f'\'{obj._meta.label_lower}\' with '
+                              f'options {options}.')
                 except TypeError as e:
-                    raise SyncTestError(
+                    raise SyncTestHelperError(
                         f'{e} See {obj._meta.label_lower}. Got {options}.')
 
-    def sync_test_natural_keys_by_schedule(self, visits=None, visit_attr=None, verbose=True, ):
-        """A wrapper method for sync_test_natural_keys that uses the enrollment instance
-        to test each CRF in each visit in the schedule linked to the enrollment model."""
+    def sync_test_natural_keys_by_schedule(self, visits=None, visit_attr=None,
+                                           verbose=True, ):
+        """A wrapper method for sync_test_natural_keys that uses
+        the enrollment instance to test each CRF in each visit
+        in the schedule linked to the enrollment model.
+        """
         complete_required_crfs = {}
         for visit in visits:
             if verbose:
@@ -71,7 +78,8 @@ class SyncTestSerializerMixin:
     def sync_test_serializers_for_visit(self, complete_required_crfs, verbose=None):
         """Assert CRF model instances have transactions and that the
         transactions can be deserialized and compared to their original
-        model instances."""
+        model instances.
+        """
         for visit_code in [visit_code for visit_code in complete_required_crfs.keys()]:
             for obj in complete_required_crfs.get(visit_code):
                 try:
@@ -86,12 +94,12 @@ class SyncTestSerializerMixin:
                         self.sync_test_deserialize(
                             obj, outgoing_transaction, verbose=verbose)
                 except OutgoingTransaction.DoesNotExist:
-                    self.fail(
-                        'OutgoingTransaction.DoesNotExist unexpectedly '
-                        'raised for {}'.format(obj._meta.label_lower))
+                    self.fail('OutgoingTransaction.DoesNotExist unexpectedly '
+                              f'raised for {obj._meta.label_lower}')
 
     def sync_test_deserialize(self, obj, outgoing_transaction, verbose=None):
-        """Assert object matches its deserialized transaction."""
+        """Assert object matches its deserialized transaction.
+        """
         json_text = outgoing_transaction.aes_decrypt(outgoing_transaction.tx)
         for deserialised_obj in deserialize(json_text=json_text):
             json_tx = json.loads(json_text)[0]

@@ -1,9 +1,9 @@
 import logging
 import os
+import tempfile
 
 from django.test.testcases import TestCase
 from edc_sync_files.action_handler import ActionHandler, ActionHandlerError
-import tempfile
 
 logger = logging.getLogger('edc_sync')
 
