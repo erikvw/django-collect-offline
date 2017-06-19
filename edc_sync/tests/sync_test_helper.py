@@ -1,11 +1,11 @@
 import json
 
+from unittest.case import TestCase
 from django.apps import apps as django_apps
 from django.core.exceptions import MultipleObjectsReturned
 
-from .models import OutgoingTransaction
-from .transaction import deserialize
-from unittest.case import TestCase
+from ..models import OutgoingTransaction
+from ..transaction import deserialize
 
 
 class SyncTestHelperError(Exception):
