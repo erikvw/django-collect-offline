@@ -11,6 +11,8 @@ from edc_sync_files.transaction import TransactionImporter, TransactionExporter
 from ..transaction import TransactionDeserializer, TransactionDeserializerError
 from ..models import OutgoingTransaction, IncomingTransaction
 from .models import TestModel, TestModelWithFkProtected, TestModelWithM2m, M2m
+from ..sync_model import SyncModel
+from ..site_sync_models import site_sync_models
 
 fake = Faker()
 
@@ -20,6 +22,14 @@ class TestDeserializer1(TestCase):
     multi_db = True
 
     def setUp(self):
+        site_sync_models.registry = {}
+        site_sync_models.loaded = False
+        sync_models = [
+            'edc_sync.testmodel',
+            'edc_sync.testmodelwithfkprotected',
+            'edc_sync.testmodelwithm2m']
+        site_sync_models.register(sync_models, sync_model_cls=SyncModel)
+
         self.export_path = os.path.join(tempfile.gettempdir(), 'export')
         if not os.path.exists(self.export_path):
             os.mkdir(self.export_path)
@@ -69,6 +79,14 @@ class TestDeserializer2(TestCase):
     multi_db = True
 
     def setUp(self):
+        site_sync_models.registry = {}
+        site_sync_models.loaded = False
+        sync_models = [
+            'edc_sync.testmodel',
+            'edc_sync.testmodelwithfkprotected',
+            'edc_sync.testmodelwithm2m']
+        site_sync_models.register(sync_models, sync_model_cls=SyncModel)
+
         self.export_path = os.path.join(tempfile.gettempdir(), 'export')
         if not os.path.exists(self.export_path):
             os.mkdir(self.export_path)
@@ -240,7 +258,7 @@ class TestDeserializer2(TestCase):
         except TestModel.DoesNotExist:
             self.fail('TestModel history unexpectedly does not exists')
 
-    @tag('erik')
+    @tag('1')
     def test_deserialize_with_m2m(self):
         """Asserts deserializes model with M2M as long as
         M2M instance exists on destination.

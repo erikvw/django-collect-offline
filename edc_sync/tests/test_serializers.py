@@ -9,6 +9,8 @@ from rest_framework.renderers import JSONRenderer
 from ..models import OutgoingTransaction
 from ..serializers import OutgoingTransactionSerializer
 from .models import TestModel
+from ..site_sync_models import site_sync_models
+from edc_sync.sync_model import SyncModel
 
 
 class TestSerializers(TestCase):
@@ -17,6 +19,10 @@ class TestSerializers(TestCase):
 
     def setUp(self):
         TestModel.objects.create(f1='give any one species too much rope ...')
+        site_sync_models.registry = {}
+        site_sync_models.loaded = False
+        sync_models = ['edc_sync.testmodel']
+        site_sync_models.register(sync_models, sync_model_cls=SyncModel)
 
     def test_outgoingtransaction_serializer_inits(self):
         obj = OutgoingTransaction.objects.last()

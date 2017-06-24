@@ -1,7 +1,6 @@
 import sys
 
 from django.apps import AppConfig as DjangoAppConfig
-from django.apps import apps as django_apps
 from django.core.management.color import color_style
 
 from .site_sync_models import site_sync_models

@@ -1,12 +1,9 @@
-from django.apps import apps as django_apps
 from django.db import models
 
 from edc_base.model_mixins import BaseUuidModel
 from edc_base.utils import get_utcnow
 
 from .model_mixins import TransactionMixin, HostModelMixin
-
-edc_device_app_config = django_apps.get_app_config('edc_device')
 
 
 class IncomingTransaction(TransactionMixin, BaseUuidModel):

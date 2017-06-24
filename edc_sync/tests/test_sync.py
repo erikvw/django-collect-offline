@@ -3,11 +3,15 @@ from django.core.exceptions import MultipleObjectsReturned
 from django.test import TestCase, tag
 from django.test.utils import override_settings
 
-from edc_sync.exceptions import SyncModelError
 from edc_sync.models import OutgoingTransaction
 
 from ..constants import INSERT, UPDATE
-from .models import TestModel, BadTestModel, AnotherBadTestModel
+from ..site_sync_models import site_sync_models
+from ..sync_model import SyncHistoricalManagerError, SyncUuidPrimaryKeyMissing
+from ..sync_model import SyncModel
+from ..sync_model import SyncNaturalKeyMissing, SyncGetByNaturalKeyMissing
+from .models import TestModel, BadTestModel, AnotherBadTestModel, YetAnotherBadTestModel
+from .models import TestSyncModelNoHistoryManager, TestSyncModelNoUuid
 
 Crypt = django_apps.get_app_config('django_crypto_fields').model
 
@@ -18,21 +22,55 @@ class TestSync(TestCase):
 
     multi_db = True
 
+    def setUp(self):
+        site_sync_models.registry = {}
+        site_sync_models.loaded = False
+        sync_models = ['edc_sync.testmodel',
+                       'edc_sync.badtestmodel',
+                       'edc_sync.anotherbadtestmodel',
+                       'edc_sync.yetanotherbadtestmodel',
+                       'edc_sync.testmodelwithfkprotected',
+                       'edc_sync.testmodelwithm2m',
+                       'edc_sync.testsyncmodelnohistorymanager',
+                       'edc_sync.testsyncmodelnouuid']
+        site_sync_models.register(sync_models, SyncModel)
+
     def get_credentials(self):
         return self.create_apikey(username=self.username,
                                   api_key=self.api_client_key)
 
+    def test_str(self):
+        obj = TestModel()
+        obj = SyncModel(obj)
+        self.assertTrue(str(obj))
+        self.assertTrue(repr(obj))
+
     def test_raises_on_missing_natural_key(self):
         with override_settings(DEVICE_ID='10'):
-            with self.assertRaises(SyncModelError) as cm:
+            with self.assertRaises(SyncNaturalKeyMissing):
                 BadTestModel.objects.using('client').create()
-            self.assertIn('natural_key', str(cm.exception))
 
     def test_raises_on_missing_get_by_natural_key(self):
         with override_settings(DEVICE_ID='10'):
-            with self.assertRaises(SyncModelError) as cm:
+            with self.assertRaises(SyncGetByNaturalKeyMissing):
                 AnotherBadTestModel.objects.using('client').create()
-            self.assertIn('get_by_natural_key', str(cm.exception))
+
+    def test_raises_on_wrong_type_of_historical_manager(self):
+        with override_settings(DEVICE_ID='10'):
+            with self.assertRaises(SyncHistoricalManagerError):
+                YetAnotherBadTestModel.objects.using('client').create()
+
+    def test_raises_on_no_historical_manager(self):
+        with override_settings(DEVICE_ID='10'):
+            try:
+                TestSyncModelNoHistoryManager.objects.using('client').create()
+            except SyncHistoricalManagerError:
+                self.fail('SyncHistoricalManagerError unexpectedly raised.')
+
+    def test_raises_on_missing_uuid_primary_key(self):
+        with override_settings(DEVICE_ID='10'):
+            with self.assertRaises(SyncUuidPrimaryKeyMissing):
+                TestSyncModelNoUuid.objects.using('client').create()
 
     def test_creates_outgoing_on_add(self):
         with override_settings(DEVICE_ID='10'):

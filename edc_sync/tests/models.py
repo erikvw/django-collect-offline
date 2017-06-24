@@ -1,11 +1,12 @@
 from uuid import uuid4
 
 from django.db import models
+from simple_history.models import HistoricalRecords as BadHistoricalRecords
+from django.db.models.deletion import PROTECT
 
 from edc_base.model_managers import HistoricalRecords
-from edc_base.model_mixins import BaseUuidModel
+from edc_base.model_mixins import BaseUuidModel, BaseModel
 from edc_base.model_mixins.list_model_mixin import ListModelMixin
-from django.db.models.deletion import PROTECT
 
 
 class TestModelManager(models.Manager):
@@ -46,6 +47,44 @@ class AnotherBadTestModel(BaseUuidModel):
     f1 = models.CharField(max_length=10, default='f1')
 
     objects = models.Manager()
+
+    def natural_key(self):
+        return (self.f1, )
+
+
+class YetAnotherBadTestModel(BaseUuidModel):
+    """A test model with the wrong HistoricalManager.
+    """
+
+    f1 = models.CharField(max_length=10, default='f1')
+
+    objects = TestModelManager()
+
+    history = BadHistoricalRecords()  # missing UUID handling
+
+    def natural_key(self):
+        return (self.f1, )
+
+
+class TestSyncModelNoHistoryManager(BaseUuidModel):
+    """A test model without a HistoricalManager.
+    """
+
+    f1 = models.CharField(max_length=10, default='f1')
+
+    objects = TestModelManager()
+
+    def natural_key(self):
+        return (self.f1, )
+
+
+class TestSyncModelNoUuid(BaseModel):
+    """A test model without a HistoricalManager.
+    """
+
+    f1 = models.CharField(max_length=10, default='f1')
+
+    objects = TestModelManager()
 
     def natural_key(self):
         return (self.f1, )

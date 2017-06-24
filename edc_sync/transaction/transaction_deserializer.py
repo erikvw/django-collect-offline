@@ -1,7 +1,6 @@
 import socket
 
 from django.apps import apps as django_apps
-from django.db import transaction
 from django_crypto_fields.constants import LOCAL_MODE
 from django_crypto_fields.cryptor import Cryptor
 
