@@ -1,21 +1,10 @@
 import sys
-from django.apps import apps as django_apps
 from django.contrib import admin
 
 from rest_framework.authtoken.models import Token
 
-from .actions import (
-    reset_transaction_as_not_consumed, reset_transaction_as_consumed,
-    reset_incomingtransaction_error_status, reset_incomingtransaction_ignore_status,
-    set_incomingtransaction_as_ignore_status, set_incomingtransaction_audits_to_ignored,
-    reset_incomingtransaction_audits,
-    reset_outgoing_transaction_server_as_consumed,
-    reset_outgoing_transaction_server_as_not_consumed, )
-
 from .admin_site import edc_sync_admin
 from .models import IncomingTransaction, OutgoingTransaction, Client, Server
-
-edc_sync_app_config = django_apps.get_app_config('edc_sync')
 
 if 'test' not in sys.argv:
     # registering this model causes tests to fail
@@ -47,15 +36,6 @@ class IncomingTransactionAdmin (admin.ModelAdmin):
 
     search_fields = ('tx_pk', 'tx', 'timestamp', 'error', 'id')
 
-    actions = [
-        reset_transaction_as_not_consumed,
-        reset_transaction_as_consumed,
-        reset_incomingtransaction_error_status,
-        set_incomingtransaction_as_ignore_status,
-        reset_incomingtransaction_ignore_status,
-        set_incomingtransaction_audits_to_ignored,
-        reset_incomingtransaction_audits]
-
 
 @admin.register(OutgoingTransaction, site=edc_sync_admin)
 class OutgoingTransactionAdmin (admin.ModelAdmin):
@@ -74,10 +54,6 @@ class OutgoingTransactionAdmin (admin.ModelAdmin):
         'action', 'tx_name', 'hostname_modified')
 
     search_fields = ('tx_pk', 'tx', 'timestamp', 'error', 'id')
-
-    actions = [
-        reset_outgoing_transaction_server_as_consumed,
-        reset_outgoing_transaction_server_as_not_consumed]
 
 
 class HostAdmin(admin.ModelAdmin):

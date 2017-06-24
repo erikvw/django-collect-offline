@@ -35,18 +35,18 @@ def aes_decrypt(cipher_text):
 class TransactionDeserializer:
 
     def __init__(self, using=None, allow_self=None, override_role=None, **kwargs):
-        edc_device_app_config = django_apps.get_app_config('edc_device')
+        app_config = django_apps.get_app_config('edc_device')
         self.aes_decrypt = aes_decrypt
         self.deserialize = deserialize
         self.save = save
         self.allow_self = allow_self
         self.using = using
-        if not edc_device_app_config.is_server:
+        if not app_config.is_server:
             if override_role not in [NODE_SERVER, CENTRAL_SERVER]:
                 raise TransactionDeserializerError(
                     f'Transactions may only be deserialized on a server. '
-                    f'Got override_role={override_role}, device={edc_device_app_config.device_id}, '
-                    f'device_role={edc_device_app_config.role}.')
+                    f'Got override_role={override_role}, device={app_config.device_id}, '
+                    f'device_role={app_config.device_role}.')
 
     def deserialize_transactions(self, transactions=None, deserialize_only=None):
         """Deserializes the encrypted serialized model instances, tx, in a queryset

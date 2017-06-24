@@ -23,29 +23,5 @@ class AppConfig(DjangoAppConfig):
             create_auth_token, serialize_on_post_delete,
             serialize_m2m_on_save, serialize_on_save)
         sys.stdout.write('Loading {} ...\n'.format(self.verbose_name))
-        if not self.role:
-            sys.stdout.write(style.NOTICE(
-                ' Warning: Project uses \'edc_sync\' but has not defined a '
-                'role for this app instance. See AppConfig.\n'))
-        sys.stdout.write(
-            '  * device is a {} with ID {}\n'.format(
-                self.device_id, self.role.lower()))
         site_sync_models.autodiscover()
         sys.stdout.write(' Done loading {}.\n'.format(self.verbose_name))
-
-    @property
-    def role(self):
-        """Return the role of this device.
-
-        Role is configured through edc_device. See edc_device.apps.AppConfig.
-        """
-        return django_apps.get_app_config('edc_device').device_role
-
-    @property
-    def device_id(self):
-        """Return the ID of this device.
-
-        Device ID is configured through edc_device.
-        See edc_device.apps.AppConfig.
-        """
-        return django_apps.get_app_config('edc_device').device_id

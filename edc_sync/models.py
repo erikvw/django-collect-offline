@@ -21,7 +21,6 @@ class IncomingTransaction(TransactionMixin, BaseUuidModel):
         default=False)
 
     class Meta:
-        app_label = 'edc_sync'
         ordering = ['timestamp', 'producer']
 
 
@@ -49,7 +48,6 @@ class OutgoingTransaction(TransactionMixin, BaseUuidModel):
         super().save(*args, **kwargs)
 
     class Meta:
-        app_label = 'edc_sync'
         ordering = ['timestamp']
 
 
@@ -68,7 +66,6 @@ class Client(HostModelMixin, BaseUuidModel):
     objects = HostManager()
 
     class Meta:
-        app_label = 'edc_sync'
         ordering = ['hostname', 'port']
         unique_together = (('hostname', 'port'),)
 
@@ -81,7 +78,6 @@ class Server(HostModelMixin, BaseUuidModel):
     objects = HostManager()
 
     class Meta:
-        app_label = 'edc_sync'
         ordering = ['hostname', 'port']
         unique_together = (('hostname', 'port'),)
 
@@ -113,7 +109,6 @@ class History(BaseUuidModel):
         return (self.filename, self.hostname)
 
     class Meta:
-        app_label = 'edc_sync'
         ordering = ('-sent_datetime',)
         verbose_name = 'Sent History'
         verbose_name_plural = 'Sent History'

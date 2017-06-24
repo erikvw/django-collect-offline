@@ -17,7 +17,7 @@ from pathlib import PurePath
 
 from .loggers import LOGGING
 
-APP_LABEL = 'edc_sync'
+APP_NAME = 'edc_sync'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
