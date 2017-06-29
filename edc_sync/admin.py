@@ -1,22 +1,24 @@
-import sys
 from django.contrib import admin
 
 from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.admin import TokenAdmin
 
 from .admin_site import edc_sync_admin
 from .models import IncomingTransaction, OutgoingTransaction, Client, Server
 
-if 'test' not in sys.argv:
-    # registering this model causes tests to fail
-    from rest_framework.authtoken.admin import TokenAdmin
-    admin.site.unregister(Token)  # TODO: why is it unregistered
+# registering TokenAdmin with model Token fails
+# if you have not declared 'rest_framework.authtoken' in INSTALLED_APPS.
 
-    @admin.register(Token, site=edc_sync_admin)
-    class MyTokenAdmin(TokenAdmin):
-        raw_id_fields = ('user',)
-        list_display = ('key', 'user', 'created')
-        fields = ('user', )
-        ordering = ('-created',)
+# unregister to re-register with our admin class
+admin.site.unregister(Token)
+
+
+@admin.register(Token, site=edc_sync_admin)
+class MyTokenAdmin(TokenAdmin):
+    raw_id_fields = ('user',)
+    list_display = ('key', 'user', 'created')
+    fields = ('user', )
+    ordering = ('-created',)
 
 
 @admin.register(IncomingTransaction, site=edc_sync_admin)
