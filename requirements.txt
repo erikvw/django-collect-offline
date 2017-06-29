@@ -1,15 +1,12 @@
-Django
-factory-boy
-django-simple-history
+djangorestframework
 django-js-reverse
-#corsheaders
-paramiko
-# httpie
-git+https://github.com/erikvw/django-crypto-fields@develop#egg=django-crypto-fields
-git+https://github.com/erikvw/django-appconfig-ini@develop#egg=django-appconfig-ini
+django-cors-headers
+requests
 git+https://github.com/botswana-harvard/edc-base@develop#egg=edc-base
+git+https://github.com/erikvw/django-crypto-fields@develop#egg=django-crypto-fields
 git+https://github.com/erikvw/django-revision@develop#egg=django-revision
 git+https://github.com/botswana-harvard/edc-device@develop#egg=edc-device
+git+https://github.com/botswana-harvard/edc-protocol@develop#egg=edc-protocol
 git+https://github.com/botswana-harvard/edc-rest@develop#egg=edc-rest
-git+https://github.com/botswana-harvard/edc-rest@develop#egg=edc-syn
+git+https://github.com/botswana-harvard/edc-constants@develop#egg=edc-constants
 git+https://github.com/botswana-harvard/edc-sync-files@develop#edc-sync-files
