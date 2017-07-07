@@ -4,6 +4,8 @@ from unittest.case import TestCase
 from django.apps import apps as django_apps
 from django.core.exceptions import MultipleObjectsReturned
 
+from edc_base.model_mixins import ListModelMixin
+
 from ..models import OutgoingTransaction
 from ..transaction import deserialize
 
@@ -21,7 +23,8 @@ class SyncTestHelper(TestCase):
         for app_label in app_labels:
             models = django_apps.get_app_config(app_label).get_models()
             for model in models:
-                if model._meta.label_lower not in exclude_models:
+                if (model._meta.label_lower not in exclude_models or
+                        not issubclass(model, ListModelMixin)):
                     self.assertTrue(
                         'natural_key' in dir(model),
                         'Model method \'natural_key\' missing. Got \'{}\'.'.format(
@@ -35,7 +38,8 @@ class SyncTestHelper(TestCase):
         for app_label in app_labels:
             models = django_apps.get_app_config(app_label).get_models()
             for model in models:
-                if model._meta.label_lower not in exclude_models:
+                if (model._meta.label_lower not in exclude_models or
+                        not issubclass(model, ListModelMixin)):
                     self.assertTrue(
                         'get_by_natural_key' in dir(model.objects),
                         f'Manager method \'get_by_natural_key\' missing. '
@@ -61,7 +65,7 @@ class SyncTestHelper(TestCase):
                         f'{e} See {obj._meta.label_lower}. Got {options}.')
 
     def sync_test_natural_keys_by_schedule(self, visits=None, visit_attr=None,
-                                           verbose=True, ):
+                                           verbose=True,):
         """A wrapper method for sync_test_natural_keys that uses
         the enrollment instance to test each CRF in each visit
         in the schedule linked to the enrollment model.
