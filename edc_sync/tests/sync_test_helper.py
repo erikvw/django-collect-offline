@@ -8,6 +8,7 @@ from edc_base.model_mixins import ListModelMixin
 
 from ..models import OutgoingTransaction
 from ..transaction import deserialize
+from edc_metadata.tests import CrfTestHelper
 
 
 class SyncTestHelperError(Exception):
@@ -15,6 +16,8 @@ class SyncTestHelperError(Exception):
 
 
 class SyncTestHelper(TestCase):
+
+    crf_helper = CrfTestHelper()
 
     def sync_test_natural_key_attr(self, *app_labels, exclude_models=None):
         """Asserts all models in given apps have a natural_key model method.
@@ -75,7 +78,7 @@ class SyncTestHelper(TestCase):
             if verbose:
                 print(visit.visit_code)
             complete_required_crfs.update({
-                visit.visit_code: self.complete_required_crfs(
+                visit.visit_code: self.crf_helper.complete_required_crfs(
                     visit_code=visit.visit_code,
                     visit=visit,
                     visit_attr=visit_attr,
