@@ -54,7 +54,7 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
             edc_sync_app_config=app_config,
             edc_sync_files_app_config=django_apps.get_app_config(
                 'edc_sync_files'),
-            edc_sync_role=self.role,
+            edc_sync_role=self.device_role,
             hostname=socket.gethostname(),
             ip_address=django_apps.get_app_config(
                 'edc_sync_files').remote_host,
