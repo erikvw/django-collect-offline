@@ -15,14 +15,14 @@
 	    	  edcSyncReady('{{ hosts|escapejs }}', '{{ user.username }}', '{{ api_token }}', "{% url 'edc_sync:home_url' %}");
 	      });
 	  </script>
-		<script type="text/javascript" charset="utf8" class="init">
+	  <script type="text/javascript" charset="utf8" class="init">
 		     $(document).ready( function() {
 		    	 edcSyncUSBReady('{{ ip_address|escapejs }}', '{{ user.username }}', '{{ api_token }}');
 		     });
-	 	</script>
+	  </script>
   {% elif edc_sync_role == 'Client'  %}
  	<script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/file_transfer.js" %}"></script>	
- 		<script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/middleman.js" %}"></script>	
+ 	<script type="text/javascript" charset="utf8" src="{% static "edc_sync/js/middleman.js" %}"></script>	
 	<script type="text/javascript" charset="utf8" class="init">
 	     $(document).ready( function() {
 	   	  edcSyncReady('{{ ip_address|escapejs }}', '{{ user.username }}', '{{ api_token }}');
@@ -47,13 +47,13 @@
                 <li><a href="#">{{ edc_sync_role|title }}: {{ hostname }} <span class="pull-right">{{ ip_address }}</span></a></li>
             </ul>
         </div>
-        {% if edc_sync_role == "NodeServer" %}
+        {% if edc_sync_role == 'NodeServer' %}
             {% include 'edc_sync/server.html' %}
         {% elif edc_sync_role == 'Client' %}
         	{% include 'edc_sync/client.html' %}
         {% else %}
             <div class="panel-heading">Resources</div>
-            <div class="alert alert-danger text-center">Edc-Sync role undefined. See AppConfig.</div>
+            <div class="alert alert-danger text-center">Edc-sync role undefined. See AppConfig.</div>
         {% endif%}
     </div>
 

@@ -1,3 +1,5 @@
-SERVER = 'Server'
 CLIENT = 'Client'
-NODESERVER = 'NodeServer'
+SERVER = 'Server'
+INSERT = 'I'
+UPDATE = 'U'
+DELETE = 'D'

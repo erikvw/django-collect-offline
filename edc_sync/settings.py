@@ -15,6 +15,10 @@ import sys
 
 from pathlib import PurePath
 
+from .loggers import LOGGING
+
+APP_NAME = 'edc_sync'
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -39,49 +43,18 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_revision',
+    'django_crypto_fields.apps.AppConfig',
+    'django_revision.apps.AppConfig',
     'rest_framework',
     'rest_framework.authtoken',
-    'django_crypto_fields.apps.AppConfig',
     'django_js_reverse',
     'simple_history',
-    'edc_appointment.apps.AppConfig',
     'edc_base.apps.AppConfig',
     'edc_device.apps.AppConfig',
-    'edc_identifier.apps.AppConfig',
     'edc_sync_files.apps.AppConfig',
-    # 'edc_lab.apps.AppConfig',
-    'edc_protocol.apps.AppConfig',
-    'edc_offstudy.apps.AppConfig',
-    'edc_visit_schedule.apps.AppConfig',
-    'edc_visit_tracking.apps.AppConfig',
-    'edc_example.apps.AppConfig',
     'edc_sync.apps.AppConfig',
 ]
 
-if 'test' in sys.argv:
-    # Ignore running migrations on unit tests -- speeds up tests.
-    MIGRATION_MODULES = {
-        "call_manager": None,
-        "edc_appointment": None,
-        "edc_code_lists": None,
-        "edc_configuration": None,
-        "edc_consent": None,
-        "edc_content_type_map": None,
-        "edc_data_manager": None,
-        "edc_death_report": None,
-        "edc_death_report": None,
-        "edc_identifier": None,
-        "edc_metadata": None,
-        "edc_registration": None,
-        "edc_sync": None,
-        "edc_visit_schedule": None,
-        "edc_visit_tracking": None,
-        "edc_lab": None,
-        "edc_sync_files": None,
-        "ba_namotswe": None,
-        'django_crypto_fields': None,
-    }
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
@@ -196,6 +169,7 @@ STATICFILES_FINDERS = (
 )
 
 
+GIT_DIR = str(PurePath(BASE_DIR).parent)
 KEY_PATH = os.path.join(str(PurePath(BASE_DIR).parent), 'crypto_fields')
 EDC_CRYPTO_FIELDS_CLIENT_USING = 'client'
 SHOW_CRYPTO_FORM_DATA = True
@@ -218,6 +192,18 @@ REST_FRAMEWORK = {
     #         'rest_framework.permissions.IsAuthenticated',
     #     )
 }
+LOGGING = LOGGING
 
 
-APP_LABEL = 'edc_sync'
+if 'test' in sys.argv:
+
+    class DisableMigrations:
+        def __contains__(self, item):
+            return True
+
+        def __getitem__(self, item):
+            return None
+
+    MIGRATION_MODULES = DisableMigrations()
+    PASSWORD_HASHERS = ('django.contrib.auth.hashers.MD5PasswordHasher', )
+    DEFAULT_FILE_STORAGE = 'inmemorystorage.InMemoryStorage'

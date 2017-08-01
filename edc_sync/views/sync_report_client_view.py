@@ -1,20 +1,18 @@
-import json
 import requests
 
 from datetime import datetime
 
 from django.urls import reverse
 from django.apps import apps as django_apps
-from django.http.response import HttpResponse
 from django.views.generic.base import TemplateView
 from requests.exceptions import ConnectionError, HTTPError
 
 from edc_base.view_mixins import EdcBaseViewMixin
-from edc_sync_files.models import UploadTransactionFile
+from edc_sync_files.models import ImportedTransactionFileHistory
 
 from ..admin import edc_sync_admin
 from ..edc_sync_view_mixin import EdcSyncViewMixin
-from ..models import ReceiveDevice, Client
+from ..models import Client
 
 
 class SyncReportClientView(
@@ -41,33 +39,32 @@ class SyncReportClientView(
         context.update({'report_data': report.report_data})
         if request.is_ajax():
             action = request.GET.get('action')
-            response_data = {}
+            # response_data = {}
             if action == 'receive':
-                ReceiveDevice.objects.create(
-                    hostname=request.GET.get('hostname'),
-                    received_by=request.user,
-                    sync_files=json.dumps(report.synced_files(
-                        request.GET.get('hostname'))))
-                return HttpResponse(
-                    json.dumps(response_data), content_type='application/json')
+                # TODO: see TransactionExporterViewMixin
+                raise TypeError()
+#                 response_data = dict(
+#                     confirm=True, hostname=sync_confirm.confirm_code)
+#                 return HttpResponse(
+# json.dumps(response_data), content_type='application/')
         return self.render_to_response(context)
 
 
 class Report:
     """ Displays number of pending transactions in the client and number of
-        times the machine have synced.
+    times the machine have synced.
     """
+    imported_history_model = ImportedTransactionFileHistory
 
     def __init__(self):
         self.report_data = []
-
         for client in Client.objects.all():
             try:
-                ReceiveDevice.objects.get(
+                self.history_model.objects.get(
                     hostname=client.hostname,
-                    received_date=datetime.today().date())
+                    confirmed_date=datetime.today().date())  # ????
                 received = True
-            except ReceiveDevice.DoesNotExist:
+            except self.history_model.DoesNotExist:
                 received = False
             try:
                 url = 'http://' + client.hostname + reverse(
@@ -83,16 +80,18 @@ class Report:
                 connected = True
             else:
                 pending = data.get('outgoingtransaction_count')
+                pending_files_no = data.get('pending_files_no')
             data = {'device': client.hostname,
                     'sync_times': self.synced_files(client.hostname),
                     'pending': pending,
                     'connected': connected,
                     'received': received,
+                    'pending_files_no': pending_files_no,
                     'comment': client.comment}
             self.report_data.append(data)
 
     def synced_files(self, hostname):
         producer = '{}-default'.format(hostname)
-        return [p for p in UploadTransactionFile.objects.filter(
+        return [p for p in self.imported_history_model.objects.filter(
             producer=producer,
             created__date=datetime.today().date()).order_by('-created')]

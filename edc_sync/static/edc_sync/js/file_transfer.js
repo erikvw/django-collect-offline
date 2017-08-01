@@ -24,8 +24,8 @@ function edcSyncReady(server, userName, apiToken) {
     	$( '#id-transfer-status-div' ).text( 'Connecting to the server. Please wait!' );
     	$( '#id-transfer-status-div' ).removeClass( 'alert-danger' ).addClass( 'alert-warning' );
     	$( '#id-in-progress-div-pending-files' ).hide();
-        $(this).prop("disabled",true);
-        dumpTransactionFile(server , userName);
+        $(this).prop("disabled", true);
+        exportBatch(server, userName);
     });
     
     $('#btn-send-again').click( function(e) {
@@ -40,7 +40,7 @@ function edcSyncReady(server, userName, apiToken) {
 
 
     $( '#btn-approve' ).click( function(e) {
-    	saveApproval();
+    	saveConfirmationCode();
     });
 
     $('#element').popover('toggle');
@@ -54,62 +54,50 @@ function File (filename, filesize, index) {
     this.active = false;
 }
 
-function dumpTransactionFile(server , userName) {
+function exportBatch(server , userName) {
 
 	var url = client + '/edc_sync/';
-	var ajDumpFile = $.ajax({
+	var ajExportBatch = $.ajax({
 		url: url,
 		type: 'GET',
 		dataType: 'json ',
 		processData: true,
-		data: {'action': 'dump_transaction_file'},
+		data: {'action': 'export_batch'},
 	});
 	
-	ajDumpFile.done( function ( data ) {
-		if(data.error == false) {
+	ajExportBatch.done( function ( data ) {
+		if( data.errmsg ) {
+			$( '#btn-sync').prop( "disabled", false );
+			$( '#id-transfer-status-div' ).show();
+			$( '#id-transfer-status-div' ).text( data.errmsg );
+			$( '#id-transfer-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-danger' );
+		} else {
 			$( '#id-transfer-div' ).hide();
 			$( '#id-in-progress-div' ).show();
 			$( '#id-transfer-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-success' );
-			$( '#id-transfer-status-div' ).text('Connected to the server.');
+			$( '#id-transfer-status-div' ).text('Ready to transfer files to server.');
 			//display files
-			$.each( data.transactionFiles, function(index,  file  ) {
+			$.each( data.pending_files, function( index,  filename  ) {
 				index = index + 1;
-				var txFile = new File(file.filename, file.filesize, index);
+				var txFile = new File(filename, filename, index);
 				fileObjs.push(txFile);
 				var spanFile = "<span class='glyphicon glyphicon-level-up'></span>";
-				$("<tr><td>" + index + "</td><td>" + spanFile +" "+ file.filename + "</td><td>" + file.filesize + "</td><td></td></tr>").appendTo("#id-file-table tbody");
+				$("<tr><td>" + index + "</td><td>" + spanFile +" "+ filename + "</td><td></td></tr>").appendTo("#id-file-table tbody");
 			});
-	
-			ajDumpFile.then( function() {
+
+			ajExportBatch.then( function() {
 					var firstFile = window.fileObjs[0];
-					$( "tr:eq( " +firstFile.index+ " )" ).find('td:eq(3)').html("<span class='fa fa-spinner fa-spin'></span>");
+					$( "tr:eq( " +firstFile.index+ " )" ).find('td:eq(2)').html("<span class='fa fa-spinner fa-spin'></span>");
 					sendTransactionFile(firstFile);
+					//
+					getFileTransferStatus(firstFile.filename);
 			});
-		} else {
-			$( '#btn-sync').prop( "disabled", false );
-			$( '#id-transfer-status-div' ).show();
-			var error = "";
-			$.each( data.messages, function(index,  message  ) {
-				try {
-					error = message.error.network;
-					if( error !== void 0) {
-						$( '#id-transfer-status-div' ).text('Network Error, unable to connect to the server. Got '+error);
-					}
-				} catch(err) { }
-				
-				try {
-					error = message.error.permission;
-					if( error !== void 0) {
-						$( '#id-transfer-status-div' ).text('An error occurred. Got, '+error);
-					}
-				} catch(err) { }
-			});
-			$( '#id-transfer-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-danger' );
+
 		}
 	});
 
-	ajDumpFile.fail( function( jqXHR, textStatus, errorThrown ) {
-		$( '#id-sync-status' ).removeClass( 'alert-success' ).addClass( 'alert-danger' );
+	ajExportBatch.fail( function( jqXHR, textStatus, errorThrown ) {
+		$( '#id-sync-status' ).rešoveClass( 'alert-success' ).addClass( 'alert-danger' );
 		$( '#id-sync-status' ).text( 'An error occurred. Got ' + errorThrown);
 	});
 }
@@ -125,96 +113,77 @@ function sendTransactionFile(file) {
 		dataType: 'json ',
 		processData: true,
 		data: {
-			'action': 'transfer_transaction_file',
+			'action': 'send_files',
 			'filename': file.filename,
 		}
 	});
 	
 	ajSendFile.done( function( data ) {
-		if(data.error == false) {
-			updateIcon(file.index, 'success');
-			$.each(window.fileObjs, function(index, fileObj) {
-				if(fileObj.index == file.index ) {
-					fileObj.isSend  = true;
-					window.fileObjs[index] = fileObj;
-					return false;
-				}
-			});	
-			//
-			var tmpObj = null;
-			$.each(window.fileObjs, function(index, fileObj) { 
-				if(fileObj.isSend == false ){
-					tmpObj = fileObj;
-					return false;
-				}
-			});
-			if (tmpObj != null) {
-				sendTransactionFile(tmpObj); //recurse to send another file
-			} else {
-				$( "#btn-progress" ).click();
-				$( '#btn-sync').prop( "disabled", false );
-				$( '#progress-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-success' );
-				$( '#progress-status-div' ).text('Completed.');
-				$( '#btn-approve' ).removeClass( 'btn-default' ).addClass( 'btn-warning' );
-				$.each(window.fileObjs, function( index, fileObj ) {
-					if(fileObj.isSend ==  true) {
-						index = index + 1;
-						//display files
-						var spanFile = "<span class='glyphicon glyphicon-level-up'></span>";
-						var spanOK = "<span class='glyphicon glyphicon-ok'></span>";
-						$("<tr><td>" + index + "</td><td> " + spanFile + " "+fileObj.filename + ", "+ fileObj.filesize+"</td><td>"+spanOK+"</td></tr>").appendTo("#id-file-table-confirmation tbody");
-					}
-					
-				});
-			}
-		} else {
-			/*
-				Display the error message.
-			*/
-
-			updateIcon(file.index, 'error');
-			var error = "";
-			$.each( data.messages, function(index,  message  ) {
-				try {
-					error = message.error.permission;
-				} catch(err) {
-					
-				}
-			});
-			$( '#progress-status-div' ).text('An error occured. Got ' + error);
+		if( data.errmsg ) {
+			// Display error message
+			updateIcon( file.index, 'error' );
+			$( '#progress-status-div' ).text( 'An error occured. Got ' + data.errmsg );
 			$( '#progress-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-danger' );
+		} else {
+			$( "#btn-progress" ).click();
+			$( '#btn-sync').prop( "disabled", false );
+			$( '#progress-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-success' );
+			$( '#progress-status-div' ).text('Completed.');
+			$( '#btn-approve' ).removeClass( 'btn-default' ).addClass( 'btn-warning' );
+			$.each(window.fileObjs, function( index, fileObj ) {
+					index = index + 1;
+					//display files
+					var spanFile = "<span class='glyphicon glyphicon-level-up'></span>";
+					var spanOK = "<span class='glyphicon glyphicon-ok'></span>";
+					$("<tr><td>" + index + "</td><td> " + spanFile + " "+ fileObj.filename + "</td><td>"+spanOK+"</td></tr>").appendTo("#id-file-table-confirmation tbody");
+			});
 		}
 	});
 
-	ajSendFile.then( function() {
-		monitorFileSending( file );
-	});
-	
 	ajSendFile.fail( function( jqXHR, textStatus, errorThrown ) {
 		updateIcon(file.index, 'error');
 		$( '#progress-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-danger' );
 		$( '#progress-status-div' ).text('An error occurred. Got ' + errorThrown + '. Status '+ jqXHR.status);
-//		$( '#id-sync-status' ).removeClass( 'alert-success' ).addClass( 'alert-danger' );
-//		$( '#id-sync-status' ).text( 'An error occurred. Got ' + errorThrown);
 	});
 }
 
-function monitorFileSending( file ) {
+function getFileTransferStatus( fileName ) {
+	//
 	var url = client + '/edc_sync/';
-	var ajTransferingFileProgress = $.ajax({
+	var isTransferred = $.ajax({
 		url: url,
 		type: 'GET',
-		dataType: 'json ',
+		dataType: 'json',
 		processData: true,
-		data: { 'action': 'get_file_transfer_progress' },
+		data: { 'action': 'pending_files' },
+	});
+	
+	isTransferred.done(function( data ) {
+		if (data.pending_files.length > 0 ) {
+			$.each( data.pending_files, function(index,  pendingFile  ) {
+				if (pendingFileName == fileName ) {
+					getFileTransferStatus( fileName ); // recurse, while not send.
+				} else {
+					getNextPendingFile(); // get Next pending file 
+					return false;
+				}
+			});
+		} else {
+			alert('all files transferred.');
+		}
 	});
 
-	ajTransferingFileProgress.done( function( data ) {
-		//
-		$( "tr:eq( " +file.index+ " )" ).find('td:eq(3)').html("<span>100%. sent.</span>");
+	isTransferred.fail(function(){
+		alert("Failed to get file transfer status.");
 	});
-	ajTransferingFileProgress.fail(function(jqXHR, textStatus, errorThrown) {
-		console.log(jqXHR.status, textStatus, errorThrown);
+}
+
+function getNextPendingFile(){
+	$.each(window.fileObjs, function( index, fileObj ) {
+		if (fileObj.isSend == false){
+			getFileTransferStatus(fileObj.filename);
+			return false;
+		}
 	});
 }
 
@@ -230,54 +199,57 @@ function updateFromHost( host ) {
 		if ( data != null ) {
 			$( '#id-pending-transactions').text(' ' + data.outgoingtransaction_count);
 			$( '#id-pending-transactions-middleman').text(' '+ data.outgoingtransaction_count);
-			if( data.outgoingtransaction_count == 0 ) {
+			if( data.outgoingtransaction_count > 0 ) {
+				$( '#btn-sync' ).removeAttr( 'disabled' );
+				$( '#btn-sync').removeClass( 'btn-default' ).addClass( 'btn-warning' );
+			} else {
 				$( '#btn-sync' ).removeClass( 'btn-warning' ).addClass( 'btn-default' );
-				$( '#btn-sync-middleman' ).removeClass( 'btn-warning' ).addClass( 'btn-default' );
-			} 
-		}
+			}
+		} 
 	});
 }
 
 function updateIcon( index, status ) {
 
 	if ( status == 'success' ) {
-		$( "tr:eq( " +index+ " )" ).find('td:eq(3)').html("<span class='glyphicon glyphicon-saved alert-success'></span>");
+		$( "tr:eq( " +index+ " )" ).find('td:eq(2)').html("<span class='glyphicon glyphicon-saved alert-success'></span>");
 	} else if( status=='error' ) {
-		$( "tr:eq( " +index+ " )" ).find('td:eq(3)').html("<span class='glyphicon glyphicon-remove alert-danger'></span>");
+		$( "tr:eq( " +index+ " )" ).find('td:eq(2)').html("<span class='glyphicon glyphicon-remove alert-danger'></span>");
 	}
 }
 
-function saveApproval() {
+function saveConfirmationCode() {
+	//
 	var url = client + '/edc_sync/';
-	var files = [];
-	
-	$.each(window.fileObjs, function( index, fileObj ) {
-		if(fileObj.isSend ==  true) {
-			files.push(fileObj.filename)
-		}
+	var ajIsFileTransfferedAll = $.ajax({
+		url: url,
+		type: 'GET',
+		dataType: 'json',
+		processData: true,
+		data: { 'action': 'pending_files' },
 	});
 
-	if ( files.length > 0 ) {
-		var ajSaveApproval = $.ajax({
-			url: url,
-			type: 'GET',
-			dataType: 'json',
-			processData: true,
-			data:{'files': files.toString(),
-				  'action': 'approve_files'}
-		});
-	
-		ajSaveApproval.fail(function(jqXHR, textStatus, errorThrown) {
-			$( '#progress-status-div' ).text('An error occured. Got ' + error);
-			$( '#progress-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-danger' );
-			console.log(jqXHR.status, textStatus, errorThrown);
-			$('#progressModel').modal('hide');
-		});
-		
-		ajSaveApproval.done( function ( data ) {
-			window.location.href = url;
-		});
-	}
+	ajIsFileTransfferedAll.done( function( data ) {
+		if (data.pending_files.length > 0) {
+		 	return false;
+		} else {
+			var ajSaveConfirmation = $.ajax({
+				url: url,
+				type: 'GET',
+				dataType: 'json',
+				processData: true,
+				data:{'action': 'confirm_batch'}
+			});
+			//
+			ajSaveConfirmation.fail(function(jqXHR, textStatus, errorThrown) {
+				alert('Confirmation Error: '+ errorThrown);
+			});
+			//
+			ajSaveConfirmation.done( function ( data ) {
+				window.location.href = url;
+			});
+		}
+	});
 }
 
 
@@ -293,47 +265,35 @@ function processPendingFiles() {
 	
 	ajPendingFiles.done( function( data ) {
 		//display files
-		if(data.error == false) {
+		if( data.errmsg ) {
+			$( '#btn-send-again').prop( "disabled", false );
+			$( '#id-transfer-status-div' ).show();
+			try {
+				$( '#id-transfer-status-div' ).text(data.errmsg);
+			} catch(err) { }
+			$( '#id-transfer-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-danger' );
+		} else {
 			$( '#id-transfer-div' ).hide();
 			$( '#id-in-progress-div' ).show();
 			$( '#id-transfer-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-success' );
-			$( '#id-transfer-status-div' ).text('Connected to the server.');
+			$( '#id-transfer-status-div' ).text('Ready to transfer files to server.');
 			$( '#id-in-progress-div-pending-files' ).hide();
 
-			$.each( data.pendingFiles, function(index,  file  ) {
+			$.each( data.pending_files, function(index,  filename  ) {
 				index = index + 1;
-				var txFile = new File(file.filename, file.filesize, index);
-				fileObjs.push(txFile);
+				var transactionFile = new File(filename, filename, index);
+				fileObjs.push(transactionFile);
 				var spanFile = "<span class='glyphicon glyphicon-level-up'></span>";
-				$("<tr><td>" + index + "</td><td>" + spanFile +" "+ file.filename + "</td><td>" + file.filesize + "</td><td></td></tr>").appendTo("#id-file-table tbody");
+				$("<tr><td>" + index + "</td><td>" + spanFile +" "+ filename + "</td><td></td></tr>").appendTo("#id-file-table tbody");
 			});
 
-		} else {
-
-			$( '#btn-send-again').prop( "disabled", false );
-			$( '#id-transfer-status-div' ).show();
-			var error = "";
-			$.each( data.messages, function(index,  message  ) {
-				try {
-					error = message.error.network;
-					$( '#id-transfer-status-div' ).text('Network Error, unable to connect to the server. Got '+error);
-				} catch(err) { }
-				
-				try {
-					error = message.error.permission;
-					if( error !== void 0){
-						$( '#id-transfer-status-div' ).text('An error occurred. Got, '+error);
-					}
-				} catch(err) { }
-			});
-			$( '#id-transfer-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-danger' );
 		}
 		
 	});
 	
 	ajPendingFiles.then( function( data ) {
 		var firstFile = window.fileObjs[0];
-		$( "tr:eq( " +firstFile.index+ " )" ).find('td:eq(3)').html("<span class='fa fa-spinner fa-spin'></span>");
+		$( "tr:eq( " +firstFile.index+ " )" ).find('td:eq(2)').html("<span class='fa fa-spinner fa-spin'></span>");
 		sendTransactionFile(firstFile);
 	});
 	

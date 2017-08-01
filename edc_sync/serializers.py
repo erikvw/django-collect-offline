@@ -64,3 +64,9 @@ class OutgoingTransactionSerializer(BaseTransactionSerializer):
 
     is_consumed_middleman = serializers.BooleanField(
         default=False)
+
+
+# class SyncConfirmationSerializer(
+#         BaseModelSerializerMixin, serializers.Serializer):
+#
+#     model_class = SyncConfirmation

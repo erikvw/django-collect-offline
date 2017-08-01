@@ -1,14 +1,14 @@
 from django.conf.urls import url, include
 from django_js_reverse.views import urls_js
-
 from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.routers import DefaultRouter
 
-from edc_sync.views import (
-    OutgoingTransactionViewSet, IncomingTransactionViewSet, DumpToUsbView,
-    HomeView, RenderView, TransactionCountView, SyncReportView, SyncReportClientView)
 from edc_constants.constants import UUID_PATTERN
-from edc_sync.admin import edc_sync_admin
+
+from .admin import edc_sync_admin
+from .views import DumpToUsbView, HomeView, RenderView
+from .views import OutgoingTransactionViewSet, IncomingTransactionViewSet
+from .views import TransactionCountView, SyncReportView
 
 router = DefaultRouter()
 router.register(r'outgoingtransaction', OutgoingTransactionViewSet)
@@ -24,8 +24,6 @@ urlpatterns = [
         DumpToUsbView.as_view(), name='dump-to-usb'),
     url(r'^sync-report/$',
         SyncReportView.as_view(), name='sync-report'),
-    url(r'^sync-report-client/$',
-        SyncReportClientView.as_view(), name='sync-report-client'),
     url(r'^api/', include(router.urls)),
     url(r'^api-token-auth/', obtain_auth_token),
     url(r'render/(?P<model_name>\w+)/(?P<pk>{})/'.format(UUID_PATTERN.pattern),

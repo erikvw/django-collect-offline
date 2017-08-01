@@ -4,6 +4,7 @@ from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 
 from .site_sync_models import site_sync_models
+from edc_sync.site_sync_models import SiteSyncModelNotRegistered
 
 
 @receiver(post_save, sender=Token)
@@ -21,41 +22,44 @@ def serialize_m2m_on_save(sender, action, instance, using, **kwargs):
     if action == 'post_add':
         try:
             sync_model = site_sync_models.get_as_sync_model(instance)
+        except SiteSyncModelNotRegistered:
+            pass
+        else:
             sync_model.to_outgoing_transaction(using, created=True)
-        except AttributeError as e:
-            if 'to_outgoing_transaction' not in str(e):
-                raise AttributeError(str(e))
 
 
 @receiver(post_save, weak=False, dispatch_uid='serialize_on_save')
 def serialize_on_save(sender, instance, raw, created, using, **kwargs):
-    """ Serialize the model instance as an OutgoingTransaction."""
+    """ Serialize the model instance as an OutgoingTransaction.
+    """
     try:
         sync_model = site_sync_models.get_as_sync_model(instance)
+    except SiteSyncModelNotRegistered:
+        pass
+    else:
         sync_model.to_outgoing_transaction(using, created=created)
-    except AttributeError as e:
-        if 'to_outgoing_transaction' not in str(e):
-            raise AttributeError(str(e))
 
 
 @receiver(post_delete, weak=False, dispatch_uid="serialize_on_post_delete")
 def serialize_on_post_delete(sender, instance, using, **kwargs):
-    """Creates a serialized OutgoingTransaction when a model instance is deleted."""
+    """Creates a serialized OutgoingTransaction when
+    a model instance is deleted.
+    """
     try:
         sync_model = site_sync_models.get_as_sync_model(instance)
+    except SiteSyncModelNotRegistered:
+        pass
+    else:
         sync_model.to_outgoing_transaction(using, created=False, deleted=True)
-    except AttributeError as e:
-        if 'to_outgoing_transaction' not in str(e):
-            raise AttributeError(str(e))
 
 
-@receiver(post_save, weak=False, dispatch_uid="deserialize_to_inspector_on_post_save")
-def to_inspector_on_post_save(sender, instance, raw, created, using, **kwargs):
-    """Middleman"""
-    try:
-        sync_model = site_sync_models.get_as_sync_model(instance)
-        sync_model.to_inspector_on_post_save(
-            instance, raw, created, using, **kwargs)
-    except AttributeError as e:
-        if 'to_inspector_on_post_save' not in str(e):
-            raise AttributeError(str(e))
+# @receiver(post_save, weak=False, dispatch_uid="deserialize_to_inspector_on_post_save")
+# def to_inspector_on_post_save(sender, instance, raw, created, using, **kwargs):
+#     """Middleman"""
+#     try:
+#         sync_model = site_sync_models.get_as_sync_model(instance)
+#     except SiteSyncModelNotRegistered:
+#         pass
+#     else:
+#         sync_model.to_inspector_on_post_save(
+#             instance, raw, created, using, **kwargs)

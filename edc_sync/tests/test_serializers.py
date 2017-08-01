@@ -1,6 +1,4 @@
-import json
-
-from django.test.testcases import TestCase
+from django.test import TestCase, tag
 from django.utils.six import BytesIO
 from django_crypto_fields.constants import LOCAL_MODE
 from django_crypto_fields.cryptor import Cryptor
@@ -8,11 +6,11 @@ from django_crypto_fields.cryptor import Cryptor
 from rest_framework.parsers import JSONParser
 from rest_framework.renderers import JSONRenderer
 
-from edc_sync.models import OutgoingTransaction, IncomingTransaction
-from edc_sync.serializers import OutgoingTransactionSerializer
-
-from edc_example.models import (
-    TestModel, ComplexTestModel, Fk, M2m, TestEncryptedModel, BadTestModel, AnotherBadTestModel)
+from ..models import OutgoingTransaction
+from ..serializers import OutgoingTransactionSerializer
+from .models import TestModel
+from ..site_sync_models import site_sync_models
+from edc_sync.sync_model import SyncModel
 
 
 class TestSerializers(TestCase):
@@ -21,6 +19,10 @@ class TestSerializers(TestCase):
 
     def setUp(self):
         TestModel.objects.create(f1='give any one species too much rope ...')
+        site_sync_models.registry = {}
+        site_sync_models.loaded = False
+        sync_models = ['edc_sync.testmodel']
+        site_sync_models.register(sync_models, sync_model_cls=SyncModel)
 
     def test_outgoingtransaction_serializer_inits(self):
         obj = OutgoingTransaction.objects.last()
@@ -63,8 +65,11 @@ class TestSerializers(TestCase):
         serializer = OutgoingTransactionSerializer(data=data)
         serializer.is_valid()
         cryptor = Cryptor()
-        self.assertTrue(cryptor.aes_decrypt(serializer.validated_data['tx'], LOCAL_MODE))
-        value = cryptor.aes_decrypt(serializer.validated_data['tx'], LOCAL_MODE).encode()
+        self.assertTrue(cryptor.aes_decrypt(
+            serializer.validated_data['tx'], LOCAL_MODE))
+        value = cryptor.aes_decrypt(
+            serializer.validated_data['tx'], LOCAL_MODE).encode()
         stream = BytesIO(value)
         json_data = JSONParser().parse(stream)
-        self.assertTrue(json_data[0]['fields']['f1'], 'give any one species too much rope ...')
+        self.assertTrue(json_data[0]['fields']['f1'],
+                        'give any one species too much rope ...')
