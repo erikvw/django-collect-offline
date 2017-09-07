@@ -43,6 +43,10 @@ function edcSyncReady(server, userName, apiToken) {
     	saveConfirmationCode();
     });
 
+    $( '#id-tx-spinner' ).click(function(){
+    	window.location.reload(true);
+    });
+
     $('#element').popover('toggle');
 }
 
@@ -55,7 +59,6 @@ function File (filename, filesize, index) {
 }
 
 function exportBatch(server , userName) {
-
 	var url = client + '/edc_sync/';
 	var ajExportBatch = $.ajax({
 		url: url,
@@ -88,9 +91,7 @@ function exportBatch(server , userName) {
 			ajExportBatch.then( function() {
 					var firstFile = window.fileObjs[0];
 					$( "tr:eq( " +firstFile.index+ " )" ).find('td:eq(2)').html("<span class='fa fa-spinner fa-spin'></span>");
-					sendTransactionFile(firstFile);
-					//
-					getFileTransferStatus(firstFile.filename);
+					sendTransactionFile(firstFile); // Attempt to send all files.
 			});
 
 		}
@@ -161,7 +162,7 @@ function getFileTransferStatus( fileName ) {
 	isTransferred.done(function( data ) {
 		if (data.pending_files.length > 0 ) {
 			$.each( data.pending_files, function(index,  pendingFile  ) {
-				if (pendingFileName == fileName ) {
+				if (pendingFile == fileName ) {
 					getFileTransferStatus( fileName ); // recurse, while not send.
 				} else {
 					getNextPendingFile(); // get Next pending file 
@@ -169,16 +170,16 @@ function getFileTransferStatus( fileName ) {
 				}
 			});
 		} else {
-			alert('all files transferred.');
+			//alert('all files transferred.');
 		}
 	});
 
-	isTransferred.fail(function(){
-		alert("Failed to get file transfer status.");
+	isTransferred.fail(function( jqXHR, textStatus, errorThrown){
+		alert("Failed to get file transfer status."+ errorThrown);
 	});
 }
 
-function getNextPendingFile(){
+function getNextPendingFile() {
 	$.each(window.fileObjs, function( index, fileObj ) {
 		if (fileObj.isSend == false){
 			getFileTransferStatus(fileObj.filename);
@@ -220,36 +221,22 @@ function updateIcon( index, status ) {
 
 function saveConfirmationCode() {
 	//
-	var url = client + '/edc_sync/';
-	var ajIsFileTransfferedAll = $.ajax({
-		url: url,
-		type: 'GET',
-		dataType: 'json',
-		processData: true,
-		data: { 'action': 'pending_files' },
-	});
-
-	ajIsFileTransfferedAll.done( function( data ) {
-		if (data.pending_files.length > 0) {
-		 	return false;
-		} else {
-			var ajSaveConfirmation = $.ajax({
-				url: url,
-				type: 'GET',
-				dataType: 'json',
-				processData: true,
-				data:{'action': 'confirm_batch'}
-			});
-			//
-			ajSaveConfirmation.fail(function(jqXHR, textStatus, errorThrown) {
-				alert('Confirmation Error: '+ errorThrown);
-			});
-			//
-			ajSaveConfirmation.done( function ( data ) {
-				window.location.href = url;
-			});
-		}
-	});
+		var url = client + '/edc_sync/';
+		var ajSaveConfirmation = $.ajax({
+			url: url,
+			type: 'GET',
+			dataType: 'json',
+			processData: true,
+			data:{'action': 'confirm_batch'}
+		});
+		
+		ajSaveConfirmation.fail(function() {
+			alert('Confirmation Error: '+ errorThrown);
+		});
+		
+		ajSaveConfirmation.done( function ( data ) {
+			window.location.reload(true);
+		});
 }
 
 
@@ -293,7 +280,7 @@ function processPendingFiles() {
 	
 	ajPendingFiles.then( function( data ) {
 		var firstFile = window.fileObjs[0];
-		$( "tr:eq( " +firstFile.index+ " )" ).find('td:eq(2)').html("<span class='fa fa-spinner fa-spin'></span>");
+		$( "tr:eq( " + firstFile.index + " )" ).find('td:eq(2)').html("<span class='fa fa-spinner fa-spin'></span>");
 		sendTransactionFile(firstFile);
 	});
 	
