@@ -3,6 +3,7 @@ import os
 
 from django.core.serializers.base import DeserializationError
 from django.test import TestCase, tag
+from datetime import datetime
 from faker import Faker
 
 from edc_device.constants import NODE_SERVER
@@ -10,13 +11,16 @@ from edc_sync_files.transaction import TransactionImporter, TransactionExporter
 
 from ..transaction import TransactionDeserializer, TransactionDeserializerError
 from ..models import OutgoingTransaction, IncomingTransaction
-from .models import TestModel, TestModelWithFkProtected, TestModelWithM2m, M2m
+from .models import (
+    TestModel, TestModelWithFkProtected, TestModelWithM2m, M2m,
+    TestModelDateParse)
 from ..sync_model import SyncModel
 from ..site_sync_models import site_sync_models
 
 fake = Faker()
 
 
+@tag('TestDeserializer1')
 class TestDeserializer1(TestCase):
 
     multi_db = True
@@ -27,7 +31,8 @@ class TestDeserializer1(TestCase):
         sync_models = [
             'edc_sync.testmodel',
             'edc_sync.testmodelwithfkprotected',
-            'edc_sync.testmodelwithm2m']
+            'edc_sync.testmodelwithm2m',
+            'edc_sync.testmodelhook', ]
         site_sync_models.register(sync_models, sync_model_cls=SyncModel)
 
         self.export_path = os.path.join(tempfile.gettempdir(), 'export')
@@ -301,3 +306,49 @@ class TestDeserializer2(TestCase):
             DeserializationError,
             tx_deserializer.deserialize_transactions,
             transactions=batch.saved_transactions)
+
+
+class TestDeserializer3(TestCase):
+
+    multi_db = True
+
+    def setUp(self):
+        site_sync_models.registry = {}
+        site_sync_models.loaded = False
+        sync_models = [
+            'edc_sync.testmodeldateparse', ]
+        site_sync_models.register(sync_models, sync_model_cls=SyncModel)
+        self.export_path = os.path.join(tempfile.gettempdir(), 'export')
+        if not os.path.exists(self.export_path):
+            os.mkdir(self.export_path)
+        self.import_path = self.export_path
+        IncomingTransaction.objects.all().delete()
+        self.hook_obj = TestModelDateParse.objects.using('client').create(
+            f1='hook1', scheduled_appt_date=datetime.today())
+        tx_exporter = TransactionExporter(
+            export_path=self.export_path,
+            using='client')
+        batch = tx_exporter.export_batch()
+        tx_importer = TransactionImporter(import_path=self.import_path)
+        self.batch = tx_importer.import_batch(filename=batch.filename)
+        self.override_fields = [
+            {'edc_sync.testmodeldateparse': ['scheduled_appt_date']},
+            {'edc_sync.historicaltestmodeldateparse': ['scheduled_appt_date']}]
+
+    @tag('hook_func')
+    def test_deserilized_object_hook_func1(self):
+        tx_deserializer = TransactionDeserializer(override_role=NODE_SERVER)
+        tx_deserializer.deserialize_transactions(
+            transactions=self.batch.saved_transactions,
+            override_sync_data_values=self.override_fields)
+        self.assertEqual(TestModelDateParse.objects.all().count(), 1)
+
+    @tag('hook_func')
+    def test_deserilized_object_hook_func2(self):
+        TestModelDateParse.objects.using('client').create(
+            f1='hook2', scheduled_appt_date=None)
+        tx_deserializer = TransactionDeserializer(override_role=NODE_SERVER)
+        tx_deserializer.deserialize_transactions(
+            transactions=self.batch.saved_transactions,
+            override_sync_data_values=self.override_fields)
+        self.assertEqual(TestModelDateParse.objects.all().count(), 1)
