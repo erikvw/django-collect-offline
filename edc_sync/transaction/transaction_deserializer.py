@@ -8,6 +8,7 @@ from edc_device.constants import NODE_SERVER, CENTRAL_SERVER
 
 from ..constants import DELETE
 from .deserialize import deserialize
+from .parser import date_parse_value
 
 
 class TransactionDeserializerError(Exception):
@@ -47,13 +48,16 @@ class TransactionDeserializer:
                     f'Got override_role={override_role}, device={app_config.device_id}, '
                     f'device_role={app_config.device_role}.')
 
-    def deserialize_transactions(self, transactions=None, deserialize_only=None):
+    def deserialize_transactions(
+            self, transactions=None, deserialize_only=None,
+            override_sync_data_values=None):
         """Deserializes the encrypted serialized model instances, tx, in a queryset
         of transactions.
 
         Note: each transaction instance contains encrypted JSON text
         that represents just ONE model instance.
         """
+
         if not self.allow_self and transactions.filter(
                 producer=socket.gethostname()).exists():
             raise TransactionDeserializerError(
@@ -61,6 +65,8 @@ class TransactionDeserializer:
                 f'allow_self=False, hostname={socket.gethostname()}')
         for transaction in transactions:
             json_text = self.aes_decrypt(cipher_text=transaction.tx)
+            json_text = date_parse_value(
+                json_text, override_sync_data_values=override_sync_data_values)
             deserialized = next(self.deserialize(json_text=json_text))
             if not deserialize_only:
                 if transaction.action == DELETE:

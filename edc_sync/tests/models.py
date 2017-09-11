@@ -28,7 +28,23 @@ class TestModel(BaseUuidModel):
     history = HistoricalRecords()
 
     def natural_key(self):
-        return (self.f1, )
+        return (self.f1,)
+
+
+class TestModelDateParse(BaseUuidModel):
+
+    f1 = models.CharField(max_length=10, unique=True)
+
+    scheduled_appt_date = models.DateField(
+        blank=True,
+        null=True)
+
+    objects = TestModelManager()
+
+    history = HistoricalRecords()
+
+    def natural_key(self):
+        return (self.f1,)
 
 
 class BadTestModel(BaseUuidModel):
@@ -49,7 +65,7 @@ class AnotherBadTestModel(BaseUuidModel):
     objects = models.Manager()
 
     def natural_key(self):
-        return (self.f1, )
+        return (self.f1,)
 
 
 class YetAnotherBadTestModel(BaseUuidModel):
@@ -63,7 +79,7 @@ class YetAnotherBadTestModel(BaseUuidModel):
     history = BadHistoricalRecords()  # missing UUID handling
 
     def natural_key(self):
-        return (self.f1, )
+        return (self.f1,)
 
 
 class TestSyncModelNoHistoryManager(BaseUuidModel):
@@ -75,7 +91,7 @@ class TestSyncModelNoHistoryManager(BaseUuidModel):
     objects = TestModelManager()
 
     def natural_key(self):
-        return (self.f1, )
+        return (self.f1,)
 
 
 class TestSyncModelNoUuid(BaseModel):
@@ -87,7 +103,7 @@ class TestSyncModelNoUuid(BaseModel):
     objects = TestModelManager()
 
     def natural_key(self):
-        return (self.f1, )
+        return (self.f1,)
 
 
 class M2m(ListModelMixin, BaseUuidModel):
@@ -106,7 +122,7 @@ class TestModelWithFkProtected(BaseUuidModel):
     history = HistoricalRecords()
 
     def natural_key(self):
-        return (self.f1, )
+        return (self.f1,)
 
 
 class TestModelWithM2m(BaseUuidModel):
@@ -120,4 +136,4 @@ class TestModelWithM2m(BaseUuidModel):
     history = HistoricalRecords()
 
     def natural_key(self):
-        return (self.f1, )
+        return (self.f1,)
