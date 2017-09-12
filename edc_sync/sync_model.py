@@ -40,9 +40,9 @@ class SyncModel:
         except AttributeError:
             self.is_serialized = True
         self.instance = instance
+        self.has_sync_historical_manager_or_raise()
         self.has_natural_key_or_raise()
         self.has_get_by_natural_key_or_raise()
-        self.has_sync_historical_manager_or_raise()
         self.has_uuid_primary_key_or_raise()
 
     def __repr__(self):
@@ -68,23 +68,27 @@ class SyncModel:
                 'is missing manager method get_by_natural_key ')
 
     def has_sync_historical_manager_or_raise(self):
+        """Raises an exception if model uses a history manager and
+        historical model history_id is not a UUIDField.
+
+        Note: expected to use edc_base.HistoricalRecords instead of
+        simple_history.HistoricalRecords.
+        """
         try:
-            # if using history manager, historical model history_id
-            # (primary_key) must be UUIDField.
-            historical_model = self.instance.__class__.history.model
-            field = [
-                field for field in historical_model._meta.fields
-                if field.name == 'history_id'][0]
-            if not isinstance(field, UUIDField):
-                raise SyncHistoricalManagerError(
-                    'Field \'history_id\' of historical model \'{}.{}\' must be an UUIDfield. '
-                    'For history = HistoricalRecords() use edc_base.HistoricalRecords instead of '
-                    'simple_history.HistoricalRecords(). '
-                    'See \'{}.{}\'.'.format(
-                        historical_model._meta.app_label, historical_model._meta.model_name,
-                        self.instance._meta.app_label, self.instance._meta.model_name))
+            model = self.instance.__class__.history.model
         except AttributeError:
-            pass
+            model = self.instance.__class__
+        field = [
+            field for field in model._meta.fields
+            if field.name == 'history_id']
+        if field and not isinstance(field[0], UUIDField):
+            raise SyncHistoricalManagerError(
+                f'Field \'history_id\' of historical model '
+                f'\'{model._meta.app_label}.{model._meta.model_name}\' '
+                'must be an UUIDfield. '
+                'For history = HistoricalRecords() use edc_base.HistoricalRecords instead of '
+                'simple_history.HistoricalRecords(). '
+                f'See \'{self.instance._meta.app_label}.{self.instance._meta.model_name}\'.')
 
     def has_uuid_primary_key_or_raise(self):
         if self.primary_key_field.get_internal_type() != 'UUIDField':

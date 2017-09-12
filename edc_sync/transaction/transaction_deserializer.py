@@ -8,7 +8,6 @@ from edc_device.constants import NODE_SERVER, CENTRAL_SERVER
 
 from ..constants import DELETE
 from .deserialize import deserialize
-from .parser import date_parse_value
 
 
 class TransactionDeserializerError(Exception):
@@ -48,9 +47,7 @@ class TransactionDeserializer:
                     f'Got override_role={override_role}, device={app_config.device_id}, '
                     f'device_role={app_config.device_role}.')
 
-    def deserialize_transactions(
-            self, transactions=None, deserialize_only=None,
-            override_sync_data_values=None):
+    def deserialize_transactions(self, transactions=None, deserialize_only=None):
         """Deserializes the encrypted serialized model instances, tx, in a queryset
         of transactions.
 
@@ -65,8 +62,7 @@ class TransactionDeserializer:
                 f'allow_self=False, hostname={socket.gethostname()}')
         for transaction in transactions:
             json_text = self.aes_decrypt(cipher_text=transaction.tx)
-            json_text = date_parse_value(
-                json_text, override_sync_data_values=override_sync_data_values)
+            json_text = self.custom_parser(json_text)
             deserialized = next(self.deserialize(json_text=json_text))
             if not deserialize_only:
                 if transaction.action == DELETE:
@@ -77,3 +73,11 @@ class TransactionDeserializer:
                         m2m_data=deserialized.m2m_data)
                 transaction.is_consumed = True
                 transaction.save()
+
+    def custom_parser(self, json_text=None):
+        """Runs json_text thru custom parsers.
+        """
+        app_config = django_apps.get_app_config('edc_sync')
+        for json_parser in app_config.custom_json_parsers:
+            json_text = json_parser(json_text)
+        return json_text

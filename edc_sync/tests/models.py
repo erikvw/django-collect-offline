@@ -7,6 +7,7 @@ from django.db.models.deletion import PROTECT
 from edc_base.model_managers import HistoricalRecords
 from edc_base.model_mixins import BaseUuidModel, BaseModel
 from edc_base.model_mixins.list_model_mixin import ListModelMixin
+from edc_base.utils import get_utcnow
 
 
 class TestModelManager(models.Manager):
@@ -31,17 +32,19 @@ class TestModel(BaseUuidModel):
         return (self.f1,)
 
 
-class TestModelDateParse(BaseUuidModel):
+class TestModelDates(BaseUuidModel):
 
     f1 = models.CharField(max_length=10, unique=True)
 
-    scheduled_appt_date = models.DateField(
+    f2 = models.DateField(
         blank=True,
         null=True)
 
-    objects = TestModelManager()
+    f3 = models.DateTimeField(
+        blank=True,
+        default=get_utcnow)
 
-    history = HistoricalRecords()
+    objects = TestModelManager()
 
     def natural_key(self):
         return (self.f1,)
