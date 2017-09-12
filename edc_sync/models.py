@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 from edc_base.model_mixins import BaseUuidModel
@@ -110,3 +111,7 @@ class History(BaseUuidModel):
         verbose_name = 'Sent History'
         verbose_name_plural = 'Sent History'
         unique_together = (('filename', 'hostname'),)
+
+
+if 'edc_sync' in settings.APP_NAME:
+    from .tests import models

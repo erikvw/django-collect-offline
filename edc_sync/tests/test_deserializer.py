@@ -1,23 +1,30 @@
-import tempfile
 import os
+import tempfile
 
+from copy import copy
+from django.apps import apps as django_apps
 from django.core.serializers.base import DeserializationError
 from django.test import TestCase, tag
-from datetime import datetime
+from edc_base.utils import get_utcnow
+from edc_device.constants import NODE_SERVER
+from edc_sync import datetime_to_date_parser
+from edc_sync_files.transaction import TransactionImporter, TransactionExporter
 from faker import Faker
 
-from edc_device.constants import NODE_SERVER
-from edc_sync_files.transaction import TransactionImporter, TransactionExporter
-
-from ..transaction import TransactionDeserializer, TransactionDeserializerError
 from ..models import OutgoingTransaction, IncomingTransaction
-from .models import (
-    TestModel, TestModelWithFkProtected, TestModelWithM2m, M2m,
-    TestModelDateParse)
-from ..sync_model import SyncModel
 from ..site_sync_models import site_sync_models
+from ..sync_model import SyncModel
+from ..transaction import TransactionDeserializer, TransactionDeserializerError
+from .models import TestModel, TestModelWithFkProtected, TestModelWithM2m, M2m, TestModelDates
+
 
 fake = Faker()
+
+
+def my_test_parser(json_text):
+    model = 'edc_sync.testmodeldates'
+    field = 'f2'
+    return datetime_to_date_parser(json_text, model=model, field=field)
 
 
 @tag('TestDeserializer1')
@@ -263,7 +270,6 @@ class TestDeserializer2(TestCase):
         except TestModel.DoesNotExist:
             self.fail('TestModel history unexpectedly does not exists')
 
-    @tag('1')
     def test_deserialize_with_m2m(self):
         """Asserts deserializes model with M2M as long as
         M2M instance exists on destination.
@@ -315,40 +321,56 @@ class TestDeserializer3(TestCase):
     def setUp(self):
         site_sync_models.registry = {}
         site_sync_models.loaded = False
-        sync_models = [
-            'edc_sync.testmodeldateparse', ]
+        sync_models = ['edc_sync.testmodeldates']
         site_sync_models.register(sync_models, sync_model_cls=SyncModel)
+
         self.export_path = os.path.join(tempfile.gettempdir(), 'export')
         if not os.path.exists(self.export_path):
             os.mkdir(self.export_path)
         self.import_path = self.export_path
         IncomingTransaction.objects.all().delete()
-        self.hook_obj = TestModelDateParse.objects.using('client').create(
-            f1='hook1', scheduled_appt_date=datetime.today())
+        OutgoingTransaction.objects.using('client').all().delete()
+        TestModelDates.objects.all().delete()
+        TestModelDates.objects.using('client').all().delete()
+        self.date = get_utcnow()
+        TestModelDates.objects.using('client').create(f2=self.date.date())
+
         tx_exporter = TransactionExporter(
             export_path=self.export_path,
             using='client')
         batch = tx_exporter.export_batch()
         tx_importer = TransactionImporter(import_path=self.import_path)
         self.batch = tx_importer.import_batch(filename=batch.filename)
-        self.override_fields = [
-            {'edc_sync.testmodeldateparse': ['scheduled_appt_date']},
-            {'edc_sync.historicaltestmodeldateparse': ['scheduled_appt_date']}]
 
-    @tag('hook_func')
-    def test_deserilized_object_hook_func1(self):
-        tx_deserializer = TransactionDeserializer(override_role=NODE_SERVER)
-        tx_deserializer.deserialize_transactions(
-            transactions=self.batch.saved_transactions,
-            override_sync_data_values=self.override_fields)
-        self.assertEqual(TestModelDateParse.objects.all().count(), 1)
+        datetime_format = '%Y-%m-%dT%H:%M:%S.%fZ'
+        self.obj = IncomingTransaction.objects.all()[0]
+        bad_date = self.date.strftime(datetime_format)
+        json_text = self.obj.aes_decrypt(self.obj.tx)
+        json_text = json_text.replace(
+            '"f2": "2017-09-12"', f'"f2": "{bad_date}"')
+        self.obj.tx = self.obj.aes_encrypt(json_text)
+        self.obj.save()
+        self.app_config = copy(django_apps.get_app_config('edc_sync'))
 
-    @tag('hook_func')
-    def test_deserilized_object_hook_func2(self):
-        TestModelDateParse.objects.using('client').create(
-            f1='hook2', scheduled_appt_date=None)
-        tx_deserializer = TransactionDeserializer(override_role=NODE_SERVER)
-        tx_deserializer.deserialize_transactions(
-            transactions=self.batch.saved_transactions,
-            override_sync_data_values=self.override_fields)
-        self.assertEqual(TestModelDateParse.objects.all().count(), 1)
+    def tearDown(self):
+        django_apps.app_configs['edc_sync'] = self.app_config
+
+    def test_raises_for_invalid_date(self):
+        tx_deserializer = TransactionDeserializer(
+            allow_self=True, override_role=NODE_SERVER)
+        self.assertRaises(
+            DeserializationError,
+            tx_deserializer.deserialize_transactions,
+            transactions=[self.obj])
+
+    def test_custom_parser_declared_in_apps_fixes_date(self):
+        app_config = django_apps.get_app_config('edc_sync')
+        app_config.custom_json_parsers = [my_test_parser]
+        django_apps.app_configs['edc_sync'] = app_config
+        tx_deserializer = TransactionDeserializer(
+            allow_self=True, override_role=NODE_SERVER)
+        try:
+            tx_deserializer.deserialize_transactions(
+                transactions=[self.obj])
+        except DeserializationError:
+            self.fail('DeserializationError unexpectedly raised')

@@ -16,7 +16,7 @@ class AppConfig(DjangoAppConfig):
     name = 'edc_sync'
     verbose_name = 'Data Synchronization'
     base_template_name = 'edc_base/base.html'
-    override_sync_data_values = {}
+    custom_json_parsers = []
 
     def ready(self):
         from .signals import (
