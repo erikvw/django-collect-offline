@@ -21,7 +21,8 @@ app_config = django_apps.get_app_config('edc_sync_files')
 logger = logging.getLogger('edc_sync')
 
 
-@never_cache
+@method_decorator(never_cache, name='dispatch')
+@method_decorator(login_required, name='dispatch')
 class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
     template_name = 'edc_sync/home.html'
@@ -43,7 +44,7 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
                 remote_host=app_config.remote_host)
         return self._action_handler
 
-    @method_decorator(login_required)
+    
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
     
