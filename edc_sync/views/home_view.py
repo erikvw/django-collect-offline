@@ -34,6 +34,7 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
         if not self._action_handler:
             self._action_handler = self.action_handler_cls(
                 src_path=app_config.outgoing_folder,
+                dst_tmp=app_config.tmp_folder,
                 dst_path=app_config.incoming_folder,
                 archive_path=app_config.archive_folder,
                 username=app_config.user,
