@@ -7,6 +7,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http.response import HttpResponse
 from django.utils.decorators import method_decorator
+from django.views.decorators.cache import never_cache
 from django.views.generic.base import TemplateView
 
 from edc_base.view_mixins import EdcBaseViewMixin
@@ -20,6 +21,8 @@ app_config = django_apps.get_app_config('edc_sync_files')
 logger = logging.getLogger('edc_sync')
 
 
+@method_decorator(never_cache, name='dispatch')
+@method_decorator(login_required, name='dispatch')
 class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
 
     template_name = 'edc_sync/home.html'
@@ -34,16 +37,17 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
         if not self._action_handler:
             self._action_handler = self.action_handler_cls(
                 src_path=app_config.outgoing_folder,
+                dst_tmp=app_config.tmp_folder,
                 dst_path=app_config.incoming_folder,
                 archive_path=app_config.archive_folder,
                 username=app_config.user,
                 remote_host=app_config.remote_host)
         return self._action_handler
 
-    @method_decorator(login_required)
+    
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
-
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         app_config = django_apps.get_app_config('edc_sync')
