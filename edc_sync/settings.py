@@ -180,20 +180,17 @@ LANGUAGES = (
 )
 DEVICE_ID = '15'
 SERVER_DEVICE_ID_LIST = ['99']
-# MIDDLEMAN_DEVICE_ID_LIST = []
 
 REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        # 'edc_sync.auth.EdcSyncSignatureAuthentication',
         'rest_framework.authentication.TokenAuthentication',
     ),
-    #     'DEFAULT_PERMISSION_CLASSES': (
-    #         'rest_framework.permissions.IsAuthenticated',
-    #     )
 }
 LOGGING = LOGGING
 
+
+EDC_SYNC_SERVER_IP = None
 
 if 'test' in sys.argv:
 
