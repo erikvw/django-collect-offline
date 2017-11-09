@@ -1,12 +1,11 @@
 import json
 
-from json.decoder import JSONDecodeError
 from django.apps import apps as django_apps
 from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
+from edc_device.constants import CENTRAL_SERVER, NODE_SERVER
+from json.decoder import JSONDecodeError
 from requests.exceptions import RequestException
 from rest_framework.authtoken.models import Token
-
-from edc_device.constants import CENTRAL_SERVER, NODE_SERVER
 
 from .constants import SERVER, CLIENT
 from .models import Client, Server
