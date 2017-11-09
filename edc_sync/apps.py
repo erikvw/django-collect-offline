@@ -1,10 +1,10 @@
 import sys
 
 from django.apps import AppConfig as DjangoAppConfig
+from django.conf import settings
 from django.core.management.color import color_style
 
 from .site_sync_models import site_sync_models
-from django.conf import settings
 
 style = color_style()
 
@@ -20,6 +20,8 @@ class AppConfig(DjangoAppConfig):
     custom_json_parsers = []
     server_ip = settings.EDC_SYNC_SERVER_IP
     edc_sync_files_using = True
+
+    # see edc_device for ROLE
 
     def ready(self):
         from .signals import (

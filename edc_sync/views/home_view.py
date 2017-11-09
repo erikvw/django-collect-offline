@@ -9,8 +9,8 @@ from django.http.response import HttpResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.views.generic.base import TemplateView
-
 from edc_base.view_mixins import EdcBaseViewMixin
+from edc_navbar import NavbarViewMixin
 from edc_sync_files.action_handler import ActionHandler, ActionHandlerError
 
 from ..admin import edc_sync_admin
@@ -23,10 +23,13 @@ logger = logging.getLogger('edc_sync')
 
 @method_decorator(never_cache, name='dispatch')
 @method_decorator(login_required, name='dispatch')
-class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
+class HomeView(EdcBaseViewMixin, NavbarViewMixin, EdcSyncViewMixin, TemplateView):
 
     template_name = 'edc_sync/home.html'
     action_handler_cls = ActionHandler
+
+    navbar_name = 'edc_sync'
+    navbar_selected_item = 'synchronization'
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -44,10 +47,9 @@ class HomeView(EdcBaseViewMixin, EdcSyncViewMixin, TemplateView):
                 remote_host=app_config.remote_host)
         return self._action_handler
 
-    
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         app_config = django_apps.get_app_config('edc_sync')
