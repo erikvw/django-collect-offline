@@ -3,8 +3,8 @@ import socket
 from django.apps import apps as django_apps
 from django_crypto_fields.constants import LOCAL_MODE
 from django_crypto_fields.cryptor import Cryptor
-
 from edc_device.constants import NODE_SERVER, CENTRAL_SERVER
+from edc_sync.models import IncomingTransaction
 
 from ..constants import DELETE
 from .deserialize import deserialize
@@ -81,3 +81,24 @@ class TransactionDeserializer:
         for json_parser in app_config.custom_json_parsers:
             json_text = json_parser(json_text)
         return json_text
+
+
+class CustomTransactionDeserializer(TransactionDeserializer):
+    
+    def __init__(self,
+        using=None, allow_self=None, override_role=None,
+        order_by=None, model=None, batch=None, producer=None, **options):
+        self.allow_self = allow_self
+        self.override_role = override_role
+        self.using = using
+        filters = {}
+        if model:
+            filters.update({'tx_name': model})
+        if batch:
+            filters.update({'batch_id': batch})
+        if producer:
+            filters.update({'producer': producer})
+        if filters:
+            transactions = IncomingTransaction.objects.filter(
+                **filters).order_by(*order_by.split(','))
+            self.deserialize_transactions(transactions=transactions)
