@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'edc_device.apps.AppConfig',
     'edc_sync_files.apps.AppConfig',
     'edc_sync.apps.AppConfig',
+    'edc_protocol.apps.AppConfig',
 ]
 
 
