@@ -171,9 +171,15 @@ STATICFILES_FINDERS = (
 
 
 GIT_DIR = str(PurePath(BASE_DIR).parent)
-KEY_PATH = os.path.join(str(PurePath(BASE_DIR).parent), 'crypto_fields')
+# KEY_PATH = '/Volumes/keys'
 EDC_CRYPTO_FIELDS_CLIENT_USING = 'client'
 SHOW_CRYPTO_FORM_DATA = True
+
+EDC_SYNC_FILES_USER = 'django'
+
+EDC_SYNC_FILES_REMOTE_HOST = 'communityserver'
+EDC_SYNC_FILES_USER = 'django'
+EDC_SYNC_FILES_USB_VOLUME = '/Volumes/BCPP'
 
 LANGUAGES = (
     ('tn', 'Setswana'),
@@ -196,6 +202,7 @@ EDC_SYNC_SERVER_IP = None
 if 'test' in sys.argv:
 
     class DisableMigrations:
+
         def __contains__(self, item):
             return True
 
