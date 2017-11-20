@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'edc_device.apps.AppConfig',
     'edc_sync_files.apps.AppConfig',
     'edc_sync.apps.AppConfig',
+    'edc_protocol.apps.AppConfig',
 ]
 
 
@@ -171,9 +172,15 @@ STATICFILES_FINDERS = (
 
 
 GIT_DIR = str(PurePath(BASE_DIR).parent)
-KEY_PATH = os.path.join(str(PurePath(BASE_DIR).parent), 'crypto_fields')
+# KEY_PATH = '/Volumes/keys'
 EDC_CRYPTO_FIELDS_CLIENT_USING = 'client'
 SHOW_CRYPTO_FORM_DATA = True
+
+EDC_SYNC_FILES_USER = 'django'
+
+EDC_SYNC_FILES_REMOTE_HOST = 'communityserver'
+EDC_SYNC_FILES_USER = 'django'
+EDC_SYNC_FILES_USB_VOLUME = '/Volumes/BCPP'
 
 LANGUAGES = (
     ('tn', 'Setswana'),
