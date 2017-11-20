@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'django_js_reverse',
     'simple_history',
     'edc_base.apps.AppConfig',
+    'edc_protocol.apps.AppConfig',
     'edc_device.apps.AppConfig',
     'edc_sync_files.apps.AppConfig',
     'edc_sync.apps.AppConfig',
@@ -191,10 +192,14 @@ LOGGING = LOGGING
 
 
 EDC_SYNC_SERVER_IP = None
+EDC_SYNC_FILES_USER = None
+EDC_SYNC_FILES_REMOTE_HOST = None
+EDC_SYNC_FILES_USB_VOLUME = None
 
 if 'test' in sys.argv:
 
     class DisableMigrations:
+
         def __contains__(self, item):
             return True
 
@@ -203,4 +208,4 @@ if 'test' in sys.argv:
 
     MIGRATION_MODULES = DisableMigrations()
     PASSWORD_HASHERS = ('django.contrib.auth.hashers.MD5PasswordHasher', )
-    DEFAULT_FILE_STORAGE = 'inmemorystorage.InMemoryStorage'
+    # DEFAULT_FILE_STORAGE = 'inmemorystorage.InMemoryStorage'

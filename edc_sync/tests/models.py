@@ -1,13 +1,12 @@
 from uuid import uuid4
 
 from django.db import models
-from simple_history.models import HistoricalRecords as BadHistoricalRecords
 from django.db.models.deletion import PROTECT
-
 from edc_base.model_managers import HistoricalRecords
 from edc_base.model_mixins import BaseUuidModel, BaseModel
 from edc_base.model_mixins.list_model_mixin import ListModelMixin
 from edc_base.utils import get_utcnow
+from simple_history.models import HistoricalRecords as BadHistoricalRecords
 
 
 class TestModelManager(models.Manager):

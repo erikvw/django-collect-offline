@@ -12,6 +12,8 @@ from ..sync_model import SyncModel
 from ..sync_model import SyncNaturalKeyMissing, SyncGetByNaturalKeyMissing
 from .models import TestModel, BadTestModel, AnotherBadTestModel, YetAnotherBadTestModel
 from .models import TestSyncModelNoHistoryManager, TestSyncModelNoUuid
+from .models import TestModelWithFkProtected
+from pprint import pprint
 
 Crypt = django_apps.get_app_config('django_crypto_fields').model
 
@@ -97,6 +99,52 @@ class TestSync(TestCase):
                     pass
                 else:
                     raise OutgoingTransaction.DoesNotExist()
+
+    @tag('1')
+    def test_creates_outgoing_on_add_with_fk_in_order(self):
+        with override_settings(DEVICE_ID='10'):
+            outgoing = {}
+            test_model = TestModel.objects.using('client').create(f1='erik')
+            test_model_with_fk = TestModelWithFkProtected.objects.using(
+                'client').create(f1='f1', test_model=test_model)
+            outgoing.update(
+                test_model=OutgoingTransaction.objects.using('client').get(
+                    tx_pk=test_model.pk,
+                    tx_name='edc_sync.testmodel',
+                    action=INSERT))
+            history_obj = test_model.history.using(
+                'client').get(id=test_model.id)
+            outgoing.update(
+                test_model_historical=OutgoingTransaction.objects.using('client').get(
+                    tx_pk=history_obj.history_id,
+                    tx_name='edc_sync.historicaltestmodel',
+                    action=INSERT))
+
+            with self.assertRaises(OutgoingTransaction.DoesNotExist):
+                try:
+                    outgoing.update(
+                        test_model_with_fk=OutgoingTransaction.objects.using('client').get(
+                            tx_pk=test_model_with_fk.pk,
+                            tx_name='edc_sync.testmodelwithfkprotected',
+                            action=INSERT))
+                except OutgoingTransaction.DoesNotExist:
+                    pass
+                else:
+                    raise OutgoingTransaction.DoesNotExist()
+            history_obj = test_model_with_fk.history.using(
+                'client').get(id=test_model_with_fk.id)
+            with self.assertRaises(OutgoingTransaction.DoesNotExist):
+                try:
+                    outgoing.update(
+                        test_model_with_fk_historical=OutgoingTransaction.objects.using('client').get(
+                            tx_pk=history_obj.history_id,
+                            tx_name='edc_sync.historicaltestmodelwithfkprotected',
+                            action=INSERT))
+                except OutgoingTransaction.DoesNotExist:
+                    pass
+                else:
+                    raise OutgoingTransaction.DoesNotExist()
+        pprint({k: (k, v.timestamp) for k, v in outgoing.items()})
 
     @override_settings(ALLOW_MODEL_SERIALIZATION=False)
     def test_does_not_create_outgoing(self):
