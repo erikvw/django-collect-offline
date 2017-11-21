@@ -19,7 +19,7 @@ class IncomingTransaction(TransactionMixin, BaseUuidModel):
         default=False)
 
     class Meta:
-        ordering = ['created']
+        ordering = ['timestamp']
 
 
 class OutgoingTransaction(TransactionMixin, BaseUuidModel):
