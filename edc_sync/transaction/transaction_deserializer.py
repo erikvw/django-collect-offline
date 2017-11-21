@@ -1,10 +1,11 @@
+from django_crypto_fields.constants import LOCAL_MODE
+from edc_device.constants import NODE_SERVER, CENTRAL_SERVER
+from edc_sync.models import IncomingTransaction
+from edc_sync_files.transaction.file_archiver import FileArchiver
 import socket
 
 from django.apps import apps as django_apps
-from django_crypto_fields.constants import LOCAL_MODE
 from django_crypto_fields.cryptor import Cryptor
-from edc_device.constants import NODE_SERVER, CENTRAL_SERVER
-from edc_sync.models import IncomingTransaction
 
 from ..constants import DELETE
 from .deserialize import deserialize
@@ -43,7 +44,7 @@ class TransactionDeserializer:
         if not app_config.is_server:
             if override_role not in [NODE_SERVER, CENTRAL_SERVER]:
                 raise TransactionDeserializerError(
-                    f'Transactions may only be deserialized on a server. '
+                    'Transactions may only be deserialized on a server. '
                     f'Got override_role={override_role}, device={app_config.device_id}, '
                     f'device_role={app_config.device_role}.')
 
@@ -84,13 +85,20 @@ class TransactionDeserializer:
 
 
 class CustomTransactionDeserializer(TransactionDeserializer):
-    
+
+    file_archiver_cls = FileArchiver
+
     def __init__(self,
-        using=None, allow_self=None, override_role=None,
-        order_by=None, model=None, batch=None, producer=None, **options):
-        self.allow_self = allow_self
+                 using=None, allow_self=None, override_role=None,
+                 order_by=None, model=None, batch=None, producer=None, display_errors=None, **options):
+        super().__init__(**options)
+        self.aes_decrypt = aes_decrypt
+        self.deserialize = deserialize
         self.override_role = override_role
+        self.save = save
         self.using = using
+        """ Find how inherit parent properties.
+        """
         filters = {}
         if model:
             filters.update({'tx_name': model})
@@ -99,6 +107,16 @@ class CustomTransactionDeserializer(TransactionDeserializer):
         if producer:
             filters.update({'producer': producer})
         if filters:
-            transactions = IncomingTransaction.objects.filter(
-                **filters).order_by(*order_by.split(','))
-            self.deserialize_transactions(transactions=transactions)
+            try:
+                transactions = IncomingTransaction.objects.filter(
+                    **filters).order_by(*order_by.split(','))
+                self.deserialize_transactions(transactions=transactions)
+            except TransactionDeserializerError as e:
+                raise TransactionDeserializerError(e) from e
+            else:
+                obj = self.file_archiver_cls(
+                    src_path=django_apps.get_app_config(
+                        'edc_sync').pending_folder,
+                    dst_path=django_apps.get_app_config(
+                        'edc_sync').archive_folder)
+                obj.archive(filename=f'{batch}.json')

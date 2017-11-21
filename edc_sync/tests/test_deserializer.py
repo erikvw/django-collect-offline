@@ -1,14 +1,14 @@
+from copy import copy
+from edc_device.constants import NODE_SERVER
+from edc_sync import datetime_to_date_parser
+from edc_sync_files.transaction import TransactionImporter, TransactionExporter
 import os
 import tempfile
 
-from copy import copy
 from django.apps import apps as django_apps
 from django.core.serializers.base import DeserializationError
 from django.test import TestCase, tag
 from edc_base.utils import get_utcnow
-from edc_device.constants import NODE_SERVER
-from edc_sync import datetime_to_date_parser
-from edc_sync_files.transaction import TransactionImporter, TransactionExporter
 from faker import Faker
 
 from ..models import OutgoingTransaction, IncomingTransaction
@@ -347,7 +347,7 @@ class TestDeserializer3(TestCase):
         bad_date = self.date.strftime(datetime_format)
         json_text = self.obj.aes_decrypt(self.obj.tx)
         json_text = json_text.replace(
-            '"f2": "2017-09-12"', f'"f2": "{bad_date}"')
+            f'"f2": "{self.date.date()}"', f'"f2": "{bad_date}"')
         self.obj.tx = self.obj.aes_encrypt(json_text)
         self.obj.save()
         self.app_config = copy(django_apps.get_app_config('edc_sync'))
