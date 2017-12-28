@@ -1,3 +1,4 @@
+import json
 import os
 import tempfile
 
@@ -16,7 +17,6 @@ from ..site_sync_models import site_sync_models
 from ..sync_model import SyncModel
 from ..transaction import TransactionDeserializer, TransactionDeserializerError
 from .models import TestModel, TestModelWithFkProtected, TestModelWithM2m, M2m, TestModelDates
-import json
 
 
 fake = Faker()

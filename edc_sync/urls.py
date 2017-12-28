@@ -1,3 +1,5 @@
+from edc_constants.constants import UUID_PATTERN
+
 from django.conf.urls import url, include
 from edc_constants.constants import UUID_PATTERN
 from rest_framework.authtoken.views import obtain_auth_token
