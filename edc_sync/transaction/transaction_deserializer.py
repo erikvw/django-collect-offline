@@ -84,10 +84,10 @@ class TransactionDeserializer:
 
 
 class CustomTransactionDeserializer(TransactionDeserializer):
-    
-    def __init__(self,
-        using=None, allow_self=None, override_role=None,
-        order_by=None, model=None, batch=None, producer=None, **options):
+
+    def __init__(self, using=None, allow_self=None, override_role=None,
+                 order_by=None, model=None, batch=None, producer=None,
+                 **options):
         self.allow_self = allow_self
         self.override_role = override_role
         self.using = using

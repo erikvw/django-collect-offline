@@ -13,7 +13,6 @@ from ..sync_model import SyncNaturalKeyMissing, SyncGetByNaturalKeyMissing
 from .models import TestModel, BadTestModel, AnotherBadTestModel, YetAnotherBadTestModel
 from .models import TestSyncModelNoHistoryManager, TestSyncModelNoUuid
 from .models import TestModelWithFkProtected
-from pprint import pprint
 
 Crypt = django_apps.get_app_config('django_crypto_fields').model
 
@@ -144,7 +143,6 @@ class TestSync(TestCase):
                     pass
                 else:
                     raise OutgoingTransaction.DoesNotExist()
-        pprint({k: (k, v.timestamp) for k, v in outgoing.items()})
 
     @override_settings(ALLOW_MODEL_SERIALIZATION=False)
     def test_does_not_create_outgoing(self):

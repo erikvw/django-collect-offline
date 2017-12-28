@@ -16,6 +16,7 @@ from ..site_sync_models import site_sync_models
 from ..sync_model import SyncModel
 from ..transaction import TransactionDeserializer, TransactionDeserializerError
 from .models import TestModel, TestModelWithFkProtected, TestModelWithM2m, M2m, TestModelDates
+import json
 
 
 fake = Faker()
@@ -27,7 +28,6 @@ def my_test_parser(json_text):
     return datetime_to_date_parser(json_text, model=model, field=field)
 
 
-@tag('TestDeserializer1')
 class TestDeserializer1(TestCase):
 
     multi_db = True
@@ -346,10 +346,12 @@ class TestDeserializer3(TestCase):
         self.obj = IncomingTransaction.objects.all()[0]
         bad_date = self.date.strftime(datetime_format)
         json_text = self.obj.aes_decrypt(self.obj.tx)
-        json_text = json_text.replace(
-            '"f2": "2017-09-12"', f'"f2": "{bad_date}"')
+        json_obj = json.loads(json_text)
+        json_obj[0]['fields']['f2'] = bad_date
+        json_text = json.dumps(json_obj)
         self.obj.tx = self.obj.aes_encrypt(json_text)
         self.obj.save()
+        self.obj = IncomingTransaction.objects.get(id=self.obj.id)
         self.app_config = copy(django_apps.get_app_config('edc_sync'))
 
     def tearDown(self):
@@ -361,7 +363,7 @@ class TestDeserializer3(TestCase):
         self.assertRaises(
             DeserializationError,
             tx_deserializer.deserialize_transactions,
-            transactions=[self.obj])
+            transactions=IncomingTransaction.objects.all())
 
     def test_custom_parser_declared_in_apps_fixes_date(self):
         app_config = django_apps.get_app_config('edc_sync')
