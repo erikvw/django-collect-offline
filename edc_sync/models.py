@@ -1,6 +1,7 @@
+import sys
+
 from django.conf import settings
 from django.db import models
-
 from edc_base.model_mixins import BaseUuidModel
 from edc_base.utils import get_utcnow
 
@@ -113,5 +114,5 @@ class History(BaseUuidModel):
         unique_together = (('filename', 'hostname'),)
 
 
-if 'edc_sync' in settings.APP_NAME:
+if 'edc_sync' in settings.APP_NAME and 'makemigrations' not in sys.argv:
     from .tests import models

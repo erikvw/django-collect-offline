@@ -17,6 +17,7 @@ from .models import TestModelWithFkProtected
 Crypt = django_apps.get_app_config('django_crypto_fields').model
 
 edc_device_app_config = django_apps.get_app_config('edc_device')
+site_sync_models
 
 
 class TestSync(TestCase):
@@ -34,7 +35,7 @@ class TestSync(TestCase):
                        'edc_sync.testmodelwithm2m',
                        'edc_sync.testsyncmodelnohistorymanager',
                        'edc_sync.testsyncmodelnouuid']
-        site_sync_models.register(sync_models, SyncModel)
+        site_sync_models.register(models=sync_models)
 
     def get_credentials(self):
         return self.create_apikey(username=self.username,
@@ -225,7 +226,7 @@ class TestSync(TestCase):
         self.assertListEqual(
             [obj.tx_name for obj in OutgoingTransaction.objects.using(
                 'client').filter(action=UPDATE)],
-            [u'edc_sync.testmodel'])
+            ['edc_sync.testmodel'])
         result = [obj.tx_name for obj in OutgoingTransaction.objects.using(
             'client').filter(action=INSERT)]
         result.sort()

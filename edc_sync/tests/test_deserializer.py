@@ -40,7 +40,7 @@ class TestDeserializer1(TestCase):
             'edc_sync.testmodelwithfkprotected',
             'edc_sync.testmodelwithm2m',
             'edc_sync.testmodelhook', ]
-        site_sync_models.register(sync_models, sync_model_cls=SyncModel)
+        site_sync_models.register(sync_models)
 
         self.export_path = os.path.join(tempfile.gettempdir(), 'export')
         if not os.path.exists(self.export_path):
@@ -97,7 +97,7 @@ class TestDeserializer2(TestCase):
             'edc_sync.testmodel',
             'edc_sync.testmodelwithfkprotected',
             'edc_sync.testmodelwithm2m']
-        site_sync_models.register(sync_models, sync_model_cls=SyncModel)
+        site_sync_models.register(sync_models, wrapper_cls=SyncModel)
 
         self.export_path = os.path.join(tempfile.gettempdir(), 'export')
         if not os.path.exists(self.export_path):
@@ -322,7 +322,7 @@ class TestDeserializer3(TestCase):
         site_sync_models.registry = {}
         site_sync_models.loaded = False
         sync_models = ['edc_sync.testmodeldates']
-        site_sync_models.register(sync_models, sync_model_cls=SyncModel)
+        site_sync_models.register(sync_models, wrapper_cls=SyncModel)
 
         self.export_path = os.path.join(tempfile.gettempdir(), 'export')
         if not os.path.exists(self.export_path):
