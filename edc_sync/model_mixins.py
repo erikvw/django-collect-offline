@@ -1,12 +1,13 @@
 from django.db import models
 from django.urls import reverse
+from django.utils.safestring import mark_safe
 from django_crypto_fields.constants import LOCAL_MODE
 from django_crypto_fields.cryptor import Cryptor
 
 from .choices import ACTIONS
 
 
-class TransactionMixin(models.Model):
+class TransactionModelMixin(models.Model):
 
     """Abstract model class for Incoming and Outgoing transactions.
     """
@@ -81,9 +82,10 @@ class TransactionMixin(models.Model):
                       kwargs={
                           'model_name': self._meta.object_name.lower(),
                           'pk': str(self.pk)})
-        ret = ('<a href="{url}" class="add-another" id="add_id_report" '
-               'onclick="return showAddAnotherPopup(this);"> <img src="/static/admin/img/icon_addlink.gif" '
-               'width="10" height="10" alt="View"/></a>'.format(url=url))
+        ret = mark_safe(
+            '<a href="{url}" class="add-another" id="add_id_report" '
+            'onclick="return showAddAnotherPopup(this);"> <img src="/static/admin/img/icon_addlink.gif" '
+            'width="10" height="10" alt="View"/></a>'.format(url=url))
         return ret
     view.allow_tags = True
 

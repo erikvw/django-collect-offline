@@ -5,10 +5,10 @@ from django.db import models
 from edc_base.model_mixins import BaseUuidModel
 from edc_base.utils import get_utcnow
 
-from .model_mixins import TransactionMixin, HostModelMixin
+from .model_mixins import TransactionModelMixin, HostModelMixin
 
 
-class IncomingTransaction(TransactionMixin, BaseUuidModel):
+class IncomingTransaction(TransactionModelMixin, BaseUuidModel):
 
     """ Transactions received from a remote host.
     """
@@ -23,7 +23,7 @@ class IncomingTransaction(TransactionMixin, BaseUuidModel):
         ordering = ['timestamp']
 
 
-class OutgoingTransaction(TransactionMixin, BaseUuidModel):
+class OutgoingTransaction(TransactionModelMixin, BaseUuidModel):
 
     """ Transactions produced locally to be consumed/sent to a queue or
         consumer.
