@@ -2,7 +2,6 @@ import logging
 
 from django.apps import apps as django_apps
 from django.core.management.base import BaseCommand
-from edc_device.constants import NODE_SERVER, CENTRAL_SERVER
 from edc_sync.transaction import CustomTransactionDeserializer
 
 
@@ -11,12 +10,13 @@ logger = logging.getLogger('edc_sync_files')
 
 
 class Command(BaseCommand):
-    """Usage 
-        python manage.py deserialize --batch=9835201711152020 
+    """Usage:
+        python manage.py deserialize --batch=9835201711152020
             --model=label_lower --order_by=created,producer
     """
 
-    help = 'Deserialises transactions manually using different filter options.'
+    help = ('Deserialises transactions manually using '
+            'different filter options.')
 
     def add_arguments(self, parser):
         parser.add_argument(
