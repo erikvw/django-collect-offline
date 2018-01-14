@@ -21,11 +21,11 @@ def serialize_m2m_on_save(sender, action, instance, using, **kwargs):
     """
     if action == 'post_add':
         try:
-            sync_model = site_sync_models.get_wrapped_instance(instance)
+            wrapped_instance = site_sync_models.get_wrapped_instance(instance)
         except SiteModelNotRegistered:
             pass
         else:
-            sync_model.to_outgoing_transaction(using, created=True)
+            wrapped_instance.to_outgoing_transaction(using, created=True)
 
 
 @receiver(post_save, weak=False, dispatch_uid='serialize_on_save')
@@ -34,11 +34,11 @@ def serialize_on_save(sender, instance, raw, created, using, **kwargs):
     """
     if not raw:
         try:
-            sync_model = site_sync_models.get_wrapped_instance(instance)
+            wrapped_instance = site_sync_models.get_wrapped_instance(instance)
         except SiteModelNotRegistered:
             pass
         else:
-            sync_model.to_outgoing_transaction(using, created=created)
+            wrapped_instance.to_outgoing_transaction(using, created=created)
 
 
 @receiver(post_delete, weak=False, dispatch_uid="serialize_on_post_delete")
@@ -47,8 +47,9 @@ def serialize_on_post_delete(sender, instance, using, **kwargs):
     a model instance is deleted.
     """
     try:
-        sync_model = site_sync_models.get_wrapped_instance(instance)
+        wrapped_instance = site_sync_models.get_wrapped_instance(instance)
     except SiteModelNotRegistered:
         pass
     else:
-        sync_model.to_outgoing_transaction(using, created=False, deleted=True)
+        wrapped_instance.to_outgoing_transaction(
+            using, created=False, deleted=True)
