@@ -3,12 +3,14 @@ import sys
 from django.conf import settings
 from django.db import models
 from edc_base.model_mixins import BaseUuidModel
+from edc_base.sites.managers import CurrentSiteManager
+from edc_base.sites.site_model_mixin import SiteModelMixin
 from edc_base.utils import get_utcnow
 
 from .model_mixins import TransactionModelMixin, HostModelMixin
 
 
-class IncomingTransaction(TransactionModelMixin, BaseUuidModel):
+class IncomingTransaction(TransactionModelMixin, SiteModelMixin, BaseUuidModel):
 
     """ Transactions received from a remote host.
     """
@@ -19,11 +21,15 @@ class IncomingTransaction(TransactionModelMixin, BaseUuidModel):
     is_self = models.BooleanField(
         default=False)
 
+    on_site = CurrentSiteManager()
+
+    objects = models.Manager()
+
     class Meta:
         ordering = ['timestamp']
 
 
-class OutgoingTransaction(TransactionModelMixin, BaseUuidModel):
+class OutgoingTransaction(TransactionModelMixin, SiteModelMixin, BaseUuidModel):
 
     """ Transactions produced locally to be consumed/sent to a queue or
         consumer.
@@ -36,6 +42,10 @@ class OutgoingTransaction(TransactionModelMixin, BaseUuidModel):
         default=False)
 
     using = models.CharField(max_length=25, null=True)
+
+    on_site = CurrentSiteManager()
+
+    objects = models.Manager()
 
     def save(self, *args, **kwargs):
         if not self.using:
