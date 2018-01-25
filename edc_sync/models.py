@@ -7,12 +7,16 @@ from edc_base.sites import CurrentSiteManager, SiteModelMixin
 from edc_base.utils import get_utcnow
 
 from .model_mixins import TransactionModelMixin, HostModelMixin
+from django.contrib.sites.models import Site
 
 
 class IncomingTransaction(TransactionModelMixin, SiteModelMixin, BaseUuidModel):
 
     """ Transactions received from a remote host.
     """
+
+    site = models.ForeignKey(
+        Site, on_delete=models.CASCADE, null=True, editable=False)
 
     is_consumed = models.BooleanField(
         default=False)
@@ -33,6 +37,9 @@ class OutgoingTransaction(TransactionModelMixin, SiteModelMixin, BaseUuidModel):
     """ Transactions produced locally to be consumed/sent to a queue or
         consumer.
     """
+
+    site = models.ForeignKey(
+        Site, on_delete=models.CASCADE, null=True, editable=False)
 
     is_consumed_middleman = models.BooleanField(
         default=False)
