@@ -11,7 +11,6 @@ class EdcSyncSignatureAuthentication(SignatureAuthentication):
     # A method to fetch (User instance, user_secret_string) from the
     # consumer key ID, or None in case it is not found.
     def fetch_user_data(self, username, api_key):
-        print(api_key)
         try:
             user = User.objects.get(username=username, api_key=api_key)
             return (user, user.secret)

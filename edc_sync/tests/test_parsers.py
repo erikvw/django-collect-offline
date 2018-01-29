@@ -6,7 +6,6 @@ from ..parsers import datetime_to_date_parser
 from .models import TestModelDates
 
 
-@tag('Parsers')
 class TestParsers(TestCase):
 
     def test_date_parser(self):
@@ -29,13 +28,13 @@ class TestParsers(TestCase):
         for obj in json_data:
             self.assertIsNone(obj.object.f2)
 
-    @tag('1')
     def test_date_parser_with_none(self):
         try:
             datetime_to_date_parser(
                 None, model='edc_sync.testmodeldates', field='f2')
         except TypeError:
-            self.fail('the JSON object must be str, bytes or bytearry, not NoneType')
+            self.fail(
+                'the JSON object must be str, bytes or bytearry, not NoneType')
 
     def test_date_parser_with_bad_fieldname(self):
         obj = TestModelDates.objects.create()

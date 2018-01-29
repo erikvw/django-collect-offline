@@ -1,14 +1,13 @@
 from django.conf.urls import url, include
-from django_js_reverse.views import urls_js
+from edc_constants.constants import UUID_PATTERN
 from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.routers import DefaultRouter
-
-from edc_constants.constants import UUID_PATTERN
 
 from .admin import edc_sync_admin
 from .views import DumpToUsbView, HomeView, RenderView
 from .views import OutgoingTransactionViewSet, IncomingTransactionViewSet
 from .views import TransactionCountView, SyncReportView
+
 
 router = DefaultRouter()
 router.register(r'outgoingtransaction', OutgoingTransactionViewSet)
@@ -28,6 +27,5 @@ urlpatterns = [
     url(r'^api-token-auth/', obtain_auth_token),
     url(r'render/(?P<model_name>\w+)/(?P<pk>{})/'.format(UUID_PATTERN.pattern),
         RenderView.as_view(), name='render_url'),
-    url(r'^jsreverse/$', urls_js, name='js_reverse'),
     url(r'^', HomeView.as_view(), name='home_url'),
 ]

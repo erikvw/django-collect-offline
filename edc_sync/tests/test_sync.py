@@ -12,10 +12,12 @@ from ..sync_model import SyncModel
 from ..sync_model import SyncNaturalKeyMissing, SyncGetByNaturalKeyMissing
 from .models import TestModel, BadTestModel, AnotherBadTestModel, YetAnotherBadTestModel
 from .models import TestSyncModelNoHistoryManager, TestSyncModelNoUuid
+from .models import TestModelWithFkProtected
 
 Crypt = django_apps.get_app_config('django_crypto_fields').model
 
 edc_device_app_config = django_apps.get_app_config('edc_device')
+site_sync_models
 
 
 class TestSync(TestCase):
@@ -33,7 +35,7 @@ class TestSync(TestCase):
                        'edc_sync.testmodelwithm2m',
                        'edc_sync.testsyncmodelnohistorymanager',
                        'edc_sync.testsyncmodelnouuid']
-        site_sync_models.register(sync_models, SyncModel)
+        site_sync_models.register(models=sync_models)
 
     def get_credentials(self):
         return self.create_apikey(username=self.username,
@@ -93,6 +95,51 @@ class TestSync(TestCase):
                         tx_pk=history_obj.history_id,
                         tx_name='edc_sync.historicaltestmodel',
                         action=INSERT)
+                except OutgoingTransaction.DoesNotExist:
+                    pass
+                else:
+                    raise OutgoingTransaction.DoesNotExist()
+
+    @tag('1')
+    def test_creates_outgoing_on_add_with_fk_in_order(self):
+        with override_settings(DEVICE_ID='10'):
+            outgoing = {}
+            test_model = TestModel.objects.using('client').create(f1='erik')
+            test_model_with_fk = TestModelWithFkProtected.objects.using(
+                'client').create(f1='f1', test_model=test_model)
+            outgoing.update(
+                test_model=OutgoingTransaction.objects.using('client').get(
+                    tx_pk=test_model.pk,
+                    tx_name='edc_sync.testmodel',
+                    action=INSERT))
+            history_obj = test_model.history.using(
+                'client').get(id=test_model.id)
+            outgoing.update(
+                test_model_historical=OutgoingTransaction.objects.using('client').get(
+                    tx_pk=history_obj.history_id,
+                    tx_name='edc_sync.historicaltestmodel',
+                    action=INSERT))
+
+            with self.assertRaises(OutgoingTransaction.DoesNotExist):
+                try:
+                    outgoing.update(
+                        test_model_with_fk=OutgoingTransaction.objects.using('client').get(
+                            tx_pk=test_model_with_fk.pk,
+                            tx_name='edc_sync.testmodelwithfkprotected',
+                            action=INSERT))
+                except OutgoingTransaction.DoesNotExist:
+                    pass
+                else:
+                    raise OutgoingTransaction.DoesNotExist()
+            history_obj = test_model_with_fk.history.using(
+                'client').get(id=test_model_with_fk.id)
+            with self.assertRaises(OutgoingTransaction.DoesNotExist):
+                try:
+                    outgoing.update(
+                        test_model_with_fk_historical=OutgoingTransaction.objects.using('client').get(
+                            tx_pk=history_obj.history_id,
+                            tx_name='edc_sync.historicaltestmodelwithfkprotected',
+                            action=INSERT))
                 except OutgoingTransaction.DoesNotExist:
                     pass
                 else:
@@ -179,7 +226,7 @@ class TestSync(TestCase):
         self.assertListEqual(
             [obj.tx_name for obj in OutgoingTransaction.objects.using(
                 'client').filter(action=UPDATE)],
-            [u'edc_sync.testmodel'])
+            ['edc_sync.testmodel'])
         result = [obj.tx_name for obj in OutgoingTransaction.objects.using(
             'client').filter(action=INSERT)]
         result.sort()

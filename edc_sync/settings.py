@@ -21,7 +21,8 @@ APP_NAME = 'edc_sync'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
-
+ETC_DIR = os.path.join(BASE_DIR, 'etc')
+SITE_ID = 40
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
 
@@ -43,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
     'django_crypto_fields.apps.AppConfig',
     'django_revision.apps.AppConfig',
     'rest_framework',
@@ -50,10 +52,10 @@ INSTALLED_APPS = [
     'django_js_reverse',
     'simple_history',
     'edc_base.apps.AppConfig',
+    'edc_protocol.apps.AppConfig',
     'edc_device.apps.AppConfig',
     'edc_sync_files.apps.AppConfig',
     'edc_sync.apps.AppConfig',
-    'edc_protocol.apps.AppConfig',
 ]
 
 
@@ -171,9 +173,15 @@ STATICFILES_FINDERS = (
 
 
 GIT_DIR = str(PurePath(BASE_DIR).parent)
-KEY_PATH = os.path.join(str(PurePath(BASE_DIR).parent), 'crypto_fields')
+# KEY_PATH = '/Volumes/keys'
 EDC_CRYPTO_FIELDS_CLIENT_USING = 'client'
 SHOW_CRYPTO_FORM_DATA = True
+
+EDC_SYNC_FILES_USER = 'django'
+
+EDC_SYNC_FILES_REMOTE_HOST = 'communityserver'
+EDC_SYNC_FILES_USER = 'django'
+EDC_SYNC_FILES_USB_VOLUME = '/Volumes/BCPP'
 
 LANGUAGES = (
     ('tn', 'Setswana'),
@@ -181,24 +189,25 @@ LANGUAGES = (
 )
 DEVICE_ID = '15'
 SERVER_DEVICE_ID_LIST = ['99']
-# MIDDLEMAN_DEVICE_ID_LIST = []
 
 REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        # 'edc_sync.auth.EdcSyncSignatureAuthentication',
         'rest_framework.authentication.TokenAuthentication',
     ),
-    #     'DEFAULT_PERMISSION_CLASSES': (
-    #         'rest_framework.permissions.IsAuthenticated',
-    #     )
 }
 LOGGING = LOGGING
 
 
+EDC_SYNC_SERVER_IP = None
+EDC_SYNC_FILES_USER = None
+EDC_SYNC_FILES_REMOTE_HOST = None
+EDC_SYNC_FILES_USB_VOLUME = None
+
 if 'test' in sys.argv:
 
     class DisableMigrations:
+
         def __contains__(self, item):
             return True
 
@@ -207,4 +216,4 @@ if 'test' in sys.argv:
 
     MIGRATION_MODULES = DisableMigrations()
     PASSWORD_HASHERS = ('django.contrib.auth.hashers.MD5PasswordHasher', )
-    DEFAULT_FILE_STORAGE = 'inmemorystorage.InMemoryStorage'
+    # DEFAULT_FILE_STORAGE = 'inmemorystorage.InMemoryStorage'

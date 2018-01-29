@@ -1,16 +1,22 @@
+import sys
+
 from django.conf import settings
 from django.db import models
-
 from edc_base.model_mixins import BaseUuidModel
+from edc_base.sites import CurrentSiteManager, SiteModelMixin
 from edc_base.utils import get_utcnow
 
-from .model_mixins import TransactionMixin, HostModelMixin
+from .model_mixins import TransactionModelMixin, HostModelMixin
+from django.contrib.sites.models import Site
 
 
-class IncomingTransaction(TransactionMixin, BaseUuidModel):
+class IncomingTransaction(TransactionModelMixin, SiteModelMixin, BaseUuidModel):
 
     """ Transactions received from a remote host.
     """
+
+    site = models.ForeignKey(
+        Site, on_delete=models.CASCADE, null=True, editable=False)
 
     is_consumed = models.BooleanField(
         default=False)
@@ -18,15 +24,22 @@ class IncomingTransaction(TransactionMixin, BaseUuidModel):
     is_self = models.BooleanField(
         default=False)
 
+    on_site = CurrentSiteManager()
+
+    objects = models.Manager()
+
     class Meta:
         ordering = ['timestamp']
 
 
-class OutgoingTransaction(TransactionMixin, BaseUuidModel):
+class OutgoingTransaction(TransactionModelMixin, SiteModelMixin, BaseUuidModel):
 
     """ Transactions produced locally to be consumed/sent to a queue or
         consumer.
     """
+
+    site = models.ForeignKey(
+        Site, on_delete=models.CASCADE, null=True, editable=False)
 
     is_consumed_middleman = models.BooleanField(
         default=False)
@@ -35,6 +48,10 @@ class OutgoingTransaction(TransactionMixin, BaseUuidModel):
         default=False)
 
     using = models.CharField(max_length=25, null=True)
+
+    on_site = CurrentSiteManager()
+
+    objects = models.Manager()
 
     def save(self, *args, **kwargs):
         if not self.using:
@@ -113,5 +130,5 @@ class History(BaseUuidModel):
         unique_together = (('filename', 'hostname'),)
 
 
-if 'edc_sync' in settings.APP_NAME:
+if 'edc_sync' in settings.APP_NAME and 'makemigrations' not in sys.argv:
     from .tests import models

@@ -1,14 +1,12 @@
 import requests
 
 from datetime import datetime
-
-from django.urls import reverse
 from django.apps import apps as django_apps
+from django.urls import reverse
 from django.views.generic.base import TemplateView
-from requests.exceptions import ConnectionError, HTTPError
-
 from edc_base.view_mixins import EdcBaseViewMixin
 from edc_sync_files.models import ImportedTransactionFileHistory
+from requests.exceptions import ConnectionError, HTTPError
 
 from ..admin import edc_sync_admin
 from ..edc_sync_view_mixin import EdcSyncViewMixin

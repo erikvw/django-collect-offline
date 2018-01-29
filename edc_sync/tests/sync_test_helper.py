@@ -8,7 +8,6 @@ from edc_base.model_mixins import ListModelMixin
 
 from ..models import OutgoingTransaction
 from ..transaction import deserialize
-from pprint import pprint
 
 
 class SyncTestHelperError(Exception):
@@ -46,14 +45,12 @@ class SyncTestHelper(TestCase):
                         f'Manager method \'get_by_natural_key\' missing. '
                         f'Got \'{model._meta.label_lower}\'.')
 
-    def sync_test_natural_keys(self, complete_required_crfs, verbose=None):
+    def sync_test_natural_keys(self, complete_required_crfs):
         """Asserts tuple from natural_key when passed to get_by_natural_key
         successfully gets the model instance.
         """
         for objs in complete_required_crfs.values():
             for obj in objs:
-                if verbose:
-                    print(obj._meta.label_lower)
                 options = obj.natural_key()
                 try:
                     obj.__class__.objects.get_by_natural_key(*options)
@@ -65,16 +62,13 @@ class SyncTestHelper(TestCase):
                     raise SyncTestHelperError(
                         f'{e} See {obj._meta.label_lower}. Got {options}.')
 
-    def sync_test_natural_keys_by_schedule(self, visits=None, visit_attr=None,
-                                           verbose=True,):
+    def sync_test_natural_keys_by_schedule(self, visits=None, visit_attr=None):
         """A wrapper method for sync_test_natural_keys that uses
         the enrollment instance to test each CRF in each visit
         in the schedule linked to the enrollment model.
         """
         complete_required_crfs = {}
         for visit in visits:
-            if verbose:
-                print(visit.visit_code)
             complete_required_crfs.update({
                 visit.visit_code: self.complete_required_crfs(
                     visit_code=visit.visit_code,
@@ -82,7 +76,7 @@ class SyncTestHelper(TestCase):
                     visit_attr=visit_attr,
                     subject_identifier=visit.subject_identifier)
             })
-        self.sync_test_natural_keys(complete_required_crfs, verbose=verbose)
+        self.sync_test_natural_keys(complete_required_crfs)
 
     def sync_test_serializers_for_visit(self, complete_required_crfs, verbose=None):
         """Assert CRF model instances have transactions and that the
@@ -106,7 +100,7 @@ class SyncTestHelper(TestCase):
                     self.fail('OutgoingTransaction.DoesNotExist unexpectedly '
                               f'raised for {obj._meta.label_lower}')
 
-    def sync_test_deserialize(self, obj, outgoing_transaction, verbose=None):
+    def sync_test_deserialize(self, obj, outgoing_transaction):
         """Assert object matches its deserialized transaction.
         """
         json_text = outgoing_transaction.aes_decrypt(outgoing_transaction.tx)
@@ -115,5 +109,3 @@ class SyncTestHelper(TestCase):
             self.assertEqual(json_tx.get('model'), obj._meta.label_lower)
             # TODO: verify natural key values?
             self.assertEqual(obj.pk, deserialised_obj.object.pk)
-            if verbose:
-                print(obj._meta.label_lower)
