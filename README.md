@@ -1,6 +1,6 @@
-[![Build Status](https://travis-ci.org/botswana-harvard/edc-sync.svg?branch=develop)](https://travis-ci.org/botswana-harvard/edc-sync)
-[![Coverage Status](https://coveralls.io/repos/botswana-harvard/edc-sync/badge.svg?branch=develop)](https://coveralls.io/r/botswana-harvard/edc-sync?branch=develop)
-[![Code Health](https://landscape.io/github/botswana-harvard/edc-sync/develop/landscape.svg?style=flat)](https://landscape.io/github/botswana-harvard/edc-sync/develop)
+[![Build Status](https://travis-ci.org/clinicedc/edc-sync.svg?branch=develop)](https://travis-ci.org/clinicedc/edc-sync)
+[![Coverage Status](https://coveralls.io/repos/clinicedc/edc-sync/badge.svg?branch=develop)](https://coveralls.io/r/clinicedc/edc-sync?branch=develop)
+[![Code Health](https://landscape.io/github/clinicedc/edc-sync/develop/landscape.svg?style=flat)](https://landscape.io/github/clinicedc/edc-sync/develop)
 
 # edc-sync
 
@@ -8,7 +8,7 @@ Deploy a Django app as a client on laptop that is offline and sync the data with
 
 ### Installation
 
-    pip install git+https://github.com/botswana-harvard/edc-sync@develop#egg=edc_sync
+    pip install git+https://github.com/clinicedc/edc-sync@develop#egg=edc_sync
 
 Add the pattern for access to the REST API:
 
