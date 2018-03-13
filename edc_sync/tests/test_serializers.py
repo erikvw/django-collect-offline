@@ -12,7 +12,6 @@ from ..site_sync_models import site_sync_models
 from .models import TestModel
 
 
-@tag('1')
 class TestSerializers(TestCase):
 
     multi_db = True

@@ -2,7 +2,8 @@ import logging
 
 from django.apps import apps as django_apps
 from django.core.management.base import BaseCommand
-from edc_sync.transaction import CustomTransactionDeserializer
+
+from ...transaction import CustomTransactionDeserializer
 
 
 app_config = django_apps.get_app_config('edc_sync_files')

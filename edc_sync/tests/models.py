@@ -125,6 +125,7 @@ class TestModelWithFkProtected(BaseUuidModel):
 
     def natural_key(self):
         return (self.f1,)
+    natural_key.dependencies = ['edc_sync.test_model']
 
 
 class TestModelWithM2m(BaseUuidModel):

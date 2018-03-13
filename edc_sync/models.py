@@ -1,13 +1,13 @@
 import sys
 
 from django.conf import settings
+from django.contrib.sites.models import Site
 from django.db import models
 from edc_base.model_mixins import BaseUuidModel
 from edc_base.sites import CurrentSiteManager, SiteModelMixin
 from edc_base.utils import get_utcnow
 
 from .model_mixins import TransactionModelMixin, HostModelMixin
-from django.contrib.sites.models import Site
 
 
 class IncomingTransaction(TransactionModelMixin, SiteModelMixin, BaseUuidModel):
@@ -34,8 +34,8 @@ class IncomingTransaction(TransactionModelMixin, SiteModelMixin, BaseUuidModel):
 
 class OutgoingTransaction(TransactionModelMixin, SiteModelMixin, BaseUuidModel):
 
-    """ Transactions produced locally to be consumed/sent to a queue or
-        consumer.
+    """ Transactions produced locally to be consumed/sent
+    to a queue or consumer.
     """
 
     site = models.ForeignKey(

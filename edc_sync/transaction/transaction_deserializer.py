@@ -1,11 +1,11 @@
-from django_crypto_fields.constants import LOCAL_MODE
-from edc_device.constants import NODE_SERVER, CENTRAL_SERVER
-from edc_sync.models import IncomingTransaction
-from edc_sync_files.transaction.file_archiver import FileArchiver
 import socket
 
 from django.apps import apps as django_apps
+from django_crypto_fields.constants import LOCAL_MODE
 from django_crypto_fields.cryptor import Cryptor
+from edc_device.constants import NODE_SERVER, CENTRAL_SERVER
+from edc_sync.models import IncomingTransaction
+from edc_sync_files.transaction.file_archiver import FileArchiver
 
 from ..constants import DELETE
 from .deserialize import deserialize
@@ -49,8 +49,8 @@ class TransactionDeserializer:
                     f'device_role={app_config.device_role}.')
 
     def deserialize_transactions(self, transactions=None, deserialize_only=None):
-        """Deserializes the encrypted serialized model instances, tx, in a queryset
-        of transactions.
+        """Deserializes the encrypted serialized model
+        instances, tx, in a queryset of transactions.
 
         Note: each transaction instance contains encrypted JSON text
         that represents just ONE model instance.

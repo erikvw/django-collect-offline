@@ -8,7 +8,8 @@ from .site_sync_models import site_sync_models
 
 @receiver(post_save, sender=Token)
 def create_auth_token(sender, instance, raw, created, **kwargs):
-    """Create token when a user is created (from rest_framework)."""
+    """Create token when a user is created (from rest_framework).
+    """
     if not raw:
         if created:
             sender.objects.create(user=instance)
@@ -18,6 +19,8 @@ def create_auth_token(sender, instance, raw, created, **kwargs):
 def serialize_m2m_on_save(sender, action, instance, using, **kwargs):
     """ Part of the serialize transaction process that ensures m2m are
     serialized correctly.
+
+    Skip those not registered.
     """
     if action == 'post_add':
         try:
@@ -31,6 +34,8 @@ def serialize_m2m_on_save(sender, action, instance, using, **kwargs):
 @receiver(post_save, weak=False, dispatch_uid='serialize_on_save')
 def serialize_on_save(sender, instance, raw, created, using, **kwargs):
     """ Serialize the model instance as an OutgoingTransaction.
+
+    Skip those not registered.
     """
     if not raw:
         try:
@@ -45,6 +50,8 @@ def serialize_on_save(sender, instance, raw, created, using, **kwargs):
 def serialize_on_post_delete(sender, instance, using, **kwargs):
     """Creates a serialized OutgoingTransaction when
     a model instance is deleted.
+
+    Skip those not registered.
     """
     try:
         wrapped_instance = site_sync_models.get_wrapped_instance(instance)

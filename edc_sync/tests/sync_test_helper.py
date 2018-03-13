@@ -1,10 +1,9 @@
 import json
 
-from unittest.case import TestCase
 from django.apps import apps as django_apps
 from django.core.exceptions import MultipleObjectsReturned
-
 from edc_base.model_mixins import ListModelMixin
+from unittest.case import TestCase
 
 from ..models import OutgoingTransaction
 from ..transaction import deserialize
@@ -74,11 +73,10 @@ class SyncTestHelper(TestCase):
                     visit_code=visit.visit_code,
                     visit=visit,
                     visit_attr=visit_attr,
-                    subject_identifier=visit.subject_identifier)
-            })
+                    subject_identifier=visit.subject_identifier)})
         self.sync_test_natural_keys(complete_required_crfs)
 
-    def sync_test_serializers_for_visit(self, complete_required_crfs, verbose=None):
+    def sync_test_serializers_for_visit(self, complete_required_crfs):
         """Assert CRF model instances have transactions and that the
         transactions can be deserialized and compared to their original
         model instances.
@@ -89,13 +87,11 @@ class SyncTestHelper(TestCase):
                     outgoing_transaction = OutgoingTransaction.objects.get(
                         tx_name=obj._meta.label_lower,
                         tx_pk=obj.pk)
-                    self.sync_test_deserialize(
-                        obj, outgoing_transaction, verbose=verbose)
+                    self.sync_test_deserialize(obj, outgoing_transaction)
                 except MultipleObjectsReturned:
                     for outgoing_transaction in OutgoingTransaction.objects.filter(
                             tx_name=obj._meta.label_lower, tx_pk=obj.pk):
-                        self.sync_test_deserialize(
-                            obj, outgoing_transaction, verbose=verbose)
+                        self.sync_test_deserialize(obj, outgoing_transaction)
                 except OutgoingTransaction.DoesNotExist:
                     self.fail('OutgoingTransaction.DoesNotExist unexpectedly '
                               f'raised for {obj._meta.label_lower}')
