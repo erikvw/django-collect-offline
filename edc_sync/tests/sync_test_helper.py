@@ -16,14 +16,16 @@ class SyncTestHelperError(Exception):
 class SyncTestHelper(TestCase):
 
     def sync_test_natural_key_attr(self, *app_labels, exclude_models=None):
-        """Asserts all models in given apps have a natural_key model method.
+        """Asserts all models in given apps have a
+        natural_key model method.
         """
         exclude_models = exclude_models or []
         for app_label in app_labels:
             models = django_apps.get_app_config(app_label).get_models()
             for model in models:
-                if (model._meta.label_lower not in exclude_models and
-                        not issubclass(model, ListModelMixin)):
+                if (model._meta.label_lower not in exclude_models
+                    and not issubclass(model, ListModelMixin)
+                        and '.tests.' not in model.__module__):
                     self.assertTrue(
                         'natural_key' in dir(model),
                         'Model method \'natural_key\' missing. Got \'{}\'.'.format(
@@ -37,16 +39,17 @@ class SyncTestHelper(TestCase):
         for app_label in app_labels:
             models = django_apps.get_app_config(app_label).get_models()
             for model in models:
-                if (model._meta.label_lower not in exclude_models and
-                        not issubclass(model, ListModelMixin)):
+                if (model._meta.label_lower not in exclude_models
+                    and not issubclass(model, ListModelMixin)
+                        and '.tests.' not in model.__module__):
                     self.assertTrue(
                         'get_by_natural_key' in dir(model.objects),
                         f'Manager method \'get_by_natural_key\' missing. '
                         f'Got \'{model._meta.label_lower}\'.')
 
     def sync_test_natural_keys(self, complete_required_crfs):
-        """Asserts tuple from natural_key when passed to get_by_natural_key
-        successfully gets the model instance.
+        """Asserts tuple from natural_key when passed to
+        get_by_natural_key successfully gets the model instance.
         """
         for objs in complete_required_crfs.values():
             for obj in objs:
