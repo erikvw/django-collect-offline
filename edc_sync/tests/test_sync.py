@@ -3,16 +3,15 @@ from django.core.exceptions import MultipleObjectsReturned
 from django.test import TestCase, tag
 from django.test.utils import override_settings
 
-from edc_sync.models import OutgoingTransaction
-
 from ..constants import INSERT, UPDATE
+from ..models import OutgoingTransaction
 from ..site_sync_models import site_sync_models
 from ..sync_model import SyncHistoricalManagerError, SyncUuidPrimaryKeyMissing
 from ..sync_model import SyncModel
 from ..sync_model import SyncNaturalKeyMissing, SyncGetByNaturalKeyMissing
 from .models import TestModel, BadTestModel, AnotherBadTestModel, YetAnotherBadTestModel
-from .models import TestSyncModelNoHistoryManager, TestSyncModelNoUuid
 from .models import TestModelWithFkProtected
+from .models import TestSyncModelNoHistoryManager, TestSyncModelNoUuid
 
 Crypt = django_apps.get_app_config('django_crypto_fields').model
 
@@ -136,10 +135,11 @@ class TestSync(TestCase):
             with self.assertRaises(OutgoingTransaction.DoesNotExist):
                 try:
                     outgoing.update(
-                        test_model_with_fk_historical=OutgoingTransaction.objects.using('client').get(
-                            tx_pk=history_obj.history_id,
-                            tx_name='edc_sync.historicaltestmodelwithfkprotected',
-                            action=INSERT))
+                        test_model_with_fk_historical=(
+                            OutgoingTransaction.objects.using('client').get(
+                                tx_pk=history_obj.history_id,
+                                tx_name='edc_sync.historicaltestmodelwithfkprotected',
+                                action=INSERT)))
                 except OutgoingTransaction.DoesNotExist:
                     pass
                 else:

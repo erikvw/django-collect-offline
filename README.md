@@ -1,6 +1,5 @@
 [![Build Status](https://travis-ci.org/clinicedc/edc-sync.svg?branch=develop)](https://travis-ci.org/clinicedc/edc-sync)
 [![Coverage Status](https://coveralls.io/repos/clinicedc/edc-sync/badge.svg?branch=develop)](https://coveralls.io/r/clinicedc/edc-sync?branch=develop)
-[![Code Health](https://landscape.io/github/clinicedc/edc-sync/develop/landscape.svg?style=flat)](https://landscape.io/github/clinicedc/edc-sync/develop)
 
 # edc-sync
 

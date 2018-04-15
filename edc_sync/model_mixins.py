@@ -84,7 +84,8 @@ class TransactionModelMixin(models.Model):
                           'pk': str(self.pk)})
         ret = mark_safe(
             '<a href="{url}" class="add-another" id="add_id_report" '
-            'onclick="return showAddAnotherPopup(this);"> <img src="/static/admin/img/icon_addlink.gif" '
+            'onclick="return showAddAnotherPopup(this);"> '
+            '<img src="/static/admin/img/icon_addlink.gif" '
             'width="10" height="10" alt="View"/></a>'.format(url=url))
         return ret
     view.allow_tags = True
