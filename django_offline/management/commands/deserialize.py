@@ -6,8 +6,8 @@ from django.core.management.base import BaseCommand
 from ...transaction import CustomTransactionDeserializer
 
 
-app_config = django_apps.get_app_config('edc_sync_files')
-logger = logging.getLogger('edc_sync_files')
+app_config = django_apps.get_app_config('django_offline')
+logger = logging.getLogger('django_offline')
 
 
 class Command(BaseCommand):

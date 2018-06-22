@@ -11,7 +11,7 @@ from django.views.decorators.cache import never_cache
 from django.views.generic.base import TemplateView
 from edc_base.view_mixins import EdcBaseViewMixin
 from edc_navbar import NavbarViewMixin
-from edc_sync_files.action_handler import ActionHandler, ActionHandlerError
+from django_offline_files.action_handler import ActionHandler, ActionHandlerError
 
 from ..admin import django_offline_admin
 from ..offline_view_mixin import OfflineViewMixin

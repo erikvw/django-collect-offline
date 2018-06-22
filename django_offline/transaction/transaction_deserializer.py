@@ -3,8 +3,8 @@ import socket
 from django.apps import apps as django_apps
 from django_crypto_fields.constants import LOCAL_MODE
 from django_crypto_fields.cryptor import Cryptor
+from django_offline_files.transaction.file_archiver import FileArchiver
 from edc_device.constants import NODE_SERVER, CENTRAL_SERVER
-from edc_sync_files.transaction.file_archiver import FileArchiver
 
 from ..constants import DELETE
 from ..models import IncomingTransaction
