@@ -3,7 +3,7 @@ import os
 import tempfile
 
 from django.test.testcases import TestCase
-from edc_sync_files.action_handler import ActionHandler, ActionHandlerError
+from django_offline_files.action_handler import ActionHandler, ActionHandlerError
 
 logger = logging.getLogger('django_offline')
 

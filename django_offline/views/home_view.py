@@ -17,7 +17,7 @@ from ..admin import django_offline_admin
 from ..offline_view_mixin import OfflineViewMixin
 from ..site_offline_models import site_offline_models
 
-app_config = django_apps.get_app_config('edc_sync_files')
+app_config = django_apps.get_app_config('django_offline_files')
 logger = logging.getLogger('django_offline')
 
 
@@ -58,12 +58,12 @@ class HomeView(EdcBaseViewMixin, NavbarViewMixin, OfflineViewMixin, TemplateView
             cors_origin_whitelist=self.cors_origin_whitelist,
             django_offline_admin=django_offline_admin,
             django_offline_app_config=app_config,
-            edc_sync_files_app_config=django_apps.get_app_config(
-                'edc_sync_files'),
+            django_offline_files_app_config=django_apps.get_app_config(
+                'django_offline_files'),
             django_offline_role=self.device_role,
             hostname=socket.gethostname(),
             ip_address=django_apps.get_app_config(
-                'edc_sync_files').remote_host,
+                'django_offline_files').remote_host,
             pending_files=self.action_handler.pending_filenames,
             recently_sent_files=self.action_handler.sent_history[0:20],
             site_models=site_offline_models.site_models)

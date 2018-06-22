@@ -4,7 +4,7 @@ from django.apps import apps as django_apps
 from django.db.models.aggregates import Count
 from django.views.generic import ListView
 
-from edc_sync_files.admin_site import edc_sync_files_admin
+from django_offline_files.admin_site import django_offline_files_admin
 
 from ..offline_view_mixin import OfflineViewMixin
 from ..models import IncomingTransaction
@@ -24,5 +24,5 @@ class OfflineReportView(EdcBaseViewMixin, OfflineViewMixin, ListView):
         app_config = django_apps.get_app_config('django_offline')
         context.update(
             base_template_name=app_config.base_template_name,
-            edc_sync_files_admin=edc_sync_files_admin)
+            django_offline_files_admin=django_offline_files_admin)
         return context

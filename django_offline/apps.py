@@ -17,7 +17,7 @@ class AppConfig(DjangoAppConfig):
     verbose_name = 'Offline Synchronization'
     base_template_name = 'edc_base/base.html'
     custom_json_parsers = []
-    edc_sync_files_using = True
+    django_offline_files_using = True
 
     # see edc_device for ROLE
 
