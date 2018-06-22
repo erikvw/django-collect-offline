@@ -12,13 +12,13 @@ with open(os.path.join(os.path.dirname(__file__), 'README.md')) as readme:
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
-    name='edc-sync',
+    name='django-offline',
     version='0.2.26',
     author=u'Erik van Widenfelt',
     author_email='ew2789@gmail.com',
     packages=find_packages(),
     include_package_data=True,
-    url='https://github.com/clinicedc/edc-sync',
+    url='https://github.com/erikvw/django-offline',
     license='GPL license, see LICENSE',
     description='Sync models instances between client and server.',
     long_description=README,

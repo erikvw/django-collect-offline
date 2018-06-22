@@ -1,10 +1,10 @@
 git+https://github.com/clinicedc/edc-base@develop#egg=edc-base
 git+https://github.com/erikvw/django-crypto-fields@develop#egg=django-crypto-fields
 git+https://github.com/erikvw/django-revision@develop#egg=django-revision
+git+https://github.com/erikvw/django_offline-files@develop#django_offline-files
 git+https://github.com/clinicedc/edc-identifier@develop#egg=edc-identifier
 git+https://github.com/clinicedc/edc-device@develop#egg=edc-device
 git+https://github.com/clinicedc/edc-protocol@develop#egg=edc-protocol
 git+https://github.com/clinicedc/edc-rest@develop#egg=edc-rest
 git+https://github.com/clinicedc/edc-constants@develop#egg=edc-constants
-git+https://github.com/clinicedc/edc-sync-files@develop#edc-sync-files
 git+https://github.com/clinicedc/edc-navbar@develop#edc-navbar
