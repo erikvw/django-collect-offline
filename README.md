@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/erikvw/django-offline.svg?branch=develop)](https://travis-ci.com/erikvw/django-offline)
+[![Build Status](https://travis-ci.com/erikvw/django-offline.svg?branch=develop)](https://travis-ci.com/erikvw/django-offline?branch=develop)
 [![Coverage Status](https://coveralls.io/repos/erikvw/django-offline/badge.svg?branch=develop)](https://coveralls.io/r/erikvw/django-offline?branch=develop)
 
 # django-offline
