@@ -1,3 +1,4 @@
+.
 git+https://github.com/clinicedc/edc-base@develop#egg=edc-base
 git+https://github.com/erikvw/django-crypto-fields@develop#egg=django-crypto-fields
 git+https://github.com/erikvw/django-revision@develop#egg=django-revision
@@ -8,3 +9,4 @@ git+https://github.com/clinicedc/edc-protocol@develop#egg=edc-protocol
 git+https://github.com/clinicedc/edc-rest@develop#egg=edc-rest
 git+https://github.com/clinicedc/edc-constants@develop#egg=edc-constants
 git+https://github.com/clinicedc/edc-navbar@develop#edc-navbar
+git+https://github.com/clinicedc/edc-model-fields@develop#edc-model-fields
