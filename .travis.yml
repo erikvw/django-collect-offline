@@ -1,6 +1,13 @@
 language: python
+
 python:
 - 3.6
+- 3.7
+
+dist: xenial
+
+sudo: true
+
 services:
 - mysql
 branches:
@@ -19,6 +26,3 @@ script:
 - coverage run --source=django_offline manage.py test
 after_success:
 - coveralls
-notifications:
-  slack:
-    secure: G5hpD5ONGjuEy7QgNjNzI5bVtjKnABNi5YFXuBXFH8/+ETkO8F6WVqUEv1STcd/RJe5CDz2epRZKFZQaGtN9u2sjT/9AgCMCDYTMG3yyy9Virmo6ImfirF3dKToMlbITjEtuFhuxT45on6txJ6hvOKgzZJi4xatT39ZlG+feAY7qh6yp+W+CE6VlvB3C3BLgemTMgKMoGqyChBXiwpAlKXwpCPW4CC62eAgQhtzb0RUuo+Mks7pnPZl42tj7fo7Tz1HrHBxwrVtcUmLEu1wwzI+nU/21hl4FxIbj9ue9QO30ZKXpcfhOQZ0F8GZclD4AuK3A64CImRTYPy3p4J/nCruWMHiWag+G+muA9nDz8E5mfrr6YtJSU6zfYElIprMBrdD2E2SW6pNVpYmQ5jdnXD3F9ndvsw2JpAJUKHuk/PhTgjWgYmHDreg6+Wect6XJ0nG630E4u8l6NJHoOGh1gd3ptKEjZ0oJ5FTTrlAxwI5VSBVsFVRw0WoRpbuwTW/pxyHgm22ZzEWNphMqP/rN4hMpj0xsIauRg6t9B7zvqh8C/zWO3mnWHv8LmZPeteGmzGQ5WlRXlQaYU8GgUA02h9+iMQ65ZT2zWxuymfXSgYFKkPxMXLwa0pEVD4jmaOUlXIQrtrJvoPiQi/V3EaurLcopy2cGya4opzeDfSra0OE=
