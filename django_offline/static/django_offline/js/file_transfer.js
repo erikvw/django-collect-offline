@@ -90,7 +90,7 @@ function exportBatch(server , userName) {
 
 			ajExportBatch.then( function() {
 					var firstFile = window.fileObjs[0];
-					$( "tr:eq( " +firstFile.index+ " )" ).find('td:eq(2)').html("<span class='fa fa-spinner fa-spin'></span>");
+					$( "tr:eq( " +firstFile.index+ " )" ).find('td:eq(2)').html("<span class='fas fa-spinner fa-spin'></span>");
 					sendTransactionFile(firstFile); // Attempt to send all files.
 			});
 
@@ -280,7 +280,7 @@ function processPendingFiles() {
 	
 	ajPendingFiles.then( function( data ) {
 		var firstFile = window.fileObjs[0];
-		$( "tr:eq( " + firstFile.index + " )" ).find('td:eq(2)').html("<span class='fa fa-spinner fa-spin'></span>");
+		$( "tr:eq( " + firstFile.index + " )" ).find('td:eq(2)').html("<span class='fas fa-spinner fa-spin'></span>");
 		sendTransactionFile(firstFile);
 	});
 	

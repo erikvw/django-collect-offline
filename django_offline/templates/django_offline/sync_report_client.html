@@ -43,7 +43,7 @@
         <!-- Page Header -->
         <div class="row">
             <div class="col-lg-12">
-                <h4 class="page-header">Operational Reports: Client Transaction Report <i class="fa fa-refresh pull-right" aria-hidden="true"></i>
+                <h4 class="page-header">Operational Reports: Client Transaction Report <i class="fas fa-refresh pull-right" aria-hidden="true"></i>
                 </h4> 
             </div>
         </div>
@@ -84,7 +84,7 @@
 					     	{% if data.connected %}
 						        No pending data
 						     {% else %}
-						    	<i class="fa fa-question" aria-hidden="true"></i>
+						    	<i class="fas fa-question" aria-hidden="true"></i>
 						    {% endif%}
 						     </td>
 					     {% endif %}
@@ -93,7 +93,7 @@
 				        		{% if data.connected %}
 				        			<button id="btn-receive" type="button" class="btn btn-warning" onclick="receiveDevice('{{data.device}}', '{{data.pending}}');">Receive</button>
 				      			{% else %}
-						    		<i class="fa fa-exclamation-triangle" aria-hidden="true"> Not Connected</i>
+						    		<i class="fas fa-exclamation-triangle" aria-hidden="true"> Not Connected</i>
 				        		{% endif %}
 				        	{% else %}
 				        		{% if data.connected %}
