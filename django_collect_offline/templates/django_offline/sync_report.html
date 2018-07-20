@@ -1,0 +1,23 @@
+{% extends base_template_name %}
+
+{% load static %}
+
+{% block main %}
+    <div class="container">
+        <div class="col-md-12">
+	        <div class="panel panel-header">
+	                <h4 class="page-header">Pending Incoming Transactions</h4>
+	        </div>
+	        <div class="panel panel-body">
+		        <div class="table table-responsive">
+			        <table class="table table-condensed">
+				        <tr><th>Client</th><th>Pending</th></tr>
+		    		    {% for row in object_list %}
+		        			<tr><td><a href="{% url 'django_collect_offline_files_admin:django_collect_offline_files_uploadtransactionfile_changelist' %}?q={{ row.producer }}">{{ row.producer }}</a></td><td>{{ row.pending }}</td></tr>
+		        		{% endfor %}
+		        	</table>
+		        </div>
+		     </div>
+		 </div>
+	</div>
+{% endblock main %}

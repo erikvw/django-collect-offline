@@ -1,0 +1,24 @@
+{% extends "django_collect_offline/render.html" %}
+
+  {% block transaction_metadata %}
+    <div class="panel panel-info">
+    <div class="panel-heading">
+        <span class="text-muted">{{ json_obj.model|title }} Metadata</span>
+    </div>
+    <div class="panel-body">
+    <table class="table table-hover">
+    <thead><tr><th>Field</th><th>Value</th></tr></thead>
+    <tbody>
+    <tr><td>id</td><td>{{ json_obj.pk }}</td></tr>
+    <tr><td>tx_name</td><td>{{ json_obj.fields.tx_name }}</td></tr>
+    <tr><td>action</td><td>{{ json_obj.fields.action }}</td></tr>
+    <tr><td>is_consumed</td><td>{{ json_obj.fields.is_consumed }}</td></tr>
+    <tr><td>is_ignored</td><td>{{ json_obj.fields.is_ignored }}</td></tr>
+    <tr><td>is_error</td><td>{{ json_obj.fields.is_error }}</td></tr>
+    <tr><td>timestamp</td><td>{{ json_obj.fields.timestamp }}</td></tr>
+    </tbody>
+    </table>
+    <span class="pull-right"><input class="btn btn-primary btn-sm" type="button" onclick="window.open('', '_self', ''); window.close();" value="Close"></span>    
+    </div>
+    </div><!-- div panel render -->
+  {% endblock transaction_metadata %}

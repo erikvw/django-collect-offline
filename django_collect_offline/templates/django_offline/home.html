@@ -1,0 +1,117 @@
+{% extends base_template_name %}
+
+{% load static %}
+
+{% block extra-scripts %}
+
+{{ block.super }}
+   <script type="text/javascript" charset="utf8" src="{% static "django_js_reverse/js/reverse.js" %}"></script>	
+  <!-- begin django_collect_offline extra-scripts -->
+  {% if offline_role == "NodeServer" %}
+ 	  <script type="text/javascript" charset="utf8" src="{% static "django_collect_offline/js/middleman.js" %}"></script>
+	  <script type="text/javascript" charset="utf8" src="{% static "django_collect_offline/js/django_collect_offline.js" %}"></script>
+	  <script type="text/javascript" charset="utf8" class="init">
+	      $(document).ready( function() {
+	    	  edcSyncReady('{{ hosts|escapejs }}', '{{ user.username }}', '{{ api_token }}', "{% url 'django_collect_offline:home_url' %}");
+	      });
+	  </script>
+	  <script type="text/javascript" charset="utf8" class="init">
+		     $(document).ready( function() {
+		    	 edcSyncUSBReady('{{ ip_address|escapejs }}', '{{ user.username }}', '{{ api_token }}');
+		     });
+	  </script>
+  {% elif offline_role == 'Client'  %}
+ 	<script type="text/javascript" charset="utf8" src="{% static "django_collect_offline/js/file_transfer.js" %}"></script>	
+ 	<script type="text/javascript" charset="utf8" src="{% static "django_collect_offline/js/middleman.js" %}"></script>	
+	<script type="text/javascript" charset="utf8" class="init">
+	     $(document).ready( function() {
+	   	  edcSyncReady('{{ ip_address|escapejs }}', '{{ user.username }}', '{{ api_token }}');
+	     });
+ 	</script>
+ 	
+	<script type="text/javascript" charset="utf8" class="init">
+	     $(document).ready( function() {
+	    	 edcSyncUSBReady('{{ ip_address|escapejs }}', '{{ user.username }}', '{{ api_token }}');
+	     });
+ 	</script>
+  {% endif %}
+  <!-- end django_collect_offline extra-scripts -->
+{% endblock extra-scripts %}
+
+{% block main %}
+<div class="container">
+
+    <div id="div-home-right" class="col-md-8">
+        <div class="panel panel-default">
+            <ul id="nav-pill-host" class="nav nav-pills nav-stacked">
+                <li><a href="#">{{ offline_role|title }}: {{ hostname }} <span class="pull-right">{{ ip_address }}</span></a></li>
+            </ul>
+        </div>
+        {% if offline_role == 'NodeServer' %}
+            {% include 'django_collect_offline/server.html' %}
+        {% elif offline_role == 'Client' %}
+        	{% include 'django_collect_offline/client.html' %}
+        {% else %}
+            <div class="panel-heading">Resources</div>
+            <div class="alert alert-danger text-center">Edc-sync role undefined. See AppConfig.</div>
+        {% endif%}
+    </div>
+
+    <div id="div-home-middle" class="col-md-4">
+     	{% if offline_role == "NodeServer" %}
+          <div class="panel panel-default">
+            <div class="panel-heading">Report</div>
+	            <ul id="nav-pill-admin">
+	            	<li>
+	            		<a href="{% url 'django_collect_offline:sync-report' %}"><i class="fas fa-bar-chart" aria-hidden="true"></i>        Server Report</a>
+	            	</li>
+                    <li>
+                        <a href="{% url 'django_collect_offline:sync-report-client' %}"><i class="fas fa-bar-chart" aria-hidden="true"></i>        Client Report</a>
+                    </li>
+	            </ul>
+        	</div>
+        {% endif %}
+        <div class="panel panel-default">
+            <div class="panel-heading">Administration</div>
+            <ul id="nav-pill-admin" class="nav nav-pills nav-stacked">
+                <li><a href="{% url 'django_collect_offline:django_collect_offline_admin:index'%} ">{{ django_collect_offline_app_config.verbose_name }}</a></li>
+                <li><a href="{% url 'django_collect_offline_files:django_collect_offline_files_admin:index'%}">{{ django_collect_offline_files_app_config.verbose_name }}</a></li>
+                {% if offline_role == "NodeServer" %}
+                    <li><a href="{% url 'django_collect_offline:django_collect_offline_admin:offline_client_changelist'%} ">Clients</a></li>
+                {% elif offline_role == 'Client' %}
+                    <li><a href="{% url 'django_collect_offline:django_collect_offline_admin:offline_server_changelist'%} ">Servers</a></li>
+                {% endif %}
+                {% comment %}
+                	<li><a href="{% url 'django_collect_offline:django_collect_offline_admin:authtoken_token_changelist'%} ">User Tokens</a></li>
+                {% endcomment %}
+            </ul>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">API</div>
+                {% if user.is_authenticated and api_token == None %}
+                    <div class="alert alert-danger text-center">Current user '{{ user.username }}' missing API token.</div>
+                {% endif %}
+                <ul id="nav-pill-api" class="nav nav-pills nav-stacked">
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'django_collect_offline:outgoingtransaction-list' %}?format=json">Show My Outgoingtransaction</a></li>
+                    <li><a href="{% url 'django_collect_offline:incomingtransaction-list' %}?format=json">Show My Incomingtransaction</a></li>
+                {% endif %}
+                </ul>
+            </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">CORS Origin Whitelist (from settings)</div>
+            {% if user.is_authenticated %}
+              <ul id="id-nav-pill-cors" class="nav nav-pills nav-stacked">
+                {% for host in cors_origin_whitelist %}
+                    <li><a>{{ host }}</a></li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+        </div>
+            
+    </div><!-- div-home-middle -->
+
+</div>
+
+{% endblock main %}

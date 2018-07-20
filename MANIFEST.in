@@ -1,3 +1,3 @@
 include AUTHORS CHANGES README.rst LICENCE VERSION
-recursive-include django_offline/templates *
-recursive-include django_offline/static *
+recursive-include django_collect_offline/templates *
+recursive-include django_collect_offline/static *

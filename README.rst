@@ -1,8 +1,8 @@
 |pypi| |travis| |coverage|
 
 
-django-offline
---------------
+django-collect-offline
+----------------------
 
 Deploy a Django app as a client on laptop that is offline and push the data to your server when you get back online.
 
@@ -14,7 +14,7 @@ Add the pattern for access to the REST API:
 .. code-block:: python
 
     urlpatterns = [
-        url(r'^django-offline/', include('django_offline.urls')),
+        url(r'^django-collect-offline/', include('django_collect_offline.urls')),
     )
 
 In settings.py:
@@ -23,7 +23,7 @@ In settings.py:
 
     INSTALLED_APPS = [
     ...
-    'django_offline.apps.AppConfig',
+    'django_collect_offline.apps.AppConfig',
     ...]
 
 Configure a model for offline-use:
@@ -63,8 +63,8 @@ In your app, add module ``offline_models.py``.
 
     # offline_models.py
     
-    from django_offline.site_offline_models import site_offline_models
-    from django_offline.offline_model import OfflineModel
+    from django_collect_offline.site_offline_models import site_offline_models
+    from django_collect_offline.offline_model import OfflineModel
     
     offline_models = [
         'my_app.CrfModel',
@@ -88,7 +88,7 @@ View models registered for synchronization
 
 .. code-block:: python
 
-    from django_offline.site_offline_models import site_offline_models
+    from django_collect_offline.site_offline_models import site_offline_models
     
     # list all models in app 'bcpp_household' set for offline-use
     models = site_offline_models.site_models('bcpp_household', sync=True)
@@ -116,24 +116,24 @@ Many client nodes may push data to their server node.
 Getting data from the field
 ============================
 
-We use ``django-offline`` in Django projects deployed to low-resourced remote communities where there is no reliable internet, public or private network. Our Research Assistants collect participant data in households, mobile tents and remote clinics. The Research Assistants enter data directly into their offline laptops. Once back online, data is pushed to the ``community-server`` and later to the ``central-server``. 
+We use ``django-collect-offline`` in Django projects deployed to low-resourced remote communities where there is no reliable internet, public or private network. Our Research Assistants collect participant data in households, mobile tents and remote clinics. The Research Assistants enter data directly into their offline laptops. Once back online, data is pushed to the ``community-server`` and later to the ``central-server``. 
 
 Our research also involves collecting blood specimens that need to get to our community clinic within an hour or two from time of collection. Research Assistants stay out in the field on shift for 6 hours or more. So we send a driver to fetch specimens and data from the Research Assistant in the field. The driver has a ``middleman`` laptop that pulls all pending data from the Research Assistant's laptop. The driver and the Research Assistant then reconcile specimens and requisition data against the ``middleman`` data and the physical specimen. (Note: we requisition and label specimens in the field through the app). The driver then returns to the community clinic, pushes data onto the ``community-server`` and delivers all the specimens. The Lab Assistant then reconciles the specimens and requisition data against the ``community-server`` data and the physical specimen.
 
 Data Flow
 =========
 
-``django-offline`` uses either the REST API or FILE transfer:
+``django-collect-offline`` uses either the REST API or FILE transfer:
 - field client ---REST---> community server
 - field client ---REST---> middleman (and modelre inspector) ---REST---> community server
 - site server ---FILE---> central server
 
 
-.. |pypi| image:: https://img.shields.io/pypi/v/django-offline.svg
-    :target: https://pypi.python.org/pypi/django-offline
+.. |pypi| image:: https://img.shields.io/pypi/v/django-collect-offline.svg
+    :target: https://pypi.python.org/pypi/django-collect-offline
     
-.. |travis| image:: https://travis-ci.org/erikvw/django-offline.svg?branch=develop
-    :target: https://travis-ci.org/erikvw/django-offline
+.. |travis| image:: https://travis-ci.org/erikvw/django-collect-offline.svg?branch=develop
+    :target: https://travis-ci.org/erikvw/django-collect-offline
     
-.. |coverage| image:: https://coveralls.io/repos/github/erikvw/django-offline/badge.svg?branch=develop
-    :target: https://coveralls.io/github/erikvw/django-offline?branch=develop
+.. |coverage| image:: https://coveralls.io/repos/github/erikvw/django-collect-offline/badge.svg?branch=develop
+    :target: https://coveralls.io/github/erikvw/django-collect-offline?branch=develop
