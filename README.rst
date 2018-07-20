@@ -2,7 +2,7 @@
 
 
 django-collect-offline
---------------
+----------------------
 
 Deploy a Django app as a client on laptop that is offline and push the data to your server when you get back online.
 
