@@ -1,0 +1,137 @@
+<div id='id-transfer-status-div' class="alert alert-danger" style="display:none">
+	Your machine is not connected to the server. Check your network connectivity.
+</div>
+<div id='id-transfer-div' class="panel panel-info">
+	<div class="panel-heading">
+ 		Transfer to the server. <span id="id-div-resource-alert"></span><a><span id="id-tx-spinner" class="fas fa-refresh pull-right"></span></a>
+	</div>
+	<div class="panel-body">
+		<p>
+			<span id="">Pending Transactions</span>
+			<span id="id-pending-transactions" class="badge">0</span>
+			<button id="btn-sync" type="button" class="btn btn-default pull-right" disabled="disabled"><i class="fas fa-exchange fa-fw"></i> Transfer to Server</button>
+		</p>
+	</div>
+ </div>
+ 
+ 
+ <div id='id-in-progress-div' class="panel panel-default" style="display: none">
+	<div class='alert alert-warning' id="progress-status-div">
+ 		File transfer in progress, Please wait. <span id="id-div-resource-alert"></span>
+	</div>
+	<table class="table table-bordered" id='id-file-table'>
+	    <thead>
+	      <tr>
+	      	<th></th>
+	        <th>File</th>
+	        <th>Status</th>
+	      </tr>
+	    </thead>
+	    <tbody>
+	    </tbody>
+	  </table>
+ </div>
+ 
+<div id='id-transfer-div' class="panel panel-info" hidden>
+	<div class="panel-heading">
+ 		Upload to USB <span id="id-div-resource-alert"></span><span id="id-tx-spinner" class="fas fa-refresh pull-right"></span>
+	</div>
+	<div class="clearfix"></div>
+	<div class="panel-body">
+		<p>
+			<span id="">Pending Transactions</span>
+			<span id="id-pending-transactions-middleman" class="badge">0</span>
+			<button id="btn-sync-middleman" type="button" class="btn btn-warning pull-right"><i class="fas fa-upload fa-fw"></i> Upload to USB</button>
+		</p>
+	</div>
+ </div>
+ 
+ {% if pending_files %}
+ <div id='id-in-progress-div-pending-files' class="panel panel-default">
+	<div class='alert alert-warning' id="progress-status-div-pending">
+ 		Pending files
+		<button id="btn-send-again" type="button" class="btn btn-warning pull-right">Send</button>
+	</div>
+	<table class="table table-bordered" id='id-file-table-pending'>
+	    <thead>
+	      <tr>
+	      	<th></th>
+	        <th>File</th>
+	        <th>Status</th>
+	      </tr>
+	    </thead>
+	    <tbody>
+	    	{% for filename in pending_files %}
+	    	<tr>
+	    	<td>{{forloop.counter}}</td>
+	    		<td>
+	    			{{filename}}
+	    		</td>
+	    		<td>
+			        <span class="glyphicon glyphicon-remove"></span>
+	    		</td>
+	    	</tr>
+	    	{% endfor %}
+	    </tbody>
+	  </table>
+ </div>
+{% endif %}
+
+ 
+ {% if recently_sent_files %}
+  <div id='id-history' class="panel panel-success">
+	<div class='alert alert-success' id="progress-status-div-hist">
+ 		Recent Transactions Sent to the Server. <div id="id-div-resource-alert-hist"></div>
+	</div>
+	<table class="table table-bordered" id='id-file-table-hist'>
+	    <thead>
+	      <tr>
+	      	<th></th>
+	        <th>File</th>
+	        <th>Confirmation Code</th>
+	        <th>Status</th>
+	      </tr>
+	    </thead>
+	    <tbody>
+		    {% for exported in recently_sent_files %}
+			      <tr>
+			      	<th>{{forloop.counter}}</th>
+			        <th>{{exported.filename}}</th>
+			        <th>{{exported.confirmation_code}}</th>
+			        <th>
+				        <span class="glyphicon glyphicon-ok"></span> 
+			        </th>
+			      </tr>
+		       {% endfor %}
+	    </tbody>
+	  </table>
+ </div>
+ {% endif %}
+
+ <div class="container">
+  <!-- Trigger the modal with a button -->
+  <button id="btn-progress" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#progressModel" style="display:none"></button>
+
+  <!-- Modal -->
+  <div class="modal fade" id="progressModel" role="dialog">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Confirmation: Sent Files</h4>
+        </div>
+        <div class="modal-body">
+        <table class="table table-bordered" id='id-file-table-confirmation'>
+	    <tbody>
+	    </tbody>
+	  </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="btn-approve" class="btn btn-default">Approve</button> <!-- data-dismiss="modal" -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+ 

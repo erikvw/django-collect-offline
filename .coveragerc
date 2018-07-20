@@ -4,3 +4,4 @@ omit =
     setup.py
     manage.py
     */migrations/*
+    venv/*
