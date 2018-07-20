@@ -1,0 +1,114 @@
+{% extends 'edc_base/base.html' %}
+
+{% load static %}
+
+{% block extra-scripts %}
+
+{{ block.super }}
+  	<link rel="stylesheet" type="text/css" href="{% static "django_collect_offline/css/badge-with-color.css" %}">
+
+  	<script type="text/javascript">
+  		var server = 'http://' + document.location.host
+	  	function receiveDevice(hostname, pending) {
+	  		if (pending > 0){
+	  			alert("Synchronize " + hostname + " with the server.");
+	  			return false;
+	  		} else {
+				var  receivedStatus = $.ajax({
+					url: window.server + '/django_collect_offline/sync-report-client',
+					type: 'GET',
+					dataType: 'json',
+					contentType: 'application/json',
+					data: {
+						hostname: hostname,
+						action: 'receive',
+					},
+				});
+				receivedStatus.done(function( data ){
+					alert(hostname + " has been received. Data collection for the machine is done for today.")
+				});
+
+				receivedStatus.fail(function( jqXHR, textStatus, errorThrown ) {
+					alert('An error occurred. Got '+ errorThrown);
+				});
+		} //End if
+	}
+  	</script>
+{% endblock extra-scripts %}
+
+{% block main %}
+    <!-- Page Content -->
+    <div class="container">
+
+        <!-- Page Header -->
+        <div class="row">
+            <div class="col-lg-12">
+                <h4 class="page-header">Operational Reports: Client Transaction Report <i class="fas fa-refresh pull-right" aria-hidden="true"></i>
+                </h4> 
+            </div>
+        </div>
+        <!-- /.row -->
+
+        <!-- Projects Row -->
+        <div class="row">
+   			<table class="table table-condensed">
+			    <thead>
+			      <tr>
+			      	<th></th>
+			        <th>Client</th>
+			        <th>Sync Time(s)</th>
+			        <th>Pending</th>
+			        <th>Checkout</th>
+			      </tr>
+			    </thead>
+			    <tbody>
+			    	{%for data in report_data %}
+				      <tr>
+				      	<td>{{forloop.counter}}</td>
+				        <td>{{data.device|truncatechars:10}}<br><small><span class="text text-muted">{{data.comment}}</span></small></td>
+				        <td>
+						  {% for file in data.sync_times %}
+						    {{forloop.counter}}. 
+						    <span class="text text-info">{{file.created |date:"D d, M y"}} {{file.created | time:"H:i A"}}</span><br>
+						  {% empty %}
+						  	<span class="text text-muted"><small>Not synced today.</small></span>
+						  {% endfor %}
+				        </td>
+				        {% if data.pending > 0 %}
+					        <td class="alert alert-danger">
+					        	{{data.pending}} records <br>
+					        	<span><small><b>Synchronize {{data.device}} with the server.</b></small></span>
+					        </td>
+					     {% else %}
+					      	<td>
+					     	{% if data.connected %}
+						        No pending data
+						     {% else %}
+						    	<i class="fas fa-question" aria-hidden="true"></i>
+						    {% endif%}
+						     </td>
+					     {% endif %}
+				        <td>
+				        	{% if not data.received %}
+				        		{% if data.connected %}
+				        			<button id="btn-receive" type="button" class="btn btn-warning" onclick="receiveDevice('{{data.device}}', '{{data.pending}}');">Receive</button>
+				      			{% else %}
+						    		<i class="fas fa-exclamation-triangle" aria-hidden="true"> Not Connected</i>
+				        		{% endif %}
+				        	{% else %}
+				        		{% if data.connected %}
+				        			<button id="btn-receive" type="button" class="btn btn-success">Received</button>
+				        		{% endif %}
+				        	{% endif %}
+				        </td>
+				      </tr>
+				    {% empty %}
+				    	<div class="well well-sm alert alert-warning">
+	        				No data to generate report.
+	        			</div>
+				    {% endfor %}
+			    </tbody>
+		  </table>
+        </div>
+        </div>
+{% endblock main %}
