@@ -132,8 +132,8 @@ Data Flow
 .. |pypi| image:: https://img.shields.io/pypi/v/django-offline.svg
     :target: https://pypi.python.org/pypi/django-offline
     
-.. |travis| image:: https://travis-ci.org/clinicedc/django-offline.svg?branch=develop
-    :target: https://travis-ci.org/clinicedc/django-offline
+.. |travis| image:: https://travis-ci.org/erikvw/django-offline.svg?branch=develop
+    :target: https://travis-ci.org/erikvw/django-offline
     
-.. |coverage| image:: https://coveralls.io/repos/github/clinicedc/django-offline/badge.svg?branch=develop
-    :target: https://coveralls.io/github/clinicedc/django-offline?branch=develop
+.. |coverage| image:: https://coveralls.io/repos/github/erikvw/django-offline/badge.svg?branch=develop
+    :target: https://coveralls.io/github/erikvw/django-offline?branch=develop
