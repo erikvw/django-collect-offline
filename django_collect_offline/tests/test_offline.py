@@ -13,7 +13,7 @@ from .models import TestModelWithFkProtected
 from .models import TestOfflineModelNoHistoryManager, TestOfflineModelNoUuid
 
 
-class TestSync(TestCase):
+class TestOffline(TestCase):
 
     multi_db = True
 
@@ -134,7 +134,9 @@ class TestSync(TestCase):
                         test_model_with_fk_historical=(
                             OutgoingTransaction.objects.using('client').get(
                                 tx_pk=history_obj.history_id,
-                                tx_name='django_collect_offline.historicaltestmodelwithfkprotected',
+                                tx_name=(
+                                    'django_collect_offline.historicaltest'
+                                    'modelwithfkprotected'),
                                 action=INSERT)))
                 except OutgoingTransaction.DoesNotExist:
                     pass

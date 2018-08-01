@@ -144,7 +144,9 @@ class HostModelMixin(models.Model):
 
     @property
     def url_template(self):
-        return f'http://{self.hostname}:{self.port}/django_collect_offline/api/{self.api_name}/'
+        return (
+            f'http://{self.hostname}:{self.port}/django_collect_offline/'
+            f'api/{self.api_name}/')
 
     @property
     def url(self):

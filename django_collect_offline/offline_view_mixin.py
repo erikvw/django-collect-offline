@@ -43,7 +43,8 @@ class OfflineViewMixin:
             resource = 'incomingtransaction'
         else:
             raise ImproperlyConfigured(
-                'Project uses \'django_collect_offline\' but has not defined a valid role for this '
+                'Project uses \'django_collect_offline\' but has '
+                f'not defined a valid role for this '
                 f'app instance. See AppConfig. Got {self.device_role}.')
         return resource
 

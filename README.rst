@@ -124,9 +124,10 @@ Data Flow
 =========
 
 ``django-collect-offline`` uses either the REST API or FILE transfer:
-- field client ---REST---> community server
-- field client ---REST---> middleman (and modelre inspector) ---REST---> community server
-- site server ---FILE---> central server
+
+* field client ---REST---> community server
+* field client ---REST---> middleman (and modelre inspector) ---REST---> community server
+* site server ---FILE---> central server
 
 
 .. |pypi| image:: https://img.shields.io/pypi/v/django-collect-offline.svg
