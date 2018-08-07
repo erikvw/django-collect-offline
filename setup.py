@@ -32,7 +32,11 @@ setup(
         'django-js-reverse',
         'django-cors-headers',
         'requests',
-        'Faker',
+        'edc-base',
+        'edc-rest',
+        'django-crypto-fields',
+        'django-collect-offline-files',
+        'edc-device'
     ],
     classifiers=[
         'Environment :: Web Environment',

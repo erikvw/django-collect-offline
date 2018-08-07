@@ -1,11 +1,11 @@
 import socket
 
-from django_crypto_fields.cryptor import Cryptor
-from edc_base.utils import get_utcnow
 from django.apps import apps as django_apps
 from django.conf import settings
 from django.db.models.fields import UUIDField
 from django_crypto_fields.constants import LOCAL_MODE
+from django_crypto_fields.cryptor import Cryptor
+from edc_base.utils import get_utcnow
 
 from .constants import INSERT, UPDATE, DELETE
 from .transaction import serialize
