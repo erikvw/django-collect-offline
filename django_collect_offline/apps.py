@@ -15,7 +15,7 @@ class OfflineConfigError(Exception):
 class AppConfig(DjangoAppConfig):
     name = 'django_collect_offline'
     verbose_name = 'Offline Synchronization'
-    base_template_name = 'edc_base/base.html'
+    base_template_name = 'edc_dashboard/bootstrap3/base.html'
     custom_json_parsers = []
     django_collect_offline_files_using = True
 
