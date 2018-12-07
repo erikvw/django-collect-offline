@@ -2,7 +2,7 @@ import json
 
 from django.apps import apps as django_apps
 from django.core.exceptions import MultipleObjectsReturned
-from edc_base.model_mixins import ListModelMixin
+from edc_list_data.model_mixins import ListModelMixin
 from unittest.case import TestCase
 
 from ..models import OutgoingTransaction
