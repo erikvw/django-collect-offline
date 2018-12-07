@@ -1,8 +1,8 @@
 from django.contrib.auth.models import User
 from django.test import TestCase, tag
-from edc_base.site_models import SiteModelAlreadyRegistered, SiteModelNotRegistered
 
 from ..site_offline_models import site_offline_models
+from ..site_offline_models import SiteModelAlreadyRegistered, SiteModelNotRegistered
 from .models import TestModel
 
 
@@ -26,7 +26,8 @@ class TestSiteSyncModels(TestCase):
         self.assertTrue(repr(site_offline_models))
 
     def test_site_offline_models2(self):
-        self.assertIn('django_collect_offline', site_offline_models.site_models())
+        self.assertIn('django_collect_offline',
+                      site_offline_models.site_models())
 
     def test_already_registered(self):
         self.assertRaises(
