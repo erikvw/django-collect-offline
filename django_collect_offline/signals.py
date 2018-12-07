@@ -1,9 +1,8 @@
 from django.db.models.signals import post_save, m2m_changed, post_delete
 from django.dispatch import receiver
-from edc_base.site_models import SiteModelNotRegistered
 from rest_framework.authtoken.models import Token
 
-from .site_offline_models import site_offline_models
+from .site_offline_models import site_offline_models, SiteModelNotRegistered
 
 
 @receiver(post_save, sender=Token)
