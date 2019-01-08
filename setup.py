@@ -35,6 +35,7 @@ setup(
         'djangorestframework',
         'edc-base',
         'edc-device',
+        'edc_list_data',
         'edc-rest',
         'requests',
     ],
