@@ -3,11 +3,9 @@ import socket
 from django.apps import apps as django_apps
 from django_crypto_fields.constants import LOCAL_MODE
 from django_crypto_fields.cryptor import Cryptor
-from django_collect_offline_files.transaction.file_archiver import FileArchiver
 from edc_device.constants import NODE_SERVER, CENTRAL_SERVER
 
 from ..constants import DELETE
-from ..models import IncomingTransaction
 from .deserialize import deserialize
 
 
@@ -82,43 +80,3 @@ class TransactionDeserializer:
         for json_parser in app_config.custom_json_parsers:
             json_text = json_parser(json_text)
         return json_text
-
-
-class CustomTransactionDeserializer(TransactionDeserializer):
-
-    file_archiver_cls = FileArchiver
-
-    def __init__(self,
-                 using=None, allow_self=None, override_role=None,
-                 order_by=None, model=None, batch=None, producer=None,
-                 **options):
-        super().__init__(**options)
-        self.allow_self = allow_self
-        self.aes_decrypt = aes_decrypt
-        self.deserialize = deserialize
-        self.override_role = override_role
-        self.save = save
-        self.using = using
-        """ Find how inherit parent properties.
-        """
-        filters = {}
-        if model:
-            filters.update({'tx_name': model})
-        if batch:
-            filters.update({'batch_id': batch})
-        if producer:
-            filters.update({'producer': producer})
-        if filters:
-            try:
-                transactions = IncomingTransaction.objects.filter(
-                    **filters).order_by(*order_by.split(','))
-                self.deserialize_transactions(transactions=transactions)
-            except TransactionDeserializerError as e:
-                raise TransactionDeserializerError(e) from e
-            else:
-                obj = self.file_archiver_cls(
-                    src_path=django_apps.get_app_config(
-                        'django_collect_offline').pending_folder,
-                    dst_path=django_apps.get_app_config(
-                        'django_collect_offline').archive_folder)
-                obj.archive(filename=f'{batch}.json')

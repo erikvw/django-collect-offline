@@ -1,4 +1,4 @@
-var outgoingListUrl = '/edc_sync/api/outgoingtransaction/'; //Urls[ 'edc_sync:outgoingtransaction-list' ]();
+var outgoingListUrl = '/django_collect_offline/api/outgoingtransaction/'; //Urls[ 'django_collect_offline:outgoingtransaction-list' ]();
 
 var client = 'http://' + document.location.host
 
@@ -59,7 +59,7 @@ function File (filename, filesize, index) {
 }
 
 function exportBatch(server , userName) {
-	var url = client + '/edc_sync/';
+	var url = client + '/django_collect_offline/';
 	var ajExportBatch = $.ajax({
 		url: url,
 		type: 'GET',
@@ -107,7 +107,7 @@ function sendTransactionFile(file) {
 	/*
 		Send a file transaction to node server or central server.
 	*/
-	var url = client + '/edc_sync/';
+	var url = client + '/django_collect_offline/';
 	var ajSendFile = $.ajax({
 		url: url,
 		type: 'GET',
@@ -150,7 +150,7 @@ function sendTransactionFile(file) {
 
 function getFileTransferStatus( fileName ) {
 	//
-	var url = client + '/edc_sync/';
+	var url = client + '/django_collect_offline/';
 	var isTransferred = $.ajax({
 		url: url,
 		type: 'GET',
@@ -189,7 +189,7 @@ function getNextPendingFile() {
 }
 
 function updateFromHost( host ) {
-	var url = host + '/edc_sync/api/transaction-count/';
+	var url = host + '/django_collect_offline/api/transaction-count/';
 	ajTransactionCount = $.ajax({
 		url: url,
 		type: 'GET',
@@ -221,7 +221,7 @@ function updateIcon( index, status ) {
 
 function saveConfirmationCode() {
 	//
-		var url = client + '/edc_sync/';
+		var url = client + '/django_collect_offline/';
 		var ajSaveConfirmation = $.ajax({
 			url: url,
 			type: 'GET',
@@ -241,7 +241,7 @@ function saveConfirmationCode() {
 
 
 function processPendingFiles() {
-	var url = client + '/edc_sync/';
+	var url = client + '/django_collect_offline/';
 	var ajPendingFiles = $.ajax({
 		url: url,
 		type: 'GET',

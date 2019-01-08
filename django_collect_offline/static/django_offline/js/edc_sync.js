@@ -1,4 +1,4 @@
-var outgoingListUrl = '/edc_sync/api/outgoingtransaction/'; //Urls[ 'edc_sync:outgoingtransaction-list' ]();
+var outgoingListUrl = '/django_collect_offline/api/outgoingtransaction/'; //Urls[ 'django_collect_offline:outgoingtransaction-list' ]();
 
 var server = 'http://' + document.location.host
 
@@ -65,7 +65,7 @@ function processOutgoingTransactions( host, userName ) {
 
 	ajPostIncoming = ajGetOutgoing.then( function( outgoingtransactions ) {
 
-		var incomingListUrl = '/edc_sync/api/incomingtransaction/'; //Urls[ 'edc_sync:incomingtransaction-list' ]();
+		var incomingListUrl = '/django_collect_offline/api/incomingtransaction/'; //Urls[ 'django_collect_offline:incomingtransaction-list' ]();
 		outgoingtransaction_count = outgoingtransactions.count;
 		outgoingtransaction = outgoingtransactions.results[0];
 		$( '#id-resource-alert-text' ).text( hostAlertText( host, outgoingtransaction_count ) );
@@ -82,8 +82,8 @@ function processOutgoingTransactions( host, userName ) {
 
 	ajPatchOutgoing = ajPostIncoming.then( function( incomingtransaction ) {
 		var json_data = {};
-		var outgoingDetailUrl = '/edc_sync/api/outgoingtransaction/'+ outgoingtransaction.pk + '/';
-			//Urls[ 'edc_sync:outgoingtransaction-detail' ]( outgoingtransaction.pk );
+		var outgoingDetailUrl = '/django_collect_offline/api/outgoingtransaction/'+ outgoingtransaction.pk + '/';
+			//Urls[ 'django_collect_offline:outgoingtransaction-detail' ]( outgoingtransaction.pk );
 		var outgoingtransaction_fields = {
 			'user_modified': userName,
 			'modified': moment().utc().format("YYYY-MM-DDTHH:mm:ss.SSSZZ"),
@@ -199,11 +199,11 @@ function updateFromHosts( hosts ) {
 
 function updateFromHost( host , isServer) {
 	var host_string = host.replace( ':', '-' ).split( '.' ).join( '-' );
-	var url = 'http://' + host + '/edc_sync/api/transaction-count/';
+	var url = 'http://' + host + '/django_collect_offline/api/transaction-count/';
 	if (isServer == true){
-		var url = host + '/edc_sync/api/transaction-count/';
+		var url = host + '/django_collect_offline/api/transaction-count/';
 	}
-	//Urls['edc_sync:transaction-count']();
+	//Urls['django_collect_offline:transaction-count']();
 	ajTransactionCount = $.ajax({
 		url: url,
 		type: 'GET',
@@ -237,8 +237,8 @@ function processIncomingTransactions( homeUrl, userName ) {
    	Called recursively until incomingtransactions are all applied.
    	*/
 
-	var incomingListUrl = '/edc_sync/api/incomingtransaction/'; 
-	//Urls[ 'edc_sync:incomingtransaction-list' ]();
+	var incomingListUrl = '/django_collect_offline/api/incomingtransaction/'; 
+	//Urls[ 'django_collect_offline:incomingtransaction-list' ]();
 
 	var ajGetIncoming = $.ajax({
 		url: server + incomingListUrl + '?format=json',

@@ -1,6 +1,7 @@
 from django.db.models.signals import post_save, m2m_changed, post_delete
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
+from simple_history.signals import post_create_historical_record
 
 from .site_offline_models import site_offline_models, SiteModelNotRegistered
 
@@ -38,13 +39,31 @@ def serialize_on_save(sender, instance, raw, created, using, **kwargs):
     Skip those not registered.
     """
     if not raw:
-        try:
-            wrapped_instance = site_offline_models.get_wrapped_instance(
-                instance)
-        except SiteModelNotRegistered:
-            pass
-        else:
-            wrapped_instance.to_outgoing_transaction(using, created=created)
+        if 'historical' not in instance._meta.label_lower:
+            try:
+                wrapped_instance = site_offline_models.get_wrapped_instance(
+                    instance)
+            except SiteModelNotRegistered:
+                pass
+            else:
+                wrapped_instance.to_outgoing_transaction(
+                    using, created=created)
+
+
+@receiver(post_create_historical_record, weak=False,
+          dispatch_uid='serialize_history_on_post_create')
+def serialize_history_on_post_create(history_instance, using, **kwargs):
+    """ Serialize the history instance as an OutgoingTransaction.
+
+    Skip those not registered.
+    """
+    try:
+        wrapped_instance = site_offline_models.get_wrapped_instance(
+            history_instance)
+    except SiteModelNotRegistered:
+        pass
+    else:
+        wrapped_instance.to_outgoing_transaction(using, created=True)
 
 
 @receiver(post_delete, weak=False, dispatch_uid="serialize_on_post_delete")

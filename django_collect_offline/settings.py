@@ -3,8 +3,6 @@ import sys
 
 from pathlib import PurePath
 
-from .loggers import LOGGING
-
 APP_NAME = 'django_collect_offline'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -176,7 +174,6 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ),
 }
-LOGGING = LOGGING
 
 DJANGO_COLLECT_OFFLINE_SERVER_IP = None
 DJANGO_COLLECT_OFFLINE_FILES_REMOTE_HOST = None

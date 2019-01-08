@@ -3,7 +3,7 @@ from django.db import models
 from edc_base.model_mixins import BaseUuidModel
 from edc_base.sites import CurrentSiteManager, SiteModelMixin
 
-from .model_mixins import TransactionModelMixin
+from ..model_mixins import TransactionModelMixin
 
 
 class IncomingTransaction(TransactionModelMixin, SiteModelMixin, BaseUuidModel):

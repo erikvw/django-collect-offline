@@ -124,7 +124,7 @@ class TestModelWithFkProtected(BaseUuidModel):
 
     def natural_key(self):
         return (self.f1,)
-    natural_key.dependencies = ['django_collect_offline.test_model']
+    natural_key.dependencies = ['django_collect_offline.testmodel']
 
 
 class TestModelWithM2m(BaseUuidModel):

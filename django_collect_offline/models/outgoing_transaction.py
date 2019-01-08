@@ -4,7 +4,11 @@ from edc_base.model_mixins import BaseUuidModel
 from edc_base.sites import CurrentSiteManager, SiteModelMixin
 from edc_base.utils import get_utcnow
 
-from .model_mixins import TransactionModelMixin
+from ..model_mixins import TransactionModelMixin
+
+
+class OutgoingTransactionError(Exception):
+    pass
 
 
 class OutgoingTransaction(TransactionModelMixin, SiteModelMixin, BaseUuidModel):
@@ -30,9 +34,8 @@ class OutgoingTransaction(TransactionModelMixin, SiteModelMixin, BaseUuidModel):
 
     def save(self, *args, **kwargs):
         if not self.using:
-            raise ValueError(
-                'Value for \'{}.using\' cannot be None.'.format(
-                    self._meta.model_name))
+            raise OutgoingTransactionError(
+                f'\'{self._meta.model_name}.using\' cannot be None.')
         if self.is_consumed_server and not self.consumed_datetime:
             self.consumed_datetime = get_utcnow()
         super().save(*args, **kwargs)

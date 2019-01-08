@@ -1,4 +1,4 @@
-var outgoingListUrl = '/edc_sync/api/outgoingtransaction/'; //Urls[ 'edc_sync:outgoingtransaction-list' ]();
+var outgoingListUrl = '/django_collect_offline/api/outgoingtransaction/'; //Urls[ 'django_collect_offline:outgoingtransaction-list' ]();
 
 var client = 'http://' + document.location.host
 
@@ -39,7 +39,7 @@ function edcSyncUSBReady(server, userName, apiToken) {
 }
 
 function checkUSBConnectivity(server , userName) {
-	var url = client + '/edc_sync/dump-to-usb/';
+	var url = client + '/django_collect_offline/dump-to-usb/';
 	var checkUSBConnection = $.ajax({
 		url: url,
 		type: 'GET',
@@ -73,7 +73,7 @@ function checkUSBConnectivity(server , userName) {
 
 function dumpTransactionMiddlemanFile(server , userName) {
 
-	var url = client + '/edc_sync/dump-to-usb/';
+	var url = client + '/django_collect_offline/dump-to-usb/';
 	var ajDumpFile = $.ajax({
 		url: url,
 		type: 'GET',
@@ -87,7 +87,7 @@ function dumpTransactionMiddlemanFile(server , userName) {
 	        $( '#id-transfer-status-div' ).show();
 	    	$( '#id-transfer-status-div' ).text( 'Transaction file: '+ data.filename + ' have been copied to usb successfuly.' );
 	    	$( '#id-transfer-status-div' ).removeClass( 'alert-warning' ).addClass( 'alert-success' );
-	    	window.location = client + '/edc_sync/';
+	    	window.location = client + '/django_collect_offline/';
 	    	window.transaction_count = 0;
 	        $( '#id-in-progress-div-pending-files' ).prop( "disabled", false );
 	        $( '#btn-sync' ).prop( 'disabled', false );
@@ -104,7 +104,7 @@ function dumpTransactionMiddlemanFile(server , userName) {
 }
 
 function loadUsbTransactionFile(server , userName) {
-	var url = client + '/edc_sync/dump-to-usb/';
+	var url = client + '/django_collect_offline/dump-to-usb/';
 	var ajloadFile = $.ajax({
 		url: url,
 		type: 'GET',
