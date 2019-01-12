@@ -4,10 +4,12 @@ from django.test.utils import override_settings
 
 from ..constants import INSERT, UPDATE
 from ..models import OutgoingTransaction
-from ..site_offline_models import site_offline_models
-from ..offline_model import OfflineHistoricalManagerError, OfflineUuidPrimaryKeyMissing
+from ..offline_model import OfflineGetByNaturalKeyMissing
+from ..offline_model import OfflineHistoricalManagerError
 from ..offline_model import OfflineModel
-from ..offline_model import OfflineNaturalKeyMissing, OfflineGetByNaturalKeyMissing
+from ..offline_model import OfflineNaturalKeyMissing
+from ..offline_model import OfflineUuidPrimaryKeyMissing
+from ..site_offline_models import site_offline_models
 from .models import TestModel, BadTestModel, AnotherBadTestModel, YetAnotherBadTestModel
 from .models import TestModelWithFkProtected
 from .models import TestOfflineModelNoHistoryManager, TestOfflineModelNoUuid
@@ -63,7 +65,6 @@ class TestOffline(TestCase):
             except OfflineHistoricalManagerError:
                 self.fail('OfflineHistoricalManagerError unexpectedly raised.')
 
-    @tag('2')
     def test_raises_on_missing_uuid_primary_key(self):
         with override_settings(DEVICE_ID='10'):
             with self.assertRaises(OfflineUuidPrimaryKeyMissing):
@@ -95,7 +96,6 @@ class TestOffline(TestCase):
                 else:
                     raise OutgoingTransaction.DoesNotExist()
 
-    @tag('1')
     def test_creates_outgoing_on_add_with_fk_in_order(self):
         with override_settings(DEVICE_ID='10'):
             outgoing = {}

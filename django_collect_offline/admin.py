@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.urls import reverse
+from django.utils.safestring import mark_safe
 
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.admin import TokenAdmin
@@ -13,6 +15,21 @@ from .models import IncomingTransaction, OutgoingTransaction, Client, Server
 admin.site.unregister(Token)
 
 
+class TransactionModelAdminMixin:
+
+    def view(self):
+        url = reverse('django_collect_offline:render_url',
+                      kwargs={
+                          'model_name': self._meta.object_name.lower(),
+                          'pk': str(self.pk)})
+        ret = mark_safe(
+            '<a href="{url}" class="add-another" id="add_id_report" '
+            'onclick="return showAddAnotherPopup(this);"> '
+            '<img src="/static/admin/img/icon_addlink.gif" '
+            'width="10" height="10" alt="View"/></a>'.format(url=url))
+        return ret
+
+
 @admin.register(Token, site=django_collect_offline_admin)
 class MyTokenAdmin(TokenAdmin):
     raw_id_fields = ('user',)
@@ -22,7 +39,7 @@ class MyTokenAdmin(TokenAdmin):
 
 
 @admin.register(IncomingTransaction, site=django_collect_offline_admin)
-class IncomingTransactionAdmin (admin.ModelAdmin):
+class IncomingTransactionAdmin (TransactionModelAdminMixin, admin.ModelAdmin):
 
     ordering = ('-timestamp', )
 
@@ -40,7 +57,7 @@ class IncomingTransactionAdmin (admin.ModelAdmin):
 
 
 @admin.register(OutgoingTransaction, site=django_collect_offline_admin)
-class OutgoingTransactionAdmin (admin.ModelAdmin):
+class OutgoingTransactionAdmin (TransactionModelAdminMixin, admin.ModelAdmin):
 
     ordering = ('-timestamp', )
 

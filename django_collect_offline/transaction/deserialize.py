@@ -14,4 +14,4 @@ def deserialize(json_text=None):
         "json", json_text,
         ensure_ascii=True,
         use_natural_foreign_keys=True,
-        use_natural_primary_keys=True)
+        use_natural_primary_keys=False)

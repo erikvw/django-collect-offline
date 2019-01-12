@@ -24,7 +24,9 @@ class AppConfig(DjangoAppConfig):
     def ready(self):
         from .signals import (
             create_auth_token, serialize_on_post_delete,
-            serialize_m2m_on_save, serialize_on_save)
+            serialize_m2m_on_save,
+            serialize_on_save,
+            serialize_history_on_post_create)
         sys.stdout.write(f'Loading {self.verbose_name} ...\n')
         site_offline_models.autodiscover()
         sys.stdout.write(f' Done loading {self.verbose_name}.\n')

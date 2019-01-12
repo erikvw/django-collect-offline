@@ -1,7 +1,13 @@
+from django.db import models
 from edc_base.model_mixins import BaseUuidModel
 
-from .managers import HostManager
-from .model_mixins import HostModelMixin
+from ..model_mixins import HostModelMixin
+
+
+class ServerManager(models.Manager):
+
+    def get_by_natural_key(self, hostname):
+        return self.get(hostname=hostname)
 
 
 class Server(HostModelMixin, BaseUuidModel):
@@ -9,8 +15,7 @@ class Server(HostModelMixin, BaseUuidModel):
     """A model to capture the attributes of the server.
     """
 
-    objects = HostManager()
+    objects = ServerManager()
 
     class Meta:
         ordering = ['hostname', 'port']
-        unique_together = (('hostname', 'port'),)

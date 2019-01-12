@@ -5,7 +5,7 @@ from django_crypto_fields.cryptor import Cryptor
 from rest_framework.parsers import JSONParser
 from rest_framework.renderers import JSONRenderer
 
-from ..models import OutgoingTransaction
+from ..models import OutgoingTransaction, OutgoingTransactionError
 from ..serializers import OutgoingTransactionSerializer
 from ..site_offline_models import site_offline_models
 from .models import TestModel
@@ -25,7 +25,7 @@ class TestSerializers(TestCase):
     def test_outgoingtransaction_serializer_inits(self):
         obj = OutgoingTransaction.objects.last()
         serializer = OutgoingTransactionSerializer(obj)
-        serializer.data
+        self.assertTrue(serializer.data)
 
     def test_outgoingtransaction_serializer_renders(self):
         obj = OutgoingTransaction.objects.last()
@@ -71,3 +71,8 @@ class TestSerializers(TestCase):
         json_data = JSONParser().parse(stream)
         self.assertTrue(json_data[0]['fields']['f1'],
                         'give any one species too much rope ...')
+
+    def test_outgoingtransaction_no_using(self):
+        obj = OutgoingTransaction.objects.last()
+        obj.using = None
+        self.assertRaises(OutgoingTransactionError, obj.save)

@@ -1,7 +1,13 @@
+from django.db import models
 from edc_base.model_mixins import BaseUuidModel
 
-from .model_mixins import HostModelMixin
-from .managers import HostManager
+from ..model_mixins import HostModelMixin
+
+
+class ClientManager(models.Manager):
+
+    def get_by_natural_key(self, hostname):
+        return self.get(hostname=hostname)
 
 
 class Client(HostModelMixin, BaseUuidModel):
@@ -10,8 +16,7 @@ class Client(HostModelMixin, BaseUuidModel):
     contacted by the server.
     """
 
-    objects = HostManager()
+    objects = ClientManager()
 
     class Meta:
         ordering = ['hostname', 'port']
-        unique_together = (('hostname', 'port'),)

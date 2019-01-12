@@ -9,6 +9,7 @@ def serialize(objects=None):
     a pk is set, it should not be changed throughout the
     distributed data.
     """
+
     return serializers.serialize(
         'json', objects,
         ensure_ascii=True,

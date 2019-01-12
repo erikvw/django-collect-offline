@@ -1,6 +1,8 @@
 [run]
 omit =
     */wsgi.py
+    */navbars.py
+    */management/*
     setup.py
     manage.py
     */migrations/*

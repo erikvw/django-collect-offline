@@ -4,11 +4,13 @@ import tempfile
 
 from copy import copy
 from django.apps import apps as django_apps
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.serializers.base import DeserializationError
 from django.test import TestCase, tag
 from edc_base.utils import get_utcnow
 from edc_device.constants import NODE_SERVER
-from django_collect_offline_files.transaction import TransactionImporter, TransactionExporter
+from django_collect_offline_files.transaction import TransactionImporter
+from django_collect_offline_files.transaction import TransactionExporter
 from faker import Faker
 
 from ..models import OutgoingTransaction, IncomingTransaction
@@ -16,7 +18,8 @@ from ..site_offline_models import site_offline_models
 from ..parsers import datetime_to_date_parser
 from ..offline_model import OfflineModel
 from ..transaction import TransactionDeserializer, TransactionDeserializerError
-from .models import TestModel, TestModelWithFkProtected, TestModelWithM2m, M2m, TestModelDates
+from .models import TestModel, TestModelWithFkProtected
+from .models import TestModelWithM2m, M2m, TestModelDates
 
 
 fake = Faker()
@@ -39,7 +42,7 @@ class TestDeserializer1(TestCase):
             'django_collect_offline.testmodel',
             'django_collect_offline.testmodelwithfkprotected',
             'django_collect_offline.testmodelwithm2m',
-            'django_collect_offline.testmodelhook', ]
+            'django_collect_offline.testmodelhook']
         site_offline_models.register(sync_models)
 
         self.export_path = os.path.join(tempfile.gettempdir(), 'export')
@@ -230,12 +233,15 @@ class TestDeserializer2(TestCase):
         self.assertRaises(TransactionDeserializerError,
                           TransactionDeserializer, allow_self=True)
 
-    def test_deserialized_with_fk(self):
+    def test_deserialized_with_fk_and_history(self):
         """Asserts correctly deserialized model with FK.
         """
+        # create model instance on 'client' DB
         test_model = TestModel.objects.using('client').create(f1='model1')
         TestModelWithFkProtected.objects.using(
             'client').create(f1='f1', test_model=test_model)
+
+        # export tx
         tx_exporter = TransactionExporter(
             export_path=self.export_path, using='client')
         batch = tx_exporter.export_batch()
@@ -245,17 +251,34 @@ class TestDeserializer2(TestCase):
             allow_self=True, override_role=NODE_SERVER)
         tx_deserializer.deserialize_transactions(
             transactions=batch.saved_transactions)
-        test_model = TestModel.objects.get(f1='model1')
+
         try:
-            obj = TestModelWithFkProtected.objects.get(f1='f1')
+            TestModelWithFkProtected.objects.get(f1='f1')
         except TestModelWithFkProtected.DoesNotExist:
-            self.fail('TestModel unexpectedly does not exists')
-        self.assertEqual(test_model, obj.test_model)
+            self.fail('TestModelWithFkProtected unexpectedly does not exist')
+
+        try:
+            TestModelWithFkProtected.history.get(f1='f1')
+        except TestModelWithFkProtected.DoesNotExist:
+            self.fail('TestModelWithFkProtected unexpectedly does not exist')
+
+        try:
+            TestModel.objects.get(f1='model1')
+        except TestModel.DoesNotExist:
+            self.fail('TestModel unexpectedly does not exist')
+
+        try:
+            TestModel.history.get(f1='model1')
+        except TestModel.DoesNotExist:
+            self.fail('TestModel unexpectedly does not exist')
 
     def test_deserialized_with_history(self):
         """Asserts correctly deserialized model with history.
         """
         TestModel.objects.using('client').create(f1='model1')
+        self.assertRaises(
+            ObjectDoesNotExist, TestModel.history.get, f1='model1')
+
         tx_exporter = TransactionExporter(
             export_path=self.export_path, using='client')
         batch = tx_exporter.export_batch()
@@ -265,10 +288,11 @@ class TestDeserializer2(TestCase):
             allow_self=True, override_role=NODE_SERVER)
         tx_deserializer.deserialize_transactions(
             transactions=batch.saved_transactions)
+
         try:
             TestModel.history.get(f1='model1')
         except TestModel.DoesNotExist:
-            self.fail('TestModel history unexpectedly does not exists')
+            self.fail('TestModel history unexpectedly does not exist')
 
     def test_deserialize_with_m2m(self):
         """Asserts deserializes model with M2M as long as
@@ -352,7 +376,8 @@ class TestDeserializer3(TestCase):
         self.obj.tx = self.obj.aes_encrypt(json_text)
         self.obj.save()
         self.obj = IncomingTransaction.objects.get(id=self.obj.id)
-        self.app_config = copy(django_apps.get_app_config('django_collect_offline'))
+        self.app_config = copy(
+            django_apps.get_app_config('django_collect_offline'))
 
     def tearDown(self):
         django_apps.app_configs['django_collect_offline'] = self.app_config
