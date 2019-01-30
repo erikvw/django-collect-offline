@@ -5,7 +5,6 @@ from ..model_mixins import HostModelMixin
 
 
 class ClientManager(models.Manager):
-
     def get_by_natural_key(self, hostname):
         return self.get(hostname=hostname)
 
@@ -19,4 +18,4 @@ class Client(HostModelMixin, BaseUuidModel):
     objects = ClientManager()
 
     class Meta:
-        ordering = ['hostname', 'port']
+        ordering = ["hostname", "port"]

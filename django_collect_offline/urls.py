@@ -11,20 +11,25 @@ from .views import TransactionCountView, OfflineReportView
 
 
 router = DefaultRouter()
-router.register(r'outgoingtransaction', OutgoingTransactionViewSet)
-router.register(r'incomingtransaction', IncomingTransactionViewSet)
+router.register(r"outgoingtransaction", OutgoingTransactionViewSet)
+router.register(r"incomingtransaction", IncomingTransactionViewSet)
 
-app_name = 'django_collect_offline'
+app_name = "django_collect_offline"
 
 urlpatterns = [
-    path('admin/', django_collect_offline_admin.urls),
-    path('api/transaction-count/',
-         TransactionCountView.as_view(), name='transaction-count'),
-    path('sync-report/',
-         OfflineReportView.as_view(), name='sync-report'),
-    path('api/', include(router.urls)),
-    path('api-token-auth/', obtain_auth_token),
-    re_path(f'render/(?P<model_name>\w+)/(?P<pk>{UUID_PATTERN.pattern})/',
-            RenderView.as_view(), name='render_url'),
-    path('', HomeView.as_view(), name='home_url'),
+    path("admin/", django_collect_offline_admin.urls),
+    path(
+        "api/transaction-count/",
+        TransactionCountView.as_view(),
+        name="transaction-count",
+    ),
+    path("sync-report/", OfflineReportView.as_view(), name="sync-report"),
+    path("api/", include(router.urls)),
+    path("api-token-auth/", obtain_auth_token),
+    re_path(
+        f"render/(?P<model_name>\w+)/(?P<pk>{UUID_PATTERN.pattern})/",
+        RenderView.as_view(),
+        name="render_url",
+    ),
+    path("", HomeView.as_view(), name="home_url"),
 ]

@@ -12,10 +12,9 @@ from .models import Client, Server
 
 
 class OfflineViewMixin:
-
     @property
     def device_role(self):
-        edc_device_app = django_apps.get_app_config('edc_device')
+        edc_device_app = django_apps.get_app_config("edc_device")
         return edc_device_app.device_role
 
     @property
@@ -29,23 +28,25 @@ class OfflineViewMixin:
             host_model = Server
         else:
             raise ImproperlyConfigured(
-                'Project uses \'django_collect_offline\' but has not defined a '
-                'valid device role for this '
-                f'app instance. See AppConfig. Got {self.device_role}.')
+                "Project uses 'django_collect_offline' but has not defined a "
+                "valid device role for this "
+                f"app instance. See AppConfig. Got {self.device_role}."
+            )
         return host_model
 
     @property
     def resource(self):
-        resource = 'outgoingtransaction'
+        resource = "outgoingtransaction"
         if self.device_role in [SERVER, CENTRAL_SERVER, NODE_SERVER]:
-            resource = 'outgoingtransaction'
+            resource = "outgoingtransaction"
         elif self.device_role == CLIENT:
-            resource = 'incomingtransaction'
+            resource = "incomingtransaction"
         else:
             raise ImproperlyConfigured(
-                'Project uses \'django_collect_offline\' but has '
-                f'not defined a valid role for this '
-                f'app instance. See AppConfig. Got {self.device_role}.')
+                "Project uses 'django_collect_offline' but has "
+                f"not defined a valid role for this "
+                f"app instance. See AppConfig. Got {self.device_role}."
+            )
         return resource
 
     @property

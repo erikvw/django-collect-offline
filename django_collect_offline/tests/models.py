@@ -9,7 +9,6 @@ from uuid import uuid4
 
 
 class TestModelManager(models.Manager):
-
     def get_by_natural_key(self, f1):
         return self.get(f1=f1)
 
@@ -34,13 +33,9 @@ class TestModelDates(BaseUuidModel):
 
     f1 = models.CharField(max_length=10, unique=True)
 
-    f2 = models.DateField(
-        blank=True,
-        null=True)
+    f2 = models.DateField(blank=True, null=True)
 
-    f3 = models.DateTimeField(
-        blank=True,
-        default=get_utcnow)
+    f3 = models.DateTimeField(blank=True, default=get_utcnow)
 
     objects = TestModelManager()
 
@@ -52,7 +47,7 @@ class BadTestModel(BaseUuidModel):
     """A test model that is missing natural_key and get_by_natural_key.
     """
 
-    f1 = models.CharField(max_length=10, default='f1')
+    f1 = models.CharField(max_length=10, default="f1")
 
     objects = models.Manager()
 
@@ -61,7 +56,7 @@ class AnotherBadTestModel(BaseUuidModel):
     """A test model that is missing get_by_natural_key.
     """
 
-    f1 = models.CharField(max_length=10, default='f1')
+    f1 = models.CharField(max_length=10, default="f1")
 
     objects = models.Manager()
 
@@ -73,7 +68,7 @@ class YetAnotherBadTestModel(BaseUuidModel):
     """A test model with the wrong HistoricalManager.
     """
 
-    f1 = models.CharField(max_length=10, default='f1')
+    f1 = models.CharField(max_length=10, default="f1")
 
     objects = TestModelManager()
 
@@ -87,7 +82,7 @@ class TestOfflineModelNoHistoryManager(BaseUuidModel):
     """A test model without a HistoricalManager.
     """
 
-    f1 = models.CharField(max_length=10, default='f1')
+    f1 = models.CharField(max_length=10, default="f1")
 
     objects = TestModelManager()
 
@@ -99,7 +94,7 @@ class TestOfflineModelNoUuid(BaseModel):
     """A test model without a HistoricalManager.
     """
 
-    f1 = models.CharField(max_length=10, default='f1')
+    f1 = models.CharField(max_length=10, default="f1")
 
     objects = TestModelManager()
 
@@ -124,7 +119,8 @@ class TestModelWithFkProtected(BaseUuidModel):
 
     def natural_key(self):
         return (self.f1,)
-    natural_key.dependencies = ['django_collect_offline.testmodel']
+
+    natural_key.dependencies = ["django_collect_offline.testmodel"]
 
 
 class TestModelWithM2m(BaseUuidModel):

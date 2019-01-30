@@ -11,7 +11,9 @@ def serialize(objects=None):
     """
 
     return serializers.serialize(
-        'json', objects,
+        "json",
+        objects,
         ensure_ascii=True,
         use_natural_foreign_keys=True,
-        use_natural_primary_keys=False)
+        use_natural_primary_keys=False,
+    )

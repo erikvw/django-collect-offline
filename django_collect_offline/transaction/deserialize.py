@@ -11,7 +11,9 @@ def deserialize(json_text=None):
     """
 
     return serializers.deserialize(
-        "json", json_text,
+        "json",
+        json_text,
         ensure_ascii=True,
         use_natural_foreign_keys=True,
-        use_natural_primary_keys=False)
+        use_natural_primary_keys=False,
+    )

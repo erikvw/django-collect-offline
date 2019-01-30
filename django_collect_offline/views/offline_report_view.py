@@ -12,17 +12,21 @@ from ..models import IncomingTransaction
 
 class OfflineReportView(EdcBaseViewMixin, OfflineViewMixin, ListView):
 
-    template_name = 'django_collect_offline/offline_report.html'
+    template_name = "django_collect_offline/offline_report.html"
 
     def get_queryset(self):
-        return IncomingTransaction.objects.values('producer').filter(
-            is_consumed=False).annotate(
-                pending=Count('is_consumed')).order_by('producer')
+        return (
+            IncomingTransaction.objects.values("producer")
+            .filter(is_consumed=False)
+            .annotate(pending=Count("is_consumed"))
+            .order_by("producer")
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        app_config = django_apps.get_app_config('django_collect_offline')
+        app_config = django_apps.get_app_config("django_collect_offline")
         context.update(
             base_template_name=app_config.base_template_name,
-            django_collect_offline_files_admin=django_collect_offline_files_admin)
+            django_collect_offline_files_admin=django_collect_offline_files_admin,
+        )
         return context
