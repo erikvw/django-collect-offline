@@ -45,26 +45,28 @@ class OfflineModel:
         self.has_uuid_primary_key_or_raise()
 
     def __repr__(self):
-        return f'{self.__class__.__name__}({repr(self.instance)})'
+        return f"{self.__class__.__name__}({repr(self.instance)})"
 
     def __str__(self):
-        return f'{self.instance._meta.label_lower}'
+        return f"{self.instance._meta.label_lower}"
 
     def has_natural_key_or_raise(self):
         try:
             self.instance.natural_key
         except AttributeError:
             raise OfflineNaturalKeyMissing(
-                f'Model \'{self.instance._meta.app_label}.{self.instance._meta.model_name}\' '
-                'is missing method natural_key ')
+                f"Model '{self.instance._meta.app_label}.{self.instance._meta.model_name}' "
+                "is missing method natural_key "
+            )
 
     def has_get_by_natural_key_or_raise(self):
         try:
             self.instance.__class__.objects.get_by_natural_key
         except AttributeError:
             raise OfflineGetByNaturalKeyMissing(
-                f'Model \'{self.instance._meta.app_label}.{self.instance._meta.model_name}\' '
-                'is missing manager method get_by_natural_key ')
+                f"Model '{self.instance._meta.app_label}.{self.instance._meta.model_name}' "
+                "is missing manager method get_by_natural_key "
+            )
 
     def has_offline_historical_manager_or_raise(self):
         """Raises an exception if model uses a history manager and
@@ -77,25 +79,25 @@ class OfflineModel:
             model = self.instance.__class__.history.model
         except AttributeError:
             model = self.instance.__class__
-        field = [
-            field for field in model._meta.fields
-            if field.name == 'history_id']
+        field = [field for field in model._meta.fields if field.name == "history_id"]
         if field and not isinstance(field[0], UUIDField):
             raise OfflineHistoricalManagerError(
-                f'Field \'history_id\' of historical model '
-                f'\'{model._meta.app_label}.{model._meta.model_name}\' '
-                'must be an UUIDfield. '
-                'For history = HistoricalRecords() use edc_base.HistoricalRecords instead of '
-                'simple_history.HistoricalRecords(). '
-                f'See \'{self.instance._meta.app_label}.{self.instance._meta.model_name}\'.')
+                f"Field 'history_id' of historical model "
+                f"'{model._meta.app_label}.{model._meta.model_name}' "
+                "must be an UUIDfield. "
+                "For history = HistoricalRecords() use edc_base.HistoricalRecords instead of "
+                "simple_history.HistoricalRecords(). "
+                f"See '{self.instance._meta.app_label}.{self.instance._meta.model_name}'."
+            )
 
     def has_uuid_primary_key_or_raise(self):
-        if self.primary_key_field.get_internal_type() != 'UUIDField':
+        if self.primary_key_field.get_internal_type() != "UUIDField":
             raise OfflineUuidPrimaryKeyMissing(
-                f'Expected Model \'{self.instance._meta.label_lower}\' '
-                f'primary key {self.primary_key_field} to be a UUIDField '
-                f'(e.g. AutoUUIDField). '
-                f'Got {self.primary_key_field.get_internal_type()}.')
+                f"Expected Model '{self.instance._meta.label_lower}' "
+                f"primary key {self.primary_key_field} to be a UUIDField "
+                f"(e.g. AutoUUIDField). "
+                f"Got {self.primary_key_field.get_internal_type()}."
+            )
 
     @property
     def primary_key_field(self):
@@ -103,18 +105,20 @@ class OfflineModel:
 
         Is `id` in most cases. Is `history_id` for Historical models.
         """
-        return [field for field in self.instance._meta.fields
-                if field.primary_key][0]
+        return [field for field in self.instance._meta.fields if field.primary_key][0]
 
     def to_outgoing_transaction(self, using, created=None, deleted=None):
         """ Serialize the model instance to an AES encrypted json object
         and saves the json object to the OutgoingTransaction model.
         """
         OutgoingTransaction = django_apps.get_model(
-            'django_collect_offline', 'OutgoingTransaction')
+            "django_collect_offline", "OutgoingTransaction"
+        )
         created = True if created is None else created
         action = INSERT if created else UPDATE
-        timestamp_datetime = self.instance.created if created else self.instance.modified
+        timestamp_datetime = (
+            self.instance.created if created else self.instance.modified
+        )
         if not timestamp_datetime:
             timestamp_datetime = get_utcnow()
         if deleted:
@@ -127,10 +131,11 @@ class OfflineModel:
                 tx_name=self.instance._meta.label_lower,
                 tx_pk=getattr(self.instance, self.primary_key_field.name),
                 tx=self.encrypted_json(),
-                timestamp=timestamp_datetime.strftime('%Y%m%d%H%M%S%f'),
-                producer=f'{hostname}-{using}',
+                timestamp=timestamp_datetime.strftime("%Y%m%d%H%M%S%f"),
+                producer=f"{hostname}-{using}",
                 action=action,
-                using=using)
+                using=using,
+            )
         return outgoing_transaction
 
     def encrypted_json(self):

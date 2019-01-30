@@ -1,5 +1,5 @@
-CLIENT = 'Client'
-SERVER = 'Server'
-INSERT = 'I'
-UPDATE = 'U'
-DELETE = 'D'
+CLIENT = "Client"
+SERVER = "Server"
+INSERT = "I"
+UPDATE = "U"
+DELETE = "D"

@@ -15,51 +15,50 @@ def create_auth_token(sender, instance, raw, created, **kwargs):
             sender.objects.create(user=instance)
 
 
-@receiver(m2m_changed, weak=False, dispatch_uid='serialize_m2m_on_save')
+@receiver(m2m_changed, weak=False, dispatch_uid="serialize_m2m_on_save")
 def serialize_m2m_on_save(sender, action, instance, using, **kwargs):
     """ Part of the serialize transaction process that ensures m2m are
     serialized correctly.
 
     Skip those not registered.
     """
-    if action == 'post_add':
+    if action == "post_add":
         try:
-            wrapped_instance = site_offline_models.get_wrapped_instance(
-                instance)
+            wrapped_instance = site_offline_models.get_wrapped_instance(instance)
         except SiteModelNotRegistered:
             pass
         else:
             wrapped_instance.to_outgoing_transaction(using, created=True)
 
 
-@receiver(post_save, weak=False, dispatch_uid='serialize_on_save')
+@receiver(post_save, weak=False, dispatch_uid="serialize_on_save")
 def serialize_on_save(sender, instance, raw, created, using, **kwargs):
     """ Serialize the model instance as an OutgoingTransaction.
 
     Skip those not registered.
     """
     if not raw:
-        if 'historical' not in instance._meta.label_lower:
+        if "historical" not in instance._meta.label_lower:
             try:
-                wrapped_instance = site_offline_models.get_wrapped_instance(
-                    instance)
+                wrapped_instance = site_offline_models.get_wrapped_instance(instance)
             except SiteModelNotRegistered:
                 pass
             else:
-                wrapped_instance.to_outgoing_transaction(
-                    using, created=created)
+                wrapped_instance.to_outgoing_transaction(using, created=created)
 
 
-@receiver(post_create_historical_record, weak=False,
-          dispatch_uid='serialize_history_on_post_create')
+@receiver(
+    post_create_historical_record,
+    weak=False,
+    dispatch_uid="serialize_history_on_post_create",
+)
 def serialize_history_on_post_create(history_instance, using, **kwargs):
     """ Serialize the history instance as an OutgoingTransaction.
 
     Skip those not registered.
     """
     try:
-        wrapped_instance = site_offline_models.get_wrapped_instance(
-            history_instance)
+        wrapped_instance = site_offline_models.get_wrapped_instance(history_instance)
     except SiteModelNotRegistered:
         pass
     else:
@@ -78,5 +77,4 @@ def serialize_on_post_delete(sender, instance, using, **kwargs):
     except SiteModelNotRegistered:
         pass
     else:
-        wrapped_instance.to_outgoing_transaction(
-            using, created=False, deleted=True)
+        wrapped_instance.to_outgoing_transaction(using, created=False, deleted=True)

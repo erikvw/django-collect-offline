@@ -11,18 +11,15 @@ class IncomingTransaction(TransactionModelMixin, SiteModelMixin, BaseUuidModel):
     """ Transactions received from a remote host.
     """
 
-    site = models.ForeignKey(
-        Site, on_delete=models.CASCADE, null=True, editable=False)
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, editable=False)
 
-    is_consumed = models.BooleanField(
-        default=False)
+    is_consumed = models.BooleanField(default=False)
 
-    is_self = models.BooleanField(
-        default=False)
+    is_self = models.BooleanField(default=False)
 
     on_site = CurrentSiteManager()
 
     objects = models.Manager()
 
     class Meta:
-        ordering = ['timestamp']
+        ordering = ["timestamp"]

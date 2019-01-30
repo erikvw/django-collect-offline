@@ -31,9 +31,8 @@ def aes_decrypt(cipher_text):
 
 
 class TransactionDeserializer:
-
     def __init__(self, using=None, allow_self=None, override_role=None, **kwargs):
-        app_config = django_apps.get_app_config('edc_device')
+        app_config = django_apps.get_app_config("edc_device")
         self.aes_decrypt = aes_decrypt
         self.deserialize = deserialize
         self.save = save
@@ -42,9 +41,10 @@ class TransactionDeserializer:
         if not app_config.is_server:
             if override_role not in [NODE_SERVER, CENTRAL_SERVER]:
                 raise TransactionDeserializerError(
-                    'Transactions may only be deserialized on a server. '
-                    f'Got override_role={override_role}, device={app_config.device_id}, '
-                    f'device_role={app_config.device_role}.')
+                    "Transactions may only be deserialized on a server. "
+                    f"Got override_role={override_role}, device={app_config.device_id}, "
+                    f"device_role={app_config.device_role}."
+                )
 
     def deserialize_transactions(self, transactions=None, deserialize_only=None):
         """Deserializes the encrypted serialized model
@@ -54,11 +54,14 @@ class TransactionDeserializer:
         that represents just ONE model instance.
         """
 
-        if not self.allow_self and transactions.filter(
-                producer=socket.gethostname()).exists():
+        if (
+            not self.allow_self
+            and transactions.filter(producer=socket.gethostname()).exists()
+        ):
             raise TransactionDeserializerError(
-                f'Not deserializing own transactions. Got '
-                f'allow_self=False, hostname={socket.gethostname()}')
+                f"Not deserializing own transactions. Got "
+                f"allow_self=False, hostname={socket.gethostname()}"
+            )
         for transaction in transactions:
             json_text = self.aes_decrypt(cipher_text=transaction.tx)
             json_text = self.custom_parser(json_text)
@@ -67,16 +70,14 @@ class TransactionDeserializer:
                 if transaction.action == DELETE:
                     deserialized.object.delete()
                 else:
-                    self.save(
-                        obj=deserialized.object,
-                        m2m_data=deserialized.m2m_data)
+                    self.save(obj=deserialized.object, m2m_data=deserialized.m2m_data)
                 transaction.is_consumed = True
                 transaction.save()
 
     def custom_parser(self, json_text=None):
         """Runs json_text thru custom parsers.
         """
-        app_config = django_apps.get_app_config('django_collect_offline')
+        app_config = django_apps.get_app_config("django_collect_offline")
         for json_parser in app_config.custom_json_parsers:
             json_text = json_parser(json_text)
         return json_text

@@ -17,14 +17,11 @@ class OutgoingTransaction(TransactionModelMixin, SiteModelMixin, BaseUuidModel):
     to a queue or consumer.
     """
 
-    site = models.ForeignKey(
-        Site, on_delete=models.CASCADE, null=True, editable=False)
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, editable=False)
 
-    is_consumed_middleman = models.BooleanField(
-        default=False)
+    is_consumed_middleman = models.BooleanField(default=False)
 
-    is_consumed_server = models.BooleanField(
-        default=False)
+    is_consumed_server = models.BooleanField(default=False)
 
     using = models.CharField(max_length=25, null=True)
 
@@ -35,10 +32,11 @@ class OutgoingTransaction(TransactionModelMixin, SiteModelMixin, BaseUuidModel):
     def save(self, *args, **kwargs):
         if not self.using:
             raise OutgoingTransactionError(
-                f'\'{self._meta.model_name}.using\' cannot be None.')
+                f"'{self._meta.model_name}.using' cannot be None."
+            )
         if self.is_consumed_server and not self.consumed_datetime:
             self.consumed_datetime = get_utcnow()
         super().save(*args, **kwargs)
 
     class Meta:
-        ordering = ['timestamp']
+        ordering = ["timestamp"]

@@ -1,3 +1,6 @@
-include AUTHORS CHANGES README.rst LICENSE VERSION
+include AUTHORS CHANGES LICENSE VERSION
+include MANIFEST.in
+include *.rst
+include *.txt
 recursive-include django_collect_offline/templates *
 recursive-include django_collect_offline/static *

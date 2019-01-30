@@ -12,57 +12,34 @@ class TransactionModelMixin(models.Model):
 
     tx = models.BinaryField()
 
-    tx_name = models.CharField(
-        max_length=64)
+    tx_name = models.CharField(max_length=64)
 
-    tx_pk = models.UUIDField(
-        db_index=True)
+    tx_pk = models.UUIDField(db_index=True)
 
     producer = models.CharField(
-        max_length=200,
-        db_index=True,
-        help_text='Producer name')
+        max_length=200, db_index=True, help_text="Producer name"
+    )
 
-    action = models.CharField(
-        max_length=1,
-        choices=ACTIONS)
+    action = models.CharField(max_length=1, choices=ACTIONS)
 
-    timestamp = models.CharField(
-        max_length=50,
-        db_index=True)
+    timestamp = models.CharField(max_length=50, db_index=True)
 
-    consumed_datetime = models.DateTimeField(
-        null=True,
-        blank=True)
+    consumed_datetime = models.DateTimeField(null=True, blank=True)
 
-    consumer = models.CharField(
-        max_length=200,
-        null=True,
-        blank=True)
+    consumer = models.CharField(max_length=200, null=True, blank=True)
 
-    is_ignored = models.BooleanField(
-        default=False)
+    is_ignored = models.BooleanField(default=False)
 
-    is_error = models.BooleanField(
-        default=False)
+    is_error = models.BooleanField(default=False)
 
-    error = models.TextField(
-        max_length=1000,
-        null=True,
-        blank=True)
+    error = models.TextField(max_length=1000, null=True, blank=True)
 
-    prev_batch_id = models.CharField(
-        max_length=100,
-        null=True,
-        blank=True)
+    prev_batch_id = models.CharField(max_length=100, null=True, blank=True)
 
-    batch_id = models.CharField(
-        max_length=100,
-        null=True,
-        blank=True)
+    batch_id = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):
-        return f'{self._meta.model_name}.{self.tx_name}.{self.id}.{self.action}'
+        return f"{self._meta.model_name}.{self.tx_name}.{self.id}.{self.action}"
 
     def aes_decrypt(self, cipher):
         cryptor = Cryptor()
