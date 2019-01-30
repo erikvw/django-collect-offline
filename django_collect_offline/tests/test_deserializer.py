@@ -7,16 +7,16 @@ from django.apps import apps as django_apps
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.serializers.base import DeserializationError
 from django.test import TestCase, tag
+from django_collect_offline_files.transaction import TransactionExporter
+from django_collect_offline_files.transaction import TransactionImporter
 from edc_base.utils import get_utcnow
 from edc_device.constants import NODE_SERVER
-from django_collect_offline_files.transaction import TransactionImporter
-from django_collect_offline_files.transaction import TransactionExporter
 from faker import Faker
 
 from ..models import OutgoingTransaction, IncomingTransaction
-from ..site_offline_models import site_offline_models
-from ..parsers import datetime_to_date_parser
 from ..offline_model import OfflineModel
+from ..parsers import datetime_to_date_parser
+from ..site_offline_models import site_offline_models
 from ..transaction import TransactionDeserializer, TransactionDeserializerError
 from .models import TestModel, TestModelWithFkProtected
 from .models import TestModelWithM2m, M2m, TestModelDates
