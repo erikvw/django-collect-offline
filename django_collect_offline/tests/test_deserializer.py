@@ -9,8 +9,8 @@ from django.core.serializers.base import DeserializationError
 from django.test import TestCase, tag
 from django_collect_offline_files.transaction import TransactionExporter
 from django_collect_offline_files.transaction import TransactionImporter
-from edc_base.utils import get_utcnow
 from edc_device.constants import NODE_SERVER
+from edc_utils import get_utcnow
 from faker import Faker
 
 from ..models import OutgoingTransaction, IncomingTransaction

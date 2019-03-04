@@ -1,9 +1,8 @@
 from django.db import models
 from django.db.models.deletion import PROTECT
-from edc_base.model_managers import HistoricalRecords
-from edc_base.model_mixins import BaseUuidModel, BaseModel
-from edc_base.utils import get_utcnow
 from edc_list_data.model_mixins import ListModelMixin
+from edc_model.models import BaseUuidModel, HistoricalRecords, BaseModel
+from edc_utils import get_utcnow
 from simple_history.models import HistoricalRecords as BadHistoricalRecords
 from uuid import uuid4
 
