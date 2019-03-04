@@ -5,7 +5,7 @@ from django.conf import settings
 from django.db.models.fields import UUIDField
 from django_crypto_fields.constants import LOCAL_MODE
 from django_crypto_fields.cryptor import Cryptor
-from edc_base.utils import get_utcnow
+from edc_utils import get_utcnow
 
 from .constants import INSERT, UPDATE, DELETE
 from .transaction import serialize
@@ -72,7 +72,7 @@ class OfflineModel:
         """Raises an exception if model uses a history manager and
         historical model history_id is not a UUIDField.
 
-        Note: expected to use edc_base.HistoricalRecords instead of
+        Note: expected to use edc_model.HistoricalRecords instead of
         simple_history.HistoricalRecords.
         """
         try:
@@ -85,7 +85,7 @@ class OfflineModel:
                 f"Field 'history_id' of historical model "
                 f"'{model._meta.app_label}.{model._meta.model_name}' "
                 "must be an UUIDfield. "
-                "For history = HistoricalRecords() use edc_base.HistoricalRecords instead of "
+                "For history = HistoricalRecords() use edc_model.HistoricalRecords instead of "
                 "simple_history.HistoricalRecords(). "
                 f"See '{self.instance._meta.app_label}.{self.instance._meta.model_name}'."
             )
