@@ -1,16 +1,14 @@
-from edc_base.view_mixins import EdcBaseViewMixin
-
 from django.apps import apps as django_apps
 from django.db.models.aggregates import Count
 from django.views.generic import ListView
-
 from django_collect_offline_files.admin_site import django_collect_offline_files_admin
+from edc_dashboard.view_mixins import EdcViewMixin
 
 from ..offline_view_mixin import OfflineViewMixin
 from ..models import IncomingTransaction
 
 
-class OfflineReportView(EdcBaseViewMixin, OfflineViewMixin, ListView):
+class OfflineReportView(EdcViewMixin, OfflineViewMixin, ListView):
 
     template_name = "django_collect_offline/offline_report.html"
 

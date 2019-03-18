@@ -7,25 +7,32 @@ dist: xenial
 
 sudo: true
 
-services:
-- mysql
-
 addons:
   apt_packages:
   - libcups2-dev
 
+services:
+- mysql
+
 install:
-- pip install flake8 coveralls tox
-- pip install -e .
-- pip install -r requirements.txt
+- pip install --upgrade pip
+- pip install flake8 coverage codecov tox-travis
 
 before_script:
 - flake8 django_collect_offline
 - mysql -e 'create database edc character set utf8;'
 
 script:
-- coverage run --source=django_collect_offline setup.py test
+- coverage run -m tox
 
 after_success:
-- coveralls
-  
+- codecov
+
+matrix:
+  include:
+    - python: 3.7
+      env: TOXENV=py37-django21
+    - python: 3.7
+      env: TOXENV=py37-django22
+;    - python: 3.7
+;      env: TOXENV=py37-djangotrunk

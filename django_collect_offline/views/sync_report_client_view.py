@@ -4,7 +4,7 @@ from datetime import datetime
 from django.apps import apps as django_apps
 from django.urls import reverse
 from django.views.generic.base import TemplateView
-from edc_base.view_mixins import EdcBaseViewMixin
+from edc_dashboard.view_mixins import EdcViewMixin
 from django_collect_offline_files.models import ImportedTransactionFileHistory
 from requests.exceptions import ConnectionError, HTTPError
 
@@ -13,7 +13,7 @@ from ..offline_view_mixin import OfflineViewMixin
 from ..models import Client
 
 
-class SyncReportClientView(EdcBaseViewMixin, OfflineViewMixin, TemplateView):
+class SyncReportClientView(EdcViewMixin, OfflineViewMixin, TemplateView):
 
     template_name = "django_collect_offline/sync_report_client.html"
 
@@ -25,7 +25,8 @@ class SyncReportClientView(EdcBaseViewMixin, OfflineViewMixin, TemplateView):
         app_config = django_apps.get_app_config("edc_map")  # FIXME: ?
         context.update(
             django_collect_offline_admin=django_collect_offline_admin,
-            project_name=context.get("project_name") + ": " + self.role.title(),
+            project_name=context.get("project_name")
+            + ": " + self.role.title(),
             base_template_name=app_config.base_template_name,
         )
         return context

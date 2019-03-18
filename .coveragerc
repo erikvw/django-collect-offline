@@ -1,12 +1,4 @@
 [run]
-omit =
-    */wsgi.py
-    */navbars.py
-    */management/*
-    setup.py
-    manage.py
-    */migrations/*
-    venv/*
-    .*/*
-    runtests.py
-    
+include = django_collect_offline/*
+omit = django_collect_offline/tests/*
+branch = 1
