@@ -7,10 +7,10 @@ from django.utils.decorators import method_decorator
 from django.views.generic.base import TemplateView
 from django_crypto_fields.constants import LOCAL_MODE
 from django_crypto_fields.cryptor import Cryptor
-from edc_base.view_mixins import EdcBaseViewMixin
+from edc_dashboard.view_mixins import EdcViewMixin
 
 
-class RenderView(EdcBaseViewMixin, TemplateView):
+class RenderView(EdcViewMixin, TemplateView):
     @method_decorator(login_required)
     def dispatch(self, *args, **kwargs):
         return super().dispatch(*args, **kwargs)

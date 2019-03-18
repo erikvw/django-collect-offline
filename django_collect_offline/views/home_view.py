@@ -9,7 +9,7 @@ from django.http.response import HttpResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.views.generic.base import TemplateView
-from edc_base.view_mixins import EdcBaseViewMixin
+from edc_dashboard.view_mixins import EdcViewMixin
 from edc_navbar import NavbarViewMixin
 from django_collect_offline_files.action_handler import (
     ActionHandler,
@@ -26,7 +26,7 @@ logger = logging.getLogger("django_collect_offline")
 
 @method_decorator(never_cache, name="dispatch")
 @method_decorator(login_required, name="dispatch")
-class HomeView(EdcBaseViewMixin, NavbarViewMixin, OfflineViewMixin, TemplateView):
+class HomeView(EdcViewMixin, NavbarViewMixin, OfflineViewMixin, TemplateView):
 
     template_name = "django_collect_offline/home.html"
     action_handler_cls = ActionHandler
