@@ -10,6 +10,47 @@ from edc_test_utils import DefaultTestSettings
 from os.path import abspath, dirname, join
 
 
+class DefaultTestSettings(DefaultTestSettings):
+    def check_travis(self):
+        if os.environ.get("TRAVIS"):
+            self.settings.update(
+                DATABASES={
+                    "default": {
+                        "ENGINE": "django.db.backends.mysql",
+                        "NAME": "edc_default",
+                        "USER": "travis",
+                        "PASSWORD": "",
+                        "HOST": "localhost",
+                        "PORT": "",
+                    },
+                    "server": {
+                        "ENGINE": "django.db.backends.mysql",
+                        "NAME": "edc_server",
+                        "USER": "travis",
+                        "PASSWORD": "",
+                        "HOST": "localhost",
+                        "PORT": "",
+                    },
+                    "client": {
+                        "ENGINE": "django.db.backends.mysql",
+                        "NAME": "edc_client",
+                        "USER": "travis",
+                        "PASSWORD": "",
+                        "HOST": "localhost",
+                        "PORT": "",
+                    },
+                    "test_server": {
+                        "ENGINE": "django.db.backends.mysql",
+                        "NAME": "edc_test_server",
+                        "USER": "travis",
+                        "PASSWORD": "",
+                        "HOST": "localhost",
+                        "PORT": "",
+                    },
+                }
+            )
+
+
 app_name = 'django_collect_offline'
 base_dir = dirname(abspath(__file__))
 

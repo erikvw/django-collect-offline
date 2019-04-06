@@ -17,7 +17,10 @@ install:
 
 before_script:
 - flake8 django_collect_offline
-- mysql -e 'create database edc character set utf8;'
+- mysql -e 'create database edc_default character set utf8;'
+- mysql -e 'create database edc_server character set utf8;'
+- mysql -e 'create database edc_client character set utf8;'
+- mysql -e 'create database edc_test_server character set utf8;'
 
 script:
 - coverage run -m tox
