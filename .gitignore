@@ -1,6 +1,4 @@
-etc/*
-venv/*
-
+django_crypto_fields
 # Swap
 [._]*.s[a-v][a-z]
 [._]*.sw[a-p]

@@ -9,7 +9,7 @@ navbar.append_item(
         label="Offline Synchronization",
         fa_icon="fa-exchange",
         url_name="django_collect_offline:home_url",
-        permission_codename="edc_navbar.nav_synchronization",
+        codename="edc_navbar.nav_synchronization",
     )
 )
 
