@@ -6,11 +6,11 @@ import sys
 
 from django.conf import settings
 from django.test.runner import DiscoverRunner
-from edc_test_utils import DefaultTestSettings
+from edc_test_utils import DefaultTestSettings as Base
 from os.path import abspath, dirname, join
 
 
-class DefaultTestSettings(DefaultTestSettings):
+class DefaultTestSettings(Base):
     def check_travis(self):
         if os.environ.get("TRAVIS"):
             self.settings.update(
