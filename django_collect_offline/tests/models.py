@@ -14,11 +14,11 @@ class TestModelManager(models.Manager):
 
 class TestModel(BaseUuidModel):
 
-    f1 = models.CharField(max_length=10, unique=True)
+    f1 = models.CharField(max_length=50, unique=True)
 
-    f2 = models.CharField(max_length=10, null=True)
+    f2 = models.CharField(max_length=50, null=True)
 
-    f3 = models.CharField(max_length=10, default=uuid4())
+    f3 = models.CharField(max_length=50, default=uuid4())
 
     objects = TestModelManager()
 
@@ -30,7 +30,7 @@ class TestModel(BaseUuidModel):
 
 class TestModelDates(BaseUuidModel):
 
-    f1 = models.CharField(max_length=10, unique=True)
+    f1 = models.CharField(max_length=50, unique=True)
 
     f2 = models.DateField(blank=True, null=True)
 
@@ -46,7 +46,7 @@ class BadTestModel(BaseUuidModel):
     """A test model that is missing natural_key and get_by_natural_key.
     """
 
-    f1 = models.CharField(max_length=10, default="f1")
+    f1 = models.CharField(max_length=50, default="f1")
 
     objects = models.Manager()
 
@@ -55,7 +55,7 @@ class AnotherBadTestModel(BaseUuidModel):
     """A test model that is missing get_by_natural_key.
     """
 
-    f1 = models.CharField(max_length=10, default="f1")
+    f1 = models.CharField(max_length=50, default="f1")
 
     objects = models.Manager()
 
@@ -67,7 +67,7 @@ class YetAnotherBadTestModel(BaseUuidModel):
     """A test model with the wrong HistoricalManager.
     """
 
-    f1 = models.CharField(max_length=10, default="f1")
+    f1 = models.CharField(max_length=50, default="f1")
 
     objects = TestModelManager()
 
@@ -81,7 +81,7 @@ class TestOfflineModelNoHistoryManager(BaseUuidModel):
     """A test model without a HistoricalManager.
     """
 
-    f1 = models.CharField(max_length=10, default="f1")
+    f1 = models.CharField(max_length=50, default="f1")
 
     objects = TestModelManager()
 
@@ -93,7 +93,7 @@ class TestOfflineModelNoUuid(BaseModel):
     """A test model without a HistoricalManager.
     """
 
-    f1 = models.CharField(max_length=10, default="f1")
+    f1 = models.CharField(max_length=50, default="f1")
 
     objects = TestModelManager()
 
@@ -108,7 +108,7 @@ class M2m(ListModelMixin, BaseUuidModel):
 
 class TestModelWithFkProtected(BaseUuidModel):
 
-    f1 = models.CharField(max_length=10, unique=True)
+    f1 = models.CharField(max_length=50, unique=True)
 
     test_model = models.ForeignKey(TestModel, on_delete=PROTECT)
 
@@ -124,7 +124,7 @@ class TestModelWithFkProtected(BaseUuidModel):
 
 class TestModelWithM2m(BaseUuidModel):
 
-    f1 = models.CharField(max_length=10, unique=True)
+    f1 = models.CharField(max_length=50, unique=True)
 
     m2m = models.ManyToManyField(M2m)
 

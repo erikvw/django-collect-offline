@@ -73,7 +73,6 @@ DEFAULT_SETTINGS = DefaultTestSettings(
         'rest_framework.authtoken',
         'django_js_reverse',
         'simple_history',
-        'edc_base.apps.AppConfig',
         'edc_protocol.apps.AppConfig',
         'edc_device.apps.AppConfig',
         'django_collect_offline_files.apps.AppConfig',
