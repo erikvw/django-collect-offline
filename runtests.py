@@ -6,11 +6,11 @@ import sys
 
 from django.conf import settings
 from django.test.runner import DiscoverRunner
-from edc_test_utils import DefaultTestSettings
+from edc_test_utils import DefaultTestSettings as Base
 from os.path import abspath, dirname, join
 
 
-class DefaultTestSettings(DefaultTestSettings):
+class DefaultTestSettings(Base):
     def check_travis(self):
         if os.environ.get("TRAVIS"):
             self.settings.update(
@@ -73,7 +73,6 @@ DEFAULT_SETTINGS = DefaultTestSettings(
         'rest_framework.authtoken',
         'django_js_reverse',
         'simple_history',
-        'edc_base.apps.AppConfig',
         'edc_protocol.apps.AppConfig',
         'edc_device.apps.AppConfig',
         'django_collect_offline_files.apps.AppConfig',
