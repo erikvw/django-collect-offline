@@ -1,4 +1,4 @@
-|pypi| |travis| |codecov| |downloads|
+|pypi| |travis| |codecov| |downloads| |maintainability| |black|
 
 
 django-collect-offline
@@ -142,11 +142,11 @@ Data Flow
 .. |downloads| image:: https://pepy.tech/badge/django-collect-offline
    :target: https://pepy.tech/project/django-collect-offline
 
-.. image:: https://api.codeclimate.com/v1/badges/e08f2bbee238af7bfdc7/maintainability
+.. |maintainability| image:: https://api.codeclimate.com/v1/badges/e08f2bbee238af7bfdc7/maintainability
    :target: https://codeclimate.com/github/erikvw/django-collect-offline/maintainability
    :alt: Maintainability
 
-.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+.. |black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
    :target: https://github.com/ambv/black
    :alt: Code Style   
 

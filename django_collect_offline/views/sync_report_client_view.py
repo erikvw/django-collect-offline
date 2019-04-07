@@ -25,8 +25,7 @@ class SyncReportClientView(EdcViewMixin, OfflineViewMixin, TemplateView):
         app_config = django_apps.get_app_config("edc_map")  # FIXME: ?
         context.update(
             django_collect_offline_admin=django_collect_offline_admin,
-            project_name=context.get("project_name")
-            + ": " + self.role.title(),
+            project_name=context.get("project_name") + ": " + self.role.title(),
             base_template_name=app_config.base_template_name,
         )
         return context
