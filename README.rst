@@ -1,4 +1,4 @@
-|pypi| |travis| |coverage|
+|pypi| |travis| |codecov| |downloads|
 
 
 django-collect-offline
@@ -136,5 +136,9 @@ Data Flow
 .. |travis| image:: https://travis-ci.org/erikvw/django-collect-offline.svg?branch=develop
     :target: https://travis-ci.org/erikvw/django-collect-offline
     
-.. |coverage| image:: https://coveralls.io/repos/github/erikvw/django-collect-offline/badge.svg?branch=develop
-    :target: https://coveralls.io/github/erikvw/django-collect-offline?branch=develop
+.. |codecov| image:: https://codecov.io/gh/erikvw/django-collect-offline/branch/develop/graph/badge.svg
+  :target: https://codecov.io/gh/erikvw/django-collect-offline
+
+.. |downloads| image:: https://pepy.tech/badge/django-collect-offline
+   :target: https://pepy.tech/project/django-collect-offline
+
