@@ -1,12 +1,11 @@
-from edc_rest.binary_field import BinaryField
-from edc_rest.serializers import BaseModelSerializerMixin
 from rest_framework import serializers
 
 from .choices import ACTIONS
 from .models import IncomingTransaction, OutgoingTransaction
+from .rest import ModelSerializerMixin, BinaryField
 
 
-class BaseTransactionSerializer(BaseModelSerializerMixin, serializers.Serializer):
+class BaseTransactionSerializer(ModelSerializerMixin, serializers.Serializer):
 
     pk = serializers.UUIDField(read_only=True)
 

@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.urls import path, re_path, include
 from edc_constants.constants import UUID_PATTERN
 from rest_framework.authtoken.views import obtain_auth_token

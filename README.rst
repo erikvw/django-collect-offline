@@ -35,7 +35,7 @@ For example the base class for all CRFs in a module might look like this:
 
 .. code-block:: python
 
-    from edc_base.model.models import BaseUuidModel, HistoricalRecords
+    from edc_model.models import BaseUuidModel, HistoricalRecords
     
     from .visit import Visit
 
