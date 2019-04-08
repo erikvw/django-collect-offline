@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase, tag
 
 from ..site_offline_models import site_offline_models
-from ..site_offline_models import SiteModelAlreadyRegistered, SiteModelNotRegistered
+from ..site_offline_models import AlreadyRegistered, ModelNotRegistered
 from .models import TestModel
 
 
@@ -31,7 +31,7 @@ class TestSiteSyncModels(TestCase):
 
     def test_already_registered(self):
         self.assertRaises(
-            SiteModelAlreadyRegistered,
+            AlreadyRegistered,
             site_offline_models.register,
             models=["django_collect_offline.testmodel"],
         )
@@ -42,7 +42,7 @@ class TestSiteSyncModels(TestCase):
     def test_get_as_sync_model_not_registered(self):
         user = User()
         self.assertRaises(
-            SiteModelNotRegistered, site_offline_models.get_wrapped_instance, user
+            ModelNotRegistered, site_offline_models.get_wrapped_instance, user
         )
 
     def test_get_as_sync_model_none(self):

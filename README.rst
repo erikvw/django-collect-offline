@@ -1,4 +1,4 @@
-|pypi| |travis| |coverage|
+|pypi| |travis| |codecov| |downloads| |maintainability| |black|
 
 
 django-collect-offline
@@ -35,7 +35,7 @@ For example the base class for all CRFs in a module might look like this:
 
 .. code-block:: python
 
-    from edc_base.model.models import BaseUuidModel, HistoricalRecords
+    from edc_model.models import BaseUuidModel, HistoricalRecords
     
     from .visit import Visit
 
@@ -136,5 +136,17 @@ Data Flow
 .. |travis| image:: https://travis-ci.org/erikvw/django-collect-offline.svg?branch=develop
     :target: https://travis-ci.org/erikvw/django-collect-offline
     
-.. |coverage| image:: https://coveralls.io/repos/github/erikvw/django-collect-offline/badge.svg?branch=develop
-    :target: https://coveralls.io/github/erikvw/django-collect-offline?branch=develop
+.. |codecov| image:: https://codecov.io/gh/erikvw/django-collect-offline/branch/develop/graph/badge.svg
+  :target: https://codecov.io/gh/erikvw/django-collect-offline
+
+.. |downloads| image:: https://pepy.tech/badge/django-collect-offline
+   :target: https://pepy.tech/project/django-collect-offline
+
+.. |maintainability| image:: https://api.codeclimate.com/v1/badges/e08f2bbee238af7bfdc7/maintainability
+   :target: https://codeclimate.com/github/erikvw/django-collect-offline/maintainability
+   :alt: Maintainability
+
+.. |black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
+   :target: https://github.com/ambv/black
+   :alt: Code Style   
+

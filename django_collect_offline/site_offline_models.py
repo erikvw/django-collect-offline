@@ -4,26 +4,21 @@ import sys
 from django.apps import apps as django_apps
 from django.utils.module_loading import import_module, module_has_submodule
 
+from .offline_model import OfflineModel
 
-class SiteModelAlreadyRegistered(Exception):
+
+class AlreadyRegistered(Exception):
     pass
 
 
-class SiteModelError(Exception):
+class ModelNotRegistered(Exception):
     pass
 
 
-class SiteModelNotRegistered(Exception):
-    pass
+class SiteOfflineModels:
 
-
-class SiteSyncModelError(Exception):
-    pass
-
-
-class SiteModels:
-
-    wrapper_cls = None
+    module_name = "offline_models"
+    wrapper_cls = OfflineModel
     register_historical = True
 
     def __init__(self):
@@ -44,25 +39,21 @@ class SiteModels:
                         {historical_model: wrapper_cls or self.wrapper_cls}
                     )
             else:
-                raise SiteModelAlreadyRegistered(
-                    f"Model is already registered. Got {model}."
-                )
+                raise AlreadyRegistered(f"Model is already registered. Got {model}.")
 
     def register_for_app(
-        self, app_label=None, exclude_models=None, include_list_models=None
+        self, app_label=None, exclude_models=None, exclude_model_classes=None
     ):
         """Registers all models for this app_label.
         """
-        from edc_list_data.model_mixins import ListModelMixin
-
         models = []
         exclude_models = exclude_models or []
         app_config = django_apps.get_app_config(app_label)
         for model in app_config.get_models():
-            if model._meta.label_lower in exclude_models:
+            if model._meta.label_lower not in exclude_models:
                 pass
-            elif include_list_models and issubclass(model, ListModelMixin):
-                models.append(model._meta.label_lower)
+            elif exclude_model_classes and issubclass(model, exclude_model_classes):
+                pass
             else:
                 models.append(model._meta.label_lower)
         self.register(models)
@@ -71,9 +62,7 @@ class SiteModels:
         """Returns a wrapped model instance.
         """
         if instance._meta.label_lower not in self.registry:
-            raise SiteModelNotRegistered(
-                f"{repr(instance)} is not registered with {self}."
-            )
+            raise ModelNotRegistered(f"{repr(instance)} is not registered with {self}.")
         wrapper_cls = self.registry.get(instance._meta.label_lower) or self.wrapper_cls
         if wrapper_cls:
             return wrapper_cls(instance)
@@ -117,21 +106,6 @@ class SiteModels:
                         raise
             except ImportError:
                 pass
-
-
-class SiteOfflineModels(SiteModels):
-
-    """ Main controller of :class:`offline_models` objects.
-    """
-
-    module_name = "offline_models"
-    register_historical = True
-
-    @property
-    def wrapper_cls(self):
-        from .offline_model import OfflineModel
-
-        return OfflineModel
 
 
 site_offline_models = SiteOfflineModels()

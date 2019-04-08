@@ -1,5 +1,9 @@
-etc/*
-venv/*
+django_crypto_fields
+.settings
+.project
+.pydevproject
+test-*
+db.sqlite3
 
 # Swap
 [._]*.s[a-v][a-z]
@@ -15,12 +19,6 @@ Session.vim
 *~
 # Auto-generated tag files
 tags
-
-.settings
-.project
-.pydevproject
-test-*
-db.sqlite3
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

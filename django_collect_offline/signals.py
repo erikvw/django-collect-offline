@@ -3,7 +3,7 @@ from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 from simple_history.signals import post_create_historical_record
 
-from .site_offline_models import site_offline_models, SiteModelNotRegistered
+from .site_offline_models import site_offline_models, ModelNotRegistered
 
 
 @receiver(post_save, sender=Token)
@@ -25,7 +25,7 @@ def serialize_m2m_on_save(sender, action, instance, using, **kwargs):
     if action == "post_add":
         try:
             wrapped_instance = site_offline_models.get_wrapped_instance(instance)
-        except SiteModelNotRegistered:
+        except ModelNotRegistered:
             pass
         else:
             wrapped_instance.to_outgoing_transaction(using, created=True)
@@ -41,7 +41,7 @@ def serialize_on_save(sender, instance, raw, created, using, **kwargs):
         if "historical" not in instance._meta.label_lower:
             try:
                 wrapped_instance = site_offline_models.get_wrapped_instance(instance)
-            except SiteModelNotRegistered:
+            except ModelNotRegistered:
                 pass
             else:
                 wrapped_instance.to_outgoing_transaction(using, created=created)
@@ -59,7 +59,7 @@ def serialize_history_on_post_create(history_instance, using, **kwargs):
     """
     try:
         wrapped_instance = site_offline_models.get_wrapped_instance(history_instance)
-    except SiteModelNotRegistered:
+    except ModelNotRegistered:
         pass
     else:
         wrapped_instance.to_outgoing_transaction(using, created=True)
@@ -74,7 +74,7 @@ def serialize_on_post_delete(sender, instance, using, **kwargs):
     """
     try:
         wrapped_instance = site_offline_models.get_wrapped_instance(instance)
-    except SiteModelNotRegistered:
+    except ModelNotRegistered:
         pass
     else:
         wrapped_instance.to_outgoing_transaction(using, created=False, deleted=True)

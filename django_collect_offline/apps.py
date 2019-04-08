@@ -15,7 +15,7 @@ class OfflineConfigError(Exception):
 class AppConfig(DjangoAppConfig):
     name = "django_collect_offline"
     verbose_name = "Offline Synchronization"
-    base_template_name = "edc_dashboard/bootstrap3/base.html"
+    base_template_name = "django_collect_offline/base.html"
     custom_json_parsers = []
     django_collect_offline_files_using = True
 
@@ -23,11 +23,11 @@ class AppConfig(DjangoAppConfig):
 
     def ready(self):
         from .signals import (
-            create_auth_token,
-            serialize_on_post_delete,
-            serialize_m2m_on_save,
-            serialize_on_save,
-            serialize_history_on_post_create,
+            create_auth_token,  # noqa
+            serialize_on_post_delete,  # noqa
+            serialize_m2m_on_save,  # noqa
+            serialize_on_save,  # noqa
+            serialize_history_on_post_create,  # noqa
         )
 
         sys.stdout.write(f"Loading {self.verbose_name} ...\n")

@@ -40,10 +40,7 @@ setup(
         'django-crypto-fields',
         'django-js-reverse',
         'djangorestframework',
-        'edc-base',
         'edc-device',
-        'edc_list_data',
-        'edc-rest',
         'requests',
     ],
     classifiers=[
