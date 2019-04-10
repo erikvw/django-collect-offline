@@ -39,8 +39,7 @@ class SiteOfflineModels:
                         {historical_model: wrapper_cls or self.wrapper_cls}
                     )
             else:
-                raise AlreadyRegistered(
-                    f"Model is already registered. Got {model}.")
+                raise AlreadyRegistered(f"Model is already registered. Got {model}.")
 
     def register_for_app(
         self, app_label=None, exclude_models=None, exclude_model_classes=None
@@ -63,10 +62,8 @@ class SiteOfflineModels:
         """Returns a wrapped model instance.
         """
         if instance._meta.label_lower not in self.registry:
-            raise ModelNotRegistered(
-                f"{repr(instance)} is not registered with {self}.")
-        wrapper_cls = self.registry.get(
-            instance._meta.label_lower) or self.wrapper_cls
+            raise ModelNotRegistered(f"{repr(instance)} is not registered with {self}.")
+        wrapper_cls = self.registry.get(instance._meta.label_lower) or self.wrapper_cls
         if wrapper_cls:
             return wrapper_cls(instance)
         return instance
