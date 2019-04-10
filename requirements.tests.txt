@@ -1,3 +1,4 @@
 edc-test-utils
 faker
 edc-list-data
+mysqlclient
