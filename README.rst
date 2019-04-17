@@ -51,9 +51,6 @@ For example the base class for all CRFs in a module might look like this:
             return (self.visit.natural_key(), )
         natural_key.dependencies = ['myapp.visit']
     
-        class Meta:
-            abstract = True
-
 Add a model to the site global
 ==============================
 
