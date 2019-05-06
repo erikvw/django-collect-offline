@@ -14,7 +14,7 @@ class OfflineConfigError(Exception):
 
 class AppConfig(DjangoAppConfig):
     name = "django_collect_offline"
-    verbose_name = "Offline Synchronization"
+    verbose_name = "Django Collect Offline"
     base_template_name = "django_collect_offline/base.html"
     custom_json_parsers = []
     django_collect_offline_files_using = True

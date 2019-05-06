@@ -32,7 +32,7 @@ class HomeView(EdcViewMixin, NavbarViewMixin, OfflineViewMixin, TemplateView):
     action_handler_cls = ActionHandler
 
     navbar_name = "django_collect_offline"
-    navbar_selected_item = "synchronization"
+    navbar_selected_item = "collect_offline"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

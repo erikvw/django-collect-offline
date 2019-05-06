@@ -41,6 +41,7 @@ setup(
         'django-js-reverse',
         'djangorestframework',
         'edc-device',
+        'edc_protocol',
         'requests',
     ],
     classifiers=[
