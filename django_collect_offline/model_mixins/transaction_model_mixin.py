@@ -51,5 +51,9 @@ class TransactionModelMixin(models.Model):
         cipher = cryptor.aes_encrypt(plaintext, LOCAL_MODE)
         return cipher
 
+    @property
+    def verbose_name(self):
+        return self._meta.verbose_name
+
     class Meta:
         abstract = True

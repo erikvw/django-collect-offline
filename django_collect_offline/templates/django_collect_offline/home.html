@@ -1,4 +1,4 @@
-{% extends base_template_name %}
+{% extends edc_base_template %}
 
 {% load static %}
 
@@ -53,7 +53,7 @@
         	{% include 'django_collect_offline/client.html' %}
         {% else %}
             <div class="panel-heading">Resources</div>
-            <div class="alert alert-danger text-center">Edc-sync role undefined. See AppConfig.</div>
+            <div class="alert alert-danger text-center">{{ django_collect_offline_app_config.verbose_name }} role undefined. See AppConfig.</div>
         {% endif%}
     </div>
 
@@ -63,10 +63,10 @@
             <div class="panel-heading">Report</div>
 	            <ul id="nav-pill-admin">
 	            	<li>
-	            		<a href="{% url 'django_collect_offline:sync-report' %}"><i class="fas fa-bar-chart" aria-hidden="true"></i>        Server Report</a>
+	            		<a href="{% url 'django_collect_offline:sync-report' %}"><i class="fas fa-bar-chart" aria-hidden="true"></i> Server Report</a>
 	            	</li>
                     <li>
-                        <a href="{% url 'django_collect_offline:sync-report-client' %}"><i class="fas fa-bar-chart" aria-hidden="true"></i>        Client Report</a>
+                        <a href="{% url 'django_collect_offline:sync-report-client' %}"><i class="fas fa-bar-chart" aria-hidden="true"></i> Client Report</a>
                     </li>
 	            </ul>
         	</div>
@@ -74,7 +74,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">Administration</div>
             <ul id="nav-pill-admin" class="nav nav-pills nav-stacked">
-                <li><a href="{% url 'django_collect_offline:django_collect_offline_admin:index'%} ">{{ django_collect_offline_app_config.verbose_name }}</a></li>
+                <li><a href="{% url 'django_collect_offline:django_collect_offline_admin:index' %} ">{{ django_collect_offline_app_config.verbose_name }}</a></li>
                 <li><a href="{% url 'django_collect_offline_files:django_collect_offline_files_admin:index'%}">{{ django_collect_offline_files_app_config.verbose_name }}</a></li>
                 {% if offline_role == "NodeServer" %}
                     <li><a href="{% url 'django_collect_offline:django_collect_offline_admin:offline_client_changelist'%} ">Clients</a></li>

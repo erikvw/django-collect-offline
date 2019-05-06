@@ -1,15 +1,9 @@
-# import logging
-
 from django.apps import apps as django_apps
 from django.core.management.base import BaseCommand
 from django_collect_offline_files.transaction import FileArchiver
 
 from ...transaction import TransactionDeserializer, TransactionDeserializerError
 from ...models import IncomingTransaction
-
-
-# app_config = django_apps.get_app_config('django_collect_offline')
-# logger = logging.getLogger('django_collect_offline')
 
 
 class CustomTransactionDeserializer(TransactionDeserializer):
@@ -50,7 +44,7 @@ class Command(BaseCommand):
             --model=label_lower --order_by=created,producer
     """
 
-    help = "Deserialises transactions manually using " "different filter options."
+    help = "Deserializes transactions manually using " "different filter options."
 
     def add_arguments(self, parser):
         parser.add_argument(
