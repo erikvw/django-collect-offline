@@ -74,8 +74,3 @@ class TestSerializers(TestCase):
         self.assertTrue(
             json_data[0]["fields"]["f1"], "give any one species too much rope ..."
         )
-
-    def test_outgoingtransaction_no_using(self):
-        obj = OutgoingTransaction.objects.last()
-        obj.using = None
-        self.assertRaises(OutgoingTransactionError, obj.save)
