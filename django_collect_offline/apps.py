@@ -18,6 +18,7 @@ class AppConfig(DjangoAppConfig):
     base_template_name = "django_collect_offline/base.html"
     custom_json_parsers = []
     django_collect_offline_files_using = True
+    include_in_administration_section = True
 
     # see edc_device for ROLE
 
