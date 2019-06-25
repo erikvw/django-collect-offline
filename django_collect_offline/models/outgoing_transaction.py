@@ -17,8 +17,7 @@ class OutgoingTransaction(TransactionModelMixin, SiteModelMixin, BaseUuidModel):
     to a queue or consumer.
     """
 
-    site = models.ForeignKey(
-        Site, on_delete=models.CASCADE, null=True, editable=False)
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, editable=False)
 
     is_consumed_middleman = models.BooleanField(default=False)
 
