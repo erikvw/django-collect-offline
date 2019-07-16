@@ -35,6 +35,7 @@ class MyTokenAdmin(TokenAdmin):
     list_display = ("key", "user", "created")
     fields = ("user",)
     ordering = ("-created",)
+    autocomplete_fields = ()
 
 
 @admin.register(IncomingTransaction, site=django_collect_offline_admin)
