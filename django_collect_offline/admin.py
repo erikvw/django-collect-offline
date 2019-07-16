@@ -21,7 +21,8 @@ class TransactionModelAdminMixin:
     def view(self, obj):
         url = reverse(
             "django_collect_offline:render_url",
-            kwargs={"model_name": obj._meta.object_name.lower(), "pk": str(obj.pk)},
+            kwargs={"model_name": obj._meta.object_name.lower(),
+                    "pk": str(obj.pk)},
         )
         return render_to_string(
             template_name="django_collect_offline/transaction.html",
@@ -35,6 +36,7 @@ class MyTokenAdmin(TokenAdmin):
     list_display = ("key", "user", "created")
     fields = ("user",)
     ordering = ("-created",)
+    autocomplete_fields = ()
 
 
 @admin.register(IncomingTransaction, site=django_collect_offline_admin)
