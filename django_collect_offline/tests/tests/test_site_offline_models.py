@@ -1,9 +1,11 @@
+from collect_offline_app.models import TestModel
 from django.contrib.auth.models import User
 from django.test import TestCase, tag
-
-from ..site_offline_models import site_offline_models
-from ..site_offline_models import AlreadyRegistered, ModelNotRegistered
-from .models import TestModel
+from django_collect_offline.site_offline_models import (
+    AlreadyRegistered,
+    ModelNotRegistered,
+)
+from django_collect_offline.site_offline_models import site_offline_models
 
 
 class TestSiteSyncModels(TestCase):
@@ -11,14 +13,14 @@ class TestSiteSyncModels(TestCase):
         site_offline_models.registry = {}
         site_offline_models.loaded = False
         self.offline_models = [
-            "django_collect_offline.testmodel",
-            "django_collect_offline.badtestmodel",
-            "django_collect_offline.anotherbadtestmodel",
-            "django_collect_offline.yetanotherbadtestmodel",
-            "django_collect_offline.testmodelwithfkprotected",
-            "django_collect_offline.testmodelwithm2m",
-            "django_collect_offline.testofflinemodelnohistorymanager",
-            "django_collect_offline.testofflinemodelnouuid",
+            "collect_offline_app.testmodel",
+            "collect_offline_app.badtestmodel",
+            "collect_offline_app.anotherbadtestmodel",
+            "collect_offline_app.yetanotherbadtestmodel",
+            "collect_offline_app.testmodelwithfkprotected",
+            "collect_offline_app.testmodelwithm2m",
+            "collect_offline_app.testofflinemodelnohistorymanager",
+            "collect_offline_app.testofflinemodelnouuid",
         ]
         site_offline_models.register(models=self.offline_models)
 
@@ -27,13 +29,13 @@ class TestSiteSyncModels(TestCase):
         self.assertTrue(repr(site_offline_models))
 
     def test_site_offline_models2(self):
-        self.assertIn("django_collect_offline", site_offline_models.site_models())
+        self.assertIn("collect_offline_app", site_offline_models.site_models())
 
     def test_already_registered(self):
         self.assertRaises(
             AlreadyRegistered,
             site_offline_models.register,
-            models=["django_collect_offline.testmodel"],
+            models=["collect_offline_app.testmodel"],
         )
 
     def test_get_as_sync_model_ok(self):

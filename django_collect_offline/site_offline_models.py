@@ -4,6 +4,8 @@ import sys
 from django.apps import apps as django_apps
 from django.utils.module_loading import import_module, module_has_submodule
 
+from . import DJANGO_COLLECT_OFFLINE_ENABLED
+
 from .offline_model import OfflineModel
 
 
@@ -16,7 +18,6 @@ class ModelNotRegistered(Exception):
 
 
 class SiteOfflineModels:
-
     module_name = "offline_models"
     wrapper_cls = OfflineModel
     register_historical = True
@@ -28,18 +29,21 @@ class SiteOfflineModels:
     def register(self, models=None, wrapper_cls=None):
         """Registers with app_label.modelname, wrapper_cls.
         """
-        self.loaded = True
-        for model in models:
-            model = model.lower()
-            if model not in self.registry:
-                self.registry.update({model: wrapper_cls or self.wrapper_cls})
-                if self.register_historical:
-                    historical_model = ".historical".join(model.split("."))
-                    self.registry.update(
-                        {historical_model: wrapper_cls or self.wrapper_cls}
+        if DJANGO_COLLECT_OFFLINE_ENABLED:
+            self.loaded = True
+            for model in models:
+                model = model.lower()
+                if model not in self.registry:
+                    self.registry.update({model: wrapper_cls or self.wrapper_cls})
+                    if self.register_historical:
+                        historical_model = ".historical".join(model.split("."))
+                        self.registry.update(
+                            {historical_model: wrapper_cls or self.wrapper_cls}
+                        )
+                else:
+                    raise AlreadyRegistered(
+                        f"Model is already registered. Got {model}."
                     )
-            else:
-                raise AlreadyRegistered(f"Model is already registered. Got {model}.")
 
     def register_for_app(
         self, app_label=None, exclude_models=None, exclude_model_classes=None

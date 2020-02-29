@@ -1,9 +1,8 @@
+from collect_offline_app.models import TestModelDates
 from django.core import serializers
 from django.test import TestCase, tag
-
-from ..transaction import deserialize
-from ..parsers import datetime_to_date_parser
-from .models import TestModelDates
+from django_collect_offline.transaction import deserialize
+from django_collect_offline.parsers import datetime_to_date_parser
 
 
 class TestParsers(TestCase):
@@ -14,7 +13,7 @@ class TestParsers(TestCase):
         bad_date = obj.f3.strftime(datetime_format)
         json_text = json_text.replace("null", f'"{bad_date}"')
         json_text = datetime_to_date_parser(
-            json_text, model="django_collect_offline.testmodeldates", field="f2"
+            json_text, model="collect_offline_app.testmodeldates", field="f2"
         )
         json_data = deserialize(json_text)
         for obj in json_data:
@@ -31,7 +30,7 @@ class TestParsers(TestCase):
     def test_date_parser_with_none(self):
         try:
             datetime_to_date_parser(
-                None, model="django_collect_offline.testmodeldates", field="f2"
+                None, model="collect_offline_app.testmodeldates", field="f2"
             )
         except TypeError:
             self.fail("the JSON object must be str, bytes or bytearry, not NoneType")
