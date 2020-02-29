@@ -1,25 +1,24 @@
+from collect_offline_app.models import TestModel
 from django.test import TestCase, tag
 from django.utils.six import BytesIO
+from django_collect_offline.models import OutgoingTransaction
+from django_collect_offline.serializers import OutgoingTransactionSerializer
+from django_collect_offline.site_offline_models import site_offline_models
 from django_crypto_fields.constants import LOCAL_MODE
 from django_crypto_fields.cryptor import Cryptor
 from rest_framework.parsers import JSONParser
 from rest_framework.renderers import JSONRenderer
 
-from ..models import OutgoingTransaction, OutgoingTransactionError
-from ..serializers import OutgoingTransactionSerializer
-from ..site_offline_models import site_offline_models
-from .models import TestModel
-
 
 class TestSerializers(TestCase):
 
-    multi_db = True
+    databases = "__all__"
 
     def setUp(self):
         TestModel.objects.create(f1="give any one species too much rope ...")
         site_offline_models.registry = {}
         site_offline_models.loaded = False
-        sync_models = ["django_collect_offline.testmodel"]
+        sync_models = ["collect_offline_app.testmodel"]
         site_offline_models.register(sync_models)
 
     def test_outgoingtransaction_serializer_inits(self):

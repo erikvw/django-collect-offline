@@ -1,36 +1,45 @@
+from collect_offline_app.models import (
+    TestModel,
+    BadTestModel,
+    AnotherBadTestModel,
+    YetAnotherBadTestModel,
+)
+from collect_offline_app.models import TestModelWithFkProtected
+from collect_offline_app.models import (
+    TestOfflineModelNoHistoryManager,
+    TestOfflineModelNoUuid,
+)
 from django.core.exceptions import MultipleObjectsReturned
 from django.test import TestCase, tag
 from django.test.utils import override_settings
-
-from ..constants import INSERT, UPDATE
-from ..models import OutgoingTransaction
-from ..offline_model import OfflineGetByNaturalKeyMissing
-from ..offline_model import OfflineHistoricalManagerError
-from ..offline_model import OfflineModel
-from ..offline_model import OfflineNaturalKeyMissing
-from ..offline_model import OfflineUuidPrimaryKeyMissing
-from ..site_offline_models import site_offline_models
-from .models import TestModel, BadTestModel, AnotherBadTestModel, YetAnotherBadTestModel
-from .models import TestModelWithFkProtected
-from .models import TestOfflineModelNoHistoryManager, TestOfflineModelNoUuid
+from django_collect_offline.constants import INSERT, UPDATE
+from django_collect_offline.models import OutgoingTransaction
+from django_collect_offline.offline_model import (
+    OfflineGetByNaturalKeyMissing,
+    OfflineHistoricalManagerError,
+    OfflineModel,
+    OfflineNaturalKeyMissing,
+    OfflineUuidPrimaryKeyMissing,
+)
+from django_collect_offline.site_offline_models import site_offline_models
 
 
 class TestOffline(TestCase):
 
-    multi_db = True
+    databases = "__all__"
 
     def setUp(self):
         site_offline_models.registry = {}
         site_offline_models.loaded = False
         offline_models = [
-            "django_collect_offline.testmodel",
-            "django_collect_offline.badtestmodel",
-            "django_collect_offline.anotherbadtestmodel",
-            "django_collect_offline.yetanotherbadtestmodel",
-            "django_collect_offline.testmodelwithfkprotected",
-            "django_collect_offline.testmodelwithm2m",
-            "django_collect_offline.testofflinemodelnohistorymanager",
-            "django_collect_offline.testofflinemodelnouuid",
+            "collect_offline_app.testmodel",
+            "collect_offline_app.badtestmodel",
+            "collect_offline_app.anotherbadtestmodel",
+            "collect_offline_app.yetanotherbadtestmodel",
+            "collect_offline_app.testmodelwithfkprotected",
+            "collect_offline_app.testmodelwithm2m",
+            "collect_offline_app.testofflinemodelnohistorymanager",
+            "collect_offline_app.testofflinemodelnouuid",
         ]
         site_offline_models.register(models=offline_models)
 
@@ -77,7 +86,7 @@ class TestOffline(TestCase):
                 try:
                     OutgoingTransaction.objects.using("client").get(
                         tx_pk=test_model.pk,
-                        tx_name="django_collect_offline.testmodel",
+                        tx_name="collect_offline_app.testmodel",
                         action=INSERT,
                     )
                 except OutgoingTransaction.DoesNotExist:
@@ -89,7 +98,7 @@ class TestOffline(TestCase):
                 try:
                     OutgoingTransaction.objects.using("client").get(
                         tx_pk=history_obj.history_id,
-                        tx_name="django_collect_offline.historicaltestmodel",
+                        tx_name="collect_offline_app.historicaltestmodel",
                         action=INSERT,
                     )
                 except OutgoingTransaction.DoesNotExist:
@@ -107,7 +116,7 @@ class TestOffline(TestCase):
             outgoing.update(
                 test_model=OutgoingTransaction.objects.using("client").get(
                     tx_pk=test_model.pk,
-                    tx_name="django_collect_offline.testmodel",
+                    tx_name="collect_offline_app.testmodel",
                     action=INSERT,
                 )
             )
@@ -115,7 +124,7 @@ class TestOffline(TestCase):
             outgoing.update(
                 test_model_historical=OutgoingTransaction.objects.using("client").get(
                     tx_pk=history_obj.history_id,
-                    tx_name="django_collect_offline.historicaltestmodel",
+                    tx_name="collect_offline_app.historicaltestmodel",
                     action=INSERT,
                 )
             )
@@ -127,7 +136,7 @@ class TestOffline(TestCase):
                             "client"
                         ).get(
                             tx_pk=test_model_with_fk.pk,
-                            tx_name="django_collect_offline.testmodelwithfkprotected",
+                            tx_name="collect_offline_app.testmodelwithfkprotected",
                             action=INSERT,
                         )
                     )
@@ -145,7 +154,7 @@ class TestOffline(TestCase):
                             OutgoingTransaction.objects.using("client").get(
                                 tx_pk=history_obj.history_id,
                                 tx_name=(
-                                    "django_collect_offline.historicaltest"
+                                    "collect_offline_app.historicaltest"
                                     "modelwithfkprotected"
                                 ),
                                 action=INSERT,
@@ -172,12 +181,12 @@ class TestOffline(TestCase):
                 try:
                     OutgoingTransaction.objects.using("client").get(
                         tx_pk=test_model.pk,
-                        tx_name="django_collect_offline.testmodel",
+                        tx_name="collect_offline_app.testmodel",
                         action=INSERT,
                     )
                     OutgoingTransaction.objects.using("client").get(
                         tx_pk=test_model.pk,
-                        tx_name="django_collect_offline.testmodel",
+                        tx_name="collect_offline_app.testmodel",
                         action=UPDATE,
                     )
                 except OutgoingTransaction.DoesNotExist:
@@ -188,7 +197,7 @@ class TestOffline(TestCase):
                 2,
                 OutgoingTransaction.objects.using("client")
                 .filter(
-                    tx_name="django_collect_offline.historicaltestmodel", action=INSERT
+                    tx_name="collect_offline_app.historicaltestmodel", action=INSERT
                 )
                 .count(),
             )
@@ -214,8 +223,8 @@ class TestOffline(TestCase):
         self.assertListEqual(
             result,
             [
-                "django_collect_offline.historicaltestmodel",
-                "django_collect_offline.testmodel",
+                "collect_offline_app.historicaltestmodel",
+                "collect_offline_app.testmodel",
             ],
         )
         self.assertListEqual(
@@ -225,7 +234,7 @@ class TestOffline(TestCase):
         self.assertRaises(
             OutgoingTransaction.DoesNotExist,
             OutgoingTransaction.objects.using("server").get,
-            tx_name="django_collect_offline.testmodel",
+            tx_name="collect_offline_app.testmodel",
         )
         self.assertRaises(
             MultipleObjectsReturned,
@@ -246,8 +255,8 @@ class TestOffline(TestCase):
         self.assertListEqual(
             result,
             [
-                "django_collect_offline.historicaltestmodel",
-                "django_collect_offline.testmodel",
+                "collect_offline_app.historicaltestmodel",
+                "collect_offline_app.testmodel",
             ],
         )
         self.assertListEqual(
@@ -267,7 +276,7 @@ class TestOffline(TestCase):
                     action=UPDATE
                 )
             ],
-            ["django_collect_offline.testmodel"],
+            ["collect_offline_app.testmodel"],
         )
         result = [
             obj.tx_name
@@ -277,8 +286,8 @@ class TestOffline(TestCase):
         self.assertListEqual(
             result,
             [
-                "django_collect_offline.historicaltestmodel",
-                "django_collect_offline.historicaltestmodel",
-                "django_collect_offline.testmodel",
+                "collect_offline_app.historicaltestmodel",
+                "collect_offline_app.historicaltestmodel",
+                "collect_offline_app.testmodel",
             ],
         )

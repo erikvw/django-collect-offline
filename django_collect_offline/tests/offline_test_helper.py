@@ -2,11 +2,10 @@ import json
 
 from django.apps import apps as django_apps
 from django.core.exceptions import MultipleObjectsReturned
+from django_collect_offline.models import OutgoingTransaction
+from django_collect_offline.transaction import deserialize
 from edc_list_data.model_mixins import ListModelMixin
 from unittest.case import TestCase
-
-from ..models import OutgoingTransaction
-from ..transaction import deserialize
 
 
 class OfflineTestHelperError(Exception):

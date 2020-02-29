@@ -28,7 +28,6 @@ class OfflineUuidPrimaryKeyMissing(Exception):
 
 
 class OfflineModel:
-
     """A wrapper for offline model instances to add methods called in
     signals for synchronization.
     """
@@ -111,7 +110,7 @@ class OfflineModel:
         """ Serialize the model instance to an AES encrypted json object
         and saves the json object to the OutgoingTransaction model.
         """
-        OutgoingTransaction = django_apps.get_model(
+        outgoing_transaction_model_cls = django_apps.get_model(
             "django_collect_offline", "OutgoingTransaction"
         )
         created = True if created is None else created
@@ -127,7 +126,7 @@ class OfflineModel:
         outgoing_transaction = None
         if self.is_serialized:
             hostname = socket.gethostname()
-            outgoing_transaction = OutgoingTransaction.objects.using(using).create(
+            outgoing_transaction = outgoing_transaction_model_cls.objects.using(using).create(
                 tx_name=self.instance._meta.label_lower,
                 tx_pk=getattr(self.instance, self.primary_key_field.name),
                 tx=self.encrypted_json(),

@@ -1,8 +1,6 @@
 from django.contrib import admin
 from django.urls import reverse
 
-# from django.utils.safestring import mark_safe
-
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.admin import TokenAdmin
 
@@ -40,7 +38,6 @@ class MyTokenAdmin(TokenAdmin):
 
 @admin.register(IncomingTransaction, site=django_collect_offline_admin)
 class IncomingTransactionAdmin(TransactionModelAdminMixin, admin.ModelAdmin):
-
     ordering = ("-timestamp",)
 
     list_display = (
@@ -75,7 +72,6 @@ class IncomingTransactionAdmin(TransactionModelAdminMixin, admin.ModelAdmin):
 
 @admin.register(OutgoingTransaction, site=django_collect_offline_admin)
 class OutgoingTransactionAdmin(TransactionModelAdminMixin, admin.ModelAdmin):
-
     ordering = ("-timestamp",)
 
     list_display = (
@@ -107,7 +103,6 @@ class OutgoingTransactionAdmin(TransactionModelAdminMixin, admin.ModelAdmin):
 
 
 class HostAdmin(admin.ModelAdmin):
-
     list_display = (
         "hostname",
         "port",

@@ -6,7 +6,7 @@ def serialize(objects=None):
     for JSON and natural keys.
 
     Note: use_natural_primary_keys is False as once
-    a pk is set, it should not be changed throughout the
+    a pk is set, it should NOT be changed throughout the
     distributed data.
     """
 

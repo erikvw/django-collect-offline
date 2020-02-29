@@ -56,9 +56,11 @@ base_dir = dirname(abspath(__file__))
 
 DEFAULT_SETTINGS = DefaultTestSettings(
     calling_file=__file__,
+    DJANGO_COLLECT_OFFLINE_ENABLED=True,
     BASE_DIR=base_dir,
     APP_NAME=app_name,
     ETC_DIR=os.path.join(base_dir, app_name, "tests", "etc"),
+    EDC_NAVBAR_DEFAULT="collect_offline_app",
     INSTALLED_APPS=[
         'django.contrib.admin',
         'django.contrib.auth',
@@ -73,10 +75,13 @@ DEFAULT_SETTINGS = DefaultTestSettings(
         'rest_framework.authtoken',
         'django_js_reverse',
         'simple_history',
+        'edc_sites.apps.AppConfig',
         'edc_protocol.apps.AppConfig',
         'edc_device.apps.AppConfig',
+        'edc_identifier.apps.AppConfig',
         'django_collect_offline_files.apps.AppConfig',
         'django_collect_offline.apps.AppConfig',
+        'collect_offline_app.apps.AppConfig',
     ],
     DEVICE_ID='15',
     DATABASES={
@@ -109,7 +114,8 @@ def main():
     if not settings.configured:
         settings.configure(**DEFAULT_SETTINGS)
     django.setup()
-    failures = DiscoverRunner(failfast=True).run_tests(
+    tags = [t.split('=')[1] for t in sys.argv if t.startswith('--tag')]
+    failures = DiscoverRunner(failfast=False, tags=tags).run_tests(
         [f'{app_name}.tests'])
     sys.exit(failures)
 
