@@ -4,7 +4,7 @@ from django.apps import AppConfig as DjangoAppConfig
 from django.core.management.color import color_style
 
 from .site_offline_models import site_offline_models
-from . import DJANGO_COLLECT_OFFLINE_ENABLED
+from . import get_offline_enabled
 
 style = color_style()
 
@@ -24,17 +24,8 @@ class AppConfig(DjangoAppConfig):
     # see edc_device for ROLE
 
     def ready(self):
-        if DJANGO_COLLECT_OFFLINE_ENABLED:
-            from .signals import (
-                create_auth_token,  # noqa
-                serialize_on_post_delete,  # noqa
-                serialize_m2m_on_save,  # noqa
-                serialize_on_save,  # noqa
-                serialize_history_on_post_create,  # noqa
-            )
-
         sys.stdout.write(f"Loading {self.verbose_name} ...\n")
-        if DJANGO_COLLECT_OFFLINE_ENABLED:
+        if get_offline_enabled():
             site_offline_models.autodiscover()
         else:
             sys.stdout.write(f"   {self.verbose_name} is disabled.\n")
