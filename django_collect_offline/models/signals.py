@@ -3,7 +3,10 @@ from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 from simple_history.signals import post_create_historical_record
 
-from .site_offline_models import site_offline_models, ModelNotRegistered
+from django_collect_offline.site_offline_models import (
+    site_offline_models,
+    ModelNotRegistered,
+)
 
 
 @receiver(post_save, sender=Token)

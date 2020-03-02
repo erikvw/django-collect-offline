@@ -4,7 +4,7 @@ import sys
 from django.apps import apps as django_apps
 from django.utils.module_loading import import_module, module_has_submodule
 
-from . import DJANGO_COLLECT_OFFLINE_ENABLED
+from . import get_offline_enabled
 
 from .offline_model import OfflineModel
 
@@ -29,7 +29,7 @@ class SiteOfflineModels:
     def register(self, models=None, wrapper_cls=None):
         """Registers with app_label.modelname, wrapper_cls.
         """
-        if DJANGO_COLLECT_OFFLINE_ENABLED:
+        if get_offline_enabled():
             self.loaded = True
             for model in models:
                 model = model.lower()
