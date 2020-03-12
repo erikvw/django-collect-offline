@@ -130,8 +130,8 @@ Data Flow
 .. |pypi| image:: https://img.shields.io/pypi/v/django-collect-offline.svg
     :target: https://pypi.python.org/pypi/django-collect-offline
     
-.. |travis| image:: https://travis-ci.org/erikvw/django-collect-offline.svg?branch=develop
-    :target: https://travis-ci.org/erikvw/django-collect-offline
+.. |travis| image:: https://travis-ci.com/erikvw/django-collect-offline.svg?branch=develop
+    :target: https://travis-ci.com/erikvw/django-collect-offline
     
 .. |codecov| image:: https://codecov.io/gh/erikvw/django-collect-offline/branch/develop/graph/badge.svg
   :target: https://codecov.io/gh/erikvw/django-collect-offline
