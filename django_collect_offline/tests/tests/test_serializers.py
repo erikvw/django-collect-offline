@@ -1,6 +1,7 @@
+from io import BytesIO
+
 from collect_offline_app.models import TestModel
 from django.test import TestCase, tag
-from django.utils.six import BytesIO
 from django_collect_offline.models import OutgoingTransaction
 from django_collect_offline.serializers import OutgoingTransactionSerializer
 from django_collect_offline.site_offline_models import site_offline_models

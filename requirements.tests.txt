@@ -1,4 +1,9 @@
 edc-test-utils
 faker
-edc-list-data
 mysqlclient
+edc-model
+edc-identifier
+edc-constants
+edc-list-data
+edc-dashboard
+edc-navbar
