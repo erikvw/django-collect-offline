@@ -5,14 +5,14 @@ from setuptools import find_packages
 from setuptools import setup
 from os.path import dirname, abspath, join, normpath
 
-with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
+with open(os.path.join(os.path.dirname(__file__), "README.rst")) as readme:
     README = readme.read()
 
-with open(os.path.join(os.path.dirname(__file__), 'VERSION')) as f:
+with open(os.path.join(os.path.dirname(__file__), "VERSION")) as f:
     VERSION = f.read()
 
 tests_require = []
-with open(join(dirname(abspath(__file__)), 'requirements.txt')) as f:
+with open(join(dirname(abspath(__file__)), "requirements.txt")) as f:
     for line in f:
         tests_require.append(line.strip())
 
@@ -20,40 +20,41 @@ with open(join(dirname(abspath(__file__)), 'requirements.txt')) as f:
 os.chdir(normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
-    name='django-collect-offline',
+    name="django-collect-offline",
     version=VERSION,
-    author=u'Erik van Widenfelt',
-    author_email='ew2789@gmail.com',
+    author=u"Erik van Widenfelt",
+    author_email="ew2789@gmail.com",
     packages=find_packages(),
     include_package_data=True,
-    url='https://github.com/erikvw/django-collect-offline',
-    license='GPL license, see LICENSE',
-    description='Collect data offline and push to the server later.',
+    url="https://github.com/erikvw/django-collect-offline",
+    license="GPL license, see LICENSE",
+    description="Collect data offline and push to the server later.",
     long_description=README,
     zip_safe=False,
-    keywords='django data synchronization offline-use',
+    keywords="django data synchronization offline-use",
     install_requires=[
-        'django-collect-offline-files',
-        'django-cors-headers',
-        'django-crypto-fields',
-        'django-js-reverse',
-        'djangorestframework',
-        'edc-device',
-        'edc_protocol',
-        'requests',
+        "django-collect-offline-files",
+        "django-cors-headers",
+        "django-crypto-fields",
+        "django-js-reverse",
+        "djangorestframework",
+        "edc-sites",
+        "edc-device",
+        "edc_protocol",
+        "requests",
     ],
     classifiers=[
-        'Environment :: Web Environment',
-        'Framework :: Django',
-        'Intended Audience :: Developers',
-        'Intended Audience :: Science/Research',
-        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python :: 3.7',
-        'Topic :: Internet :: WWW/HTTP',
-        'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
+        "Environment :: Web Environment",
+        "Framework :: Django",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3.7",
+        "Topic :: Internet :: WWW/HTTP",
+        "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
     ],
     python_requires=">=3.7",
     tests_require=tests_require,
-    test_suite='runtests.main',
+    test_suite="runtests.main",
 )
